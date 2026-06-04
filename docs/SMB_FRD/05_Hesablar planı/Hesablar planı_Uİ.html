@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Hesablar planı</title>
+	<style>
+		body{margin:0;font-family:Segoe UI,Arial,sans-serif;background:#f5f7fb;color:#1f2937}
+		.page{max-width:1240px;margin:16px auto;padding:0 12px}
+		.title{font-size:20px;font-weight:700;margin:0 0 12px}
+		.layout{display:grid;grid-template-columns:1.2fr .8fr;gap:12px}
+		.card{background:#fff;border:1px solid #dbe1ea;border-radius:10px;padding:12px}
+		.card-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+		.muted{font-size:12px;color:#64748b}
+		button{height:34px;border:1px solid #d1d9e6;background:#fff;border-radius:8px;padding:0 12px;cursor:pointer}
+		.p{background:#2563eb;color:#fff;border-color:#2563eb}
+		.status{margin-top:8px;font-size:12px;min-height:16px;color:#0f766e}
+
+		.tree{border:1px solid #e6ebf3;border-radius:8px;padding:8px;min-height:480px;max-height:70vh;overflow:auto;background:#fcfdff}
+		.tree-row{display:flex;align-items:center;gap:8px;height:30px;padding:0 8px;border-radius:8px;user-select:none;cursor:pointer;font-size:13px}
+		.tree-row:hover{background:#f1f5ff}
+		.tree-row.sel{background:#e9f0ff;outline:1px solid #cfe0ff}
+		.twisty{width:14px;text-align:center;color:#64748b;font-size:12px;flex:0 0 14px}
+		.node-dot{width:8px;height:8px;border-radius:50%;background:#94a3b8;flex:0 0 8px}
+		.label{display:flex;gap:8px;align-items:center;min-width:0}
+		.code{font-family:Consolas,monospace;font-size:12px;color:#334155;min-width:52px}
+		.name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:13px}
+
+		.detail{display:grid;grid-template-columns:1fr;gap:8px}
+		.field{border:1px solid #e8edf5;border-radius:8px;padding:8px 10px;background:#fafcff}
+		.field .k{display:block;font-size:11px;color:#64748b;margin-bottom:4px}
+		.field .v{font-size:13px;color:#111827;word-break:break-word}
+
+		.modal-wrap{position:fixed;inset:0;background:rgba(15,23,42,.35);display:none;align-items:center;justify-content:center;padding:16px;z-index:40}
+		.modal{background:#fff;border:1px solid #dbe1ea;border-radius:12px;width:min(760px,100%);max-height:90vh;overflow:auto;padding:14px}
+		.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:10px;flex-wrap:wrap}
+		.modal-head-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+		.head-check{display:flex;align-items:center;gap:6px;font-size:12px;color:#334155}
+		.head-check input[type="checkbox"]{width:14px;height:14px}
+		.btn-sm{height:28px;padding:0 10px;font-size:12px;border-radius:7px}
+		.grid{display:grid;grid-template-columns:repeat(2,minmax(180px,1fr));gap:10px}
+		.f label{display:block;font-size:12px;color:#64748b;margin-bottom:4px}
+		.f input,.f select{width:100%;height:34px;border:1px solid #dbe1ea;border-radius:8px;padding:0 10px;font-size:13px}
+		.actions{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}
+		@media (max-width:980px){.layout{grid-template-columns:1fr}.grid{grid-template-columns:1fr}}
+	</style>
+</head>
+<body>
+	<div class="page">
+		<h1 class="title">Hesablar planı</h1>
+		<div class="layout">
+			<section class="card">
+				<div class="card-head">
+					<div>
+						<strong>Tree View</strong>
+						<div class="muted">Parent node-lar açılıb-bağlanır, child node-lar indent ilə göstərilir.</div>
+					</div>
+					<button id="btnNew" class="p">Yeni</button>
+				</div>
+				<div id="tree" class="tree"></div>
+				<div id="status" class="status">Hazırdır.</div>
+			</section>
+
+			<section class="card">
+				<div class="card-head"><strong>Seçilən hesab detalları</strong></div>
+				<div id="detail" class="detail">
+					<div class="muted">Detalları görmək üçün soldan bir node seçin.</div>
+				</div>
+			</section>
+		</div>
+	</div>
+
+	<div class="modal-wrap" id="modalWrap">
+		<div class="modal">
+			<div class="modal-head">
+				<strong>Yeni hesab</strong>
+				<div class="modal-head-right">
+					<label class="head-check"><input id="is_postable" type="checkbox" checked> Qeydiyyat hesabıdır</label>
+					<button id="btnModalX" class="btn-sm">Bağla</button>
+				</div>
+			</div>
+			<div class="grid">
+				<div class="f"><label>Hesab kodu</label><input id="account_code" placeholder="məs: 531"></div>
+				<div class="f"><label>Hesab adı</label><input id="account_name"></div>
+				<div class="f"><label>Kateqoriya</label><select id="account_category_code"><option value="">-</option><option>ƏSAS_VƏSAİT</option><option>İNVENTAR</option><option>BANK_HESABI</option><option>AVANS</option><option>ÖHDƏLİK</option><option>GƏLİR</option><option>XİDMƏT</option><option>MƏSRƏF</option></select></div>
+				<div class="f"><label>Yaradılma tarixi</label><input id="created_date" value="30.03.2026" placeholder="DD.MM.YYYY"></div>
+				<div class="f"><label>Bağlanma tarixi</label><input id="closed_date" placeholder="DD.MM.YYYY"></div>
+			</div>
+			<div class="actions">
+				<button id="btnCancel">İmtina</button>
+				<button id="btnSave" class="p">Yadda Saxla</button>
+			</div>
+		</div>
+	</div>
+
+	<script>
+		const coaText=`
+1|UZUNMÜDDƏTLİ AKTİVLƏR
+10|Qeyri-maddi aktivlər
+101|Qeyri-maddi aktivlərin dəyəri
+102|Qeyri-maddi aktivlər üzrə yığılmış amortizasiya və qiymətdəndüşmə zərərləri
+103|Qeyri-maddi aktivlərlə bağlı məsrəflərin kapitallaşdırılması
+11|Torpaq, tikili və avadanlıqlar
+111|Torpaq, tikili və avadanlıqların dəyəri
+112|Torpaq, tikili və avadanlıqlar üzrə yığılmış amortizasiya və qiymətdəndüşmə zərərləri
+113|Torpaq, tikili və avadanlıqlarla bağlı məsrəflərin kapitallaşdırılması
+12|İnvestisiya mülkiyyəti
+121|İnvestisiya mülkiyyətinin dəyəri
+122|İnvestisiya mülkiyyəti üzrə yığılmış amortizasiya və qiymətdəndüşmə zərərləri
+123|İnvestisiya mülkiyyəti ilə bağlı məsrəflərin kapitallaşdırılması
+13|Bioloji aktivlər
+131|Bioloji aktivlərin dəyəri
+132|Bioloji aktivlər üzrə yığılmış amortizasiya və qiymətdəndüşmə zərərləri
+14|Təbii sərvətlər
+141|Təbii sərvətlərin (ehtiyatların) dəyəri
+142|Təbii sərvətlərin (ehtiyatların) tükənməsi
+15|İştirak payı metodu ilə uçota alınmış investisiyalar
+151|Asılı müəssisələrə investisiyalar
+152|Birgə müəssisələrə investisiyalar
+153|Asılı və birgə müəssisələrə investisiyaların dəyərinin azalmasına görə düzəlişlər
+16|Təxirə salınmış vergi aktivləri
+161|Mənfəət vergisi üzrə təxirə salınmış vergi aktivləri
+162|Digər təxirə salınmış vergi aktivləri
+17|Uzunmüddətli debitor borcları
+171|Alıcıların və sifarişçilərin uzunmüddətli debitor borcları
+172|Törəmə (asılı) müəssisələrin uzunmüddətli debitor borcları
+173|Əsas idarəetmə heyətinin uzunmüddətli debitor borcları
+174|İcarə üzrə uzunmüddətli debitor borcları
+175|Tikinti müqavilələri üzrə uzunmüddətli debitor borcları
+176|Faizlər üzrə uzunmüddətli debitor borcları
+177|Digər uzunmüddətli debitor borcları
+18|Sair uzunmüddətli maliyyə aktivləri
+181|Ödənişə qədər saxlanılan uzunmüddətli investisiyalar
+182|Verilmiş uzunmüddətli borclar
+183|Digər uzunmüddətli investisiyalar
+184|Sair uzunmüddətli maliyyə aktivlərinin dəyərinin azalmasına görə düzəlişlər
+19|Sair uzunmüddətli aktivlər
+191|Gələcək hesabat dövrlərinin xərcləri
+192|Verilmiş uzunmüddətli avanslar
+193|Digər uzunmüddətli aktivlər
+2|QISAMÜDDƏTLİ AKTİVLƏR
+20|Ehtiyatlar
+201|Material ehtiyatları
+202|İstehsalat (iş və xidmət) məsrəfləri
+203|Tikinti müqavilələri üzrə məsrəflər
+204|Hazır məhsul
+205|Mallar
+206|Satış məqsədi ilə saxlanılan digər aktivlər
+207|Digər ehtiyatlar
+208|Ehtiyatların dəyərinin azalmasına görə düzəlişlər
+21|Qısamüddətli debitor borcları
+211|Alıcıların və sifarişçilərin qısamüddətli debitor borcları
+212|Törəmə (asılı) müəssisələrin qısamüddətli debitor borcları
+213|Əsas idarəetmə heyətinin qısamüddətli debitor borcları
+214|İcarə üzrə qısamüddətli debitor borcları
+215|Tikinti müqavilələri üzrə qısamüddətli debitor borcları
+216|Faizlər üzrə qısamüddətli debitor borcları
+217|Digər qısamüddətli debitor borcları
+218|Şübhəli borclar üzrə düzəlişlər
+22|Pul vəsaitləri və onların ekvivalentləri
+221|Kassa
+222|Yolda olan pul köçürmələri
+223|Bank hesablaşma hesabları
+224|Tələblərə əsasən açılan digər bank hesabları
+225|Pul vəsaitlərinin ekvivalentləri
+226|ƏDV sub-uçot hesabı
+23|Sair qısamüddətli maliyyə aktivləri
+231|Satış məqsədi ilə saxlanılan qısamüddətli investisiyalar
+232|Ödənişə qədər saxlanılan qısamüddətli investisiyalar
+233|Verilmiş qısamüddətli borclar
+234|Digər qısamüddətli investisiyalar
+235|Sair qısamüddətli maliyyə aktivlərinin dəyərinin azalmasına görə düzəlişlər
+24|Sair qısamüddətli aktivlər
+241|Əvəzləşdirilən vergilər
+242|Gələcək hesabat dövrünün xərcləri
+243|Verilmiş qısamüddətli avanslar
+244|Təhtəlhesab məbləğlər
+245|Digər qısamüddətli aktivlər
+3|KAPİTAL
+30|Ödənilmiş nizamnamə (nominal) kapital
+301|Nizamnamə (nominal) kapitalı
+302|Nizamnamə (nominal) kapitalın ödənilməmiş hissəsi
+31|Emissiya gəliri
+311|Emissiya gəliri
+32|Geri alınmış kapital (səhmlər)
+321|Geri alınmış kapital (səhmlər)
+33|Kapital ehtiyatları
+331|Yenidən qiymətləndirilmə üzrə ehtiyat
+332|Məzənnə fərqləri üzrə ehtiyat
+333|Qanunvericilik üzrə ehtiyat
+334|Nizamnamə üzrə ehtiyat
+335|Digər ehtiyatlar
+34|Bölüşdürülməmiş mənfəət (ödənilməmiş zərər)
+341|Hesabat dövründə xalis mənfəət (zərər)
+342|Mühasibat uçotu siyasətində dəyişikliklərlə bağlı mənfəət (zərər) üzrə düzəlişlər
+343|Keçmiş illər üzrə bölüşdürülməmiş mənfəət (ödənilməmiş zərər)
+344|Elan edilmiş dividentlər
+4|UZUNMÜDDƏTLİ ÖHDƏLİKLƏR
+40|Uzunmüddətli faiz xərcləri yaradan öhdəliklər
+401|Uzunmüddətli bank kreditləri
+402|İşçilər üçün uzunmüddətli bank kreditləri
+403|Uzunmüddətli konvertasiya olunan istiqrazlar
+404|Uzunmüddətli borclar
+405|Geri alınan məhdud tədavül müddətli imtiyazlı səhmlər(uzunmüddətli)
+406|Maliyyə icarəsi üzrə uzunmüddətli öhdəliklər
+407|Törəmə(asılı) müəssisələrə uzunmüddətli faiz xərcləri yaradan öhdəliklər
+408|Digər uzunmüddətli faiz xərcləri yaradan öhdəliklər
+41|Uzunmüddətli qiymətləndirilmiş öhdəliklər
+411|İşdən azad olma ilə bağlı uzunmüddətli müavinətlər və öhdəliklər
+412|Uzunmüddətli zəmanət öhdəlikləri
+413|Uzunmüddətli hüquqi öhdəliklər
+414|Digər uzunmüddətli qiymətləndirilmiş öhdəliklər
+414-1|Sığorta müqavilələri üzrə uzunmüddətli öhdəliklər
+42|Təxirə salınmış vergi öhdəlikləri
+421|Mənfəət vergisi üzrə təxirə salınmış vergi öhdəlikləri
+422|Digər təxirə salınmış vergi öhdəliklər
+43|Uzunmüddətli kreditor borcları
+431|Malsatan və podratçılara uzunmüddətli kreditor borcları
+432|Törəmə(asılı) cəmiyyətlərə uzunmüddətli kreditor borcları
+433|Tikinti müqavilələri üzrə uzunmüddətli kreditor borcları
+434|Faizlər üzrə uzunmüddətli kreditor borcları
+435|Digər uzunmüddətli kreditor borcları
+44|Sair uzunmüddətli öhdəliklər
+441|Uzunmüddətli pensiya öhdəlikləri
+442|Gələcək hesabat dövrlərinin gəlirləri
+443|Alınmış uzunmüddətli avanslar
+444|Uzunmüddətli məqsədli maliyyələşmələr və daxilolmalar
+445|Digər uzunmüddətli öhdəliklər
+5|QISAMÜDDƏTLİ ÖHDƏLİKLƏR
+50|Qısamüddətli faiz xərcləri yaradan öhdəliklər
+501|Qısamüddətli bank kreditləri
+501-1|Bank overdraftı
+502|İşçilər üçün qısamüddətli bank kreditləri
+503|Qısamüddətli konvertasiya olunan istiqrazlar
+504|Qısamüddətli borclar
+505|Geri alınan məhdud tədavül müddətli imtiyazlı səhmlər(qısamüddətli)
+506|Törəmə(asılı) müəssisələrə qısamüddətli faiz xərcləri yaradan öhdəliklər
+507|Digər qısamüddətli faiz xərcləri yaradan öhdəliklər
+51|Qısamüddətli qiymətləndirilmiş öhdəliklər
+511|İşdən azad olma ilə bağlı qısamüddətli müavinətlər və öhdəliklər
+512|Qısamüddətli zəmanət öhdəlikləri
+513|Qısamüddətli hüquqi öhdəliklər
+514|Mənfəətdə iştirak planı və müavinət planları
+515|Digər qısamüddətli qiymətləndirilmiş öhdəliklər
+515-1|Sığorta müqavilələri üzrə qısamüddətli öhdəliklər
+52|Vergi və sair məcburi ödənişlər üzrə öhdəliklər
+521|Vergi öhdəlikləri
+522|Sosial sığorta və təminat üzrə öhdəliklər
+523|Digər məcburi ödənişlər üzrə öhdəliklər
+53|Qısamüddətli kreditor borcları
+531|Malsatan və podratçılara qısamüddətli kreditor borcları
+532|Törəmə(asılı) müəssisələrə qısamüddətli kreditor borcları
+533|Əməyin ödənişi üzrə işçi heyətinə olan borclar
+534|Dividendlərin ödənilməsi üzrə təsisçilərə kreditor borcları
+535|İcarə üzrə qısamüddətli kreditor borcları
+536|Tikinti müqavilələri üzrə qısamüddətli kreditor borcları
+537|Faizlər üzrə qısamüddətli kreditor borcları
+538|Digər qısamüddətli kreditor borcları
+54|Sair qısamüddətli öhdəliklər
+541|Qısamüddətli pensiya öhdəlikləri
+542|Gələcək hesabat dövrünün gəlirləri
+543|Alınmış qısamüddətli avanslar
+544|Qısamüddətli məqsədli maliyyələşmələr və daxilolmalar
+545|Digər qısamüddətli öhdəliklər
+6|GƏLİRLƏR
+60|Əsas əməliyyat gəliri
+601|Satış
+602|Satılmış malların qaytarılması və ucuzlaşdırılması
+603|Verilmiş güzəştlər
+61|Sair əməliyyat gəlirləri
+611|Sair əməliyyat gəlirləri
+62|Fəaliyyətin dayandırılmasından yaranan gəlirlər
+621|Fəaliyyətin dayandırılmasından yaranan gəlirlər
+63|Maliyyə gəlirləri
+631|Maliyyə gəlirləri
+64|Fövqəladə gəlirlər
+641|Fövqəladə gəlirlər
+7|XƏRCLƏR
+70|Satışın maya dəyəri üzrə xərclər
+701|Satışın maya dəyəri üzrə xərclər
+71|Kommersiya xərcləri
+711|Kommersiya xərcləri
+72|İnzibati xərclər
+721|İnzibati xərclər
+73|Sair əməliyyat xərcləri
+731|Sair əməliyyat xərcləri
+74|Fəaliyyətin dayandırılmasından yaranan xərclər
+741|Fəaliyyətin dayandırılmasından yaranan xərclər
+75|Maliyyə xərcləri
+751|Maliyyə xərcləri
+76|Fövqəladə xərclər
+761|Fövqəladə xərclər
+8|MƏNFƏƏTLƏR (ZƏRƏRLƏR)
+80|Ümumi mənfəət (zərər)
+801|Ümumi mənfəət (zərər)
+81|Asılı və birgə müəssisələrin mənfəətlərində(zərərlərində) pay
+811|Asılı və birgə müəssisələrin mənfəətlərində(zərərlərində) pay
+9|MƏNFƏƏT VERGİSİ
+90|Mənfəət vergisi
+901|Cari mənfəət vergisi üzrə xərclər
+902|Təxirə salınmış mənfəət vergisi üzrə xərclər
+`;
+
+		function categoryByCode(code){
+			const normalized=normalizeCode(code);
+			if(normalized.startsWith('224')) return 'BANK_HESABI';
+			const head=String(code).trim()[0];
+			if(head==='1'||head==='2') return 'İNVENTAR';
+			if(head==='4'||head==='5') return 'ÖHDƏLİK';
+			if(head==='6') return 'GƏLİR';
+			if(head==='7'||head==='9') return 'XƏRC';
+			if(head==='8') return 'MƏSRƏF';
+			return '';
+		}
+
+		function normalizeCode(code){
+			return String(code).replace(/[^0-9]/g,'');
+		}
+
+		function buildAccountsFromText(text){
+			const raw=text.split('\n').map(x=>x.trim()).filter(Boolean).map(line=>{
+				const parts=line.split('|');
+				if(parts.length<2) return null;
+				const code=parts[0].trim();
+				const name=parts.slice(1).join('|').trim();
+				if(!code||!name) return null;
+				return {code,name};
+			}).filter(Boolean);
+
+			const items=raw.map((r,idx)=>({
+				id:idx+1,
+				code:r.code,
+				name:r.name,
+				parent:null,
+				is_postable:true,
+				cat:categoryByCode(r.code),
+				active:true,
+				created_date:'30.03.2026',
+				closed_date:''
+			}));
+
+			for(let i=0;i<items.length;i++){
+				const currentNorm=normalizeCode(items[i].code);
+				let parentId=null;
+				let bestLen=0;
+				for(let j=0;j<i;j++){
+					const parentNorm=normalizeCode(items[j].code);
+					if(parentNorm.length<currentNorm.length && currentNorm.startsWith(parentNorm) && parentNorm.length>bestLen){
+						bestLen=parentNorm.length;
+						parentId=items[j].id;
+					}
+				}
+				items[i].parent=parentId;
+			}
+
+			const childCount=new Map();
+			items.forEach(a=>childCount.set(a.id,0));
+			items.forEach(a=>{if(a.parent){childCount.set(a.parent,(childCount.get(a.parent)||0)+1);}});
+			items.forEach(a=>{
+				a.is_postable=(childCount.get(a.id)||0)===0;
+				if(!a.is_postable){a.cat='';}
+			});
+
+			return items;
+		}
+
+		const accounts=buildAccountsFromText(coaText);
+
+		const expanded=new Set();
+		let selectedId=null;
+		const tree=document.getElementById('tree');
+		const detail=document.getElementById('detail');
+		const statusEl=document.getElementById('status');
+		const modalWrap=document.getElementById('modalWrap');
+
+		function setStatus(message,isError=false){
+			statusEl.textContent=message;
+			statusEl.style.color=isError?'#b91c1c':'#0f766e';
+		}
+
+		function childrenOf(parentId){
+			return accounts.filter(a=>a.parent===parentId);
+		}
+
+		function isParent(node){
+			return accounts.some(a=>a.parent===node.id);
+		}
+
+		function initializeExpanded(){
+			accounts.forEach(a=>{if(isParent(a)){expanded.add(a.id);}});
+		}
+
+		function flattenTree(parentId,depth,result){
+			const list=childrenOf(parentId);
+			list.forEach(node=>{
+				result.push({node,depth});
+				if(isParent(node)&&expanded.has(node.id)){
+					flattenTree(node.id,depth+1,result);
+				}
+			});
+		}
+
+		function renderTree(){
+			const flat=[];
+			flattenTree(null,0,flat);
+			tree.innerHTML='';
+			flat.forEach(({node,depth})=>{
+				const row=document.createElement('div');
+				row.className='tree-row'+(selectedId===node.id?' sel':'');
+				row.style.paddingLeft=(8+depth*18)+'px';
+
+				const hasChild=isParent(node);
+				const twisty=document.createElement('span');
+				twisty.className='twisty';
+				twisty.textContent=hasChild?(expanded.has(node.id)?'▾':'▸'):'·';
+				twisty.onclick=(e)=>{
+					e.stopPropagation();
+					if(!hasChild)return;
+					if(expanded.has(node.id)){expanded.delete(node.id);}else{expanded.add(node.id);} 
+					renderTree();
+				};
+
+				const dot=document.createElement('span');
+				dot.className='node-dot';
+
+				const label=document.createElement('span');
+				label.className='label';
+				label.innerHTML=`<span class="code">${node.code}</span><span class="name">${node.name}</span>`;
+
+				row.append(twisty,dot,label);
+				row.onclick=()=>{
+					selectedId=node.id;
+					renderTree();
+					renderDetail();
+					setStatus('Qeyd seçildi.');
+				};
+				tree.appendChild(row);
+			});
+		}
+
+		function renderDetail(){
+			const node=accounts.find(a=>a.id===selectedId);
+			if(!node){
+				detail.innerHTML='<div class="muted">Detalları görmək üçün soldan bir node seçin.</div>';
+				return;
+			}
+			const parent=accounts.find(a=>a.id===node.parent);
+			detail.innerHTML=`
+				<div class="field"><span class="k">Hesab kodu</span><span class="v">${node.code}</span></div>
+				<div class="field"><span class="k">Hesab adı</span><span class="v">${node.name}</span></div>
+				<div class="field"><span class="k">Parent</span><span class="v">${parent?parent.code+' - '+parent.name:'- (root)'}</span></div>
+				<div class="field"><span class="k">Qeydiyyat hesabıdır</span><span class="v">${node.is_postable?'Bəli':'Xeyr'}</span></div>
+				<div class="field"><span class="k">Kateqoriya</span><span class="v">${node.cat||'-'}</span></div>
+				<div class="field"><span class="k">Yaradılma tarixi</span><span class="v">${node.created_date||'-'}</span></div>
+				<div class="field"><span class="k">Bağlanma tarixi</span><span class="v">${node.closed_date||'-'}</span></div>
+				<div class="field"><span class="k">Aktivlik</span><span class="v">${node.active?'Aktiv':'Passiv'}</span></div>
+			`;
+		}
+
+		function openModal(){
+			document.getElementById('account_code').value='';
+			document.getElementById('account_name').value='';
+			document.getElementById('is_postable').checked=true;
+			document.getElementById('account_category_code').value='';
+			document.getElementById('created_date').value='30.03.2026';
+			document.getElementById('closed_date').value='';
+			syncCategory();
+			modalWrap.style.display='flex';
+		}
+
+		function closeModal(){
+			modalWrap.style.display='none';
+		}
+
+		function syncCategory(){
+			const isPostable=document.getElementById('is_postable').checked;
+			const category=document.getElementById('account_category_code');
+			category.disabled=!isPostable;
+			if(!isPostable){category.value='';}
+		}
+
+		function isCodeValid(value){
+			return /^[1-9][0-9]{0,2}(-[0-9]+)?$/.test(value);
+		}
+
+		function parseDate(value){
+			const m=/^(\d{2})\.(\d{2})\.(\d{4})$/.exec(value||'');
+			if(!m) return null;
+			return new Date(Number(m[3]),Number(m[2])-1,Number(m[1]));
+		}
+
+		function saveNew(){
+			const code=document.getElementById('account_code').value.trim();
+			const name=document.getElementById('account_name').value.trim();
+			const isPostable=document.getElementById('is_postable').checked;
+			const category=document.getElementById('account_category_code').value;
+			const createdDate=document.getElementById('created_date').value.trim();
+			const closedDate=document.getElementById('closed_date').value.trim();
+			const parent=selectedId;
+
+			if(!code||!name){return setStatus('E-102: Məcburi sahələr doldurulmayıb.',true);}
+			if(!isCodeValid(code)){return setStatus('E-206: Hesab kodu formatı etibarsızdır.',true);}
+			if(accounts.some(a=>a.code===code&&a.active)){return setStatus('E-101: Hesab kodu artıq mövcuddur.',true);}
+			if(isPostable&&!category){return setStatus('E-207: Qeydiyyat hesabıdır=true olduqda kateqoriya məcburidir.',true);}
+			if(!isPostable&&category){return setStatus('E-208: Qeydiyyat hesabıdır=false olduqda kateqoriya seçilə bilməz.',true);}
+			if(!parseDate(createdDate)){return setStatus('E-701: Yaradılma tarixi formatı DD.MM.YYYY olmalıdır.',true);}
+			if(closedDate && !parseDate(closedDate)){return setStatus('E-702: Bağlanma tarixi formatı DD.MM.YYYY olmalıdır.',true);}
+			if(closedDate && parseDate(closedDate)<parseDate(createdDate)){return setStatus('E-703: Bağlanma tarixi yaradılma tarixindən kiçik ola bilməz.',true);}
+
+			const newId=Math.max(...accounts.map(a=>a.id))+1;
+			accounts.push({id:newId,code,name,parent,is_postable:isPostable,cat:category,active:!closedDate,created_date:createdDate||'30.03.2026',closed_date:closedDate});
+			if(parent){expanded.add(parent);}
+			selectedId=newId;
+			closeModal();
+			renderTree();
+			renderDetail();
+			setStatus('Yeni hesab yaradıldı.');
+		}
+
+		document.getElementById('btnNew').onclick=openModal;
+		document.getElementById('btnModalX').onclick=closeModal;
+		document.getElementById('btnCancel').onclick=closeModal;
+		document.getElementById('is_postable').onchange=syncCategory;
+		document.getElementById('btnSave').onclick=saveNew;
+		modalWrap.onclick=(e)=>{if(e.target===modalWrap)closeModal();};
+
+		initializeExpanded();
+		renderTree();
+		renderDetail();
+	</script>
+</body>
+</html>

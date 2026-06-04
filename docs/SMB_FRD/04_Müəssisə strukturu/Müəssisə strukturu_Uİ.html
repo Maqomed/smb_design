@@ -1,0 +1,1280 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SMB ERP — Təşkilati Struktur Master Data</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: "Segoe UI", Arial, sans-serif; }
+    :root {
+      --bg: #f4f6fb;
+      --panel: #ffffff;
+      --line: #d7e0ed;
+      --text: #223041;
+      --muted: #667085;
+      --accent: #1976d2;
+      --accent-soft: #e8f1fd;
+      --danger: #c62828;
+      --ok: #1f8a46;
+      --warn: #ef6c00;
+    }
+    body { background: var(--bg); color: var(--text); min-height: 100vh; }
+    .topbar {
+      height: 46px;
+      background: var(--accent);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 0 16px;
+    }
+    .logo { font-weight: 700; font-size: 14px; letter-spacing: .3px; }
+    .layout { display: block; min-height: calc(100vh - 46px); }
+    .sidebar {
+      border-bottom: 1px solid var(--line);
+      background: #f8fbff;
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .menu-item {
+      display: inline-flex;
+      width: auto;
+      text-align: center;
+      background: #fff;
+      border: 1px solid var(--line);
+      color: var(--text);
+      border-radius: 8px;
+      padding: 8px 10px;
+      margin-bottom: 0;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    .menu-item.active { border-color: var(--accent); background: var(--accent-soft); color: #0f4f94; font-weight: 600; }
+
+    .main { padding: 14px; overflow: auto; }
+    .page-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      gap: 12px;
+    }
+    .title { font-size: 20px; font-weight: 700; }
+    .subtitle { font-size: 12px; color: var(--muted); margin-top: 4px; }
+
+    .actions { position: relative; }
+    .btn {
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--text);
+      padding: 7px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 13px;
+    }
+    .btn.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .menu {
+      position: absolute;
+      right: 0;
+      top: calc(100% + 6px);
+      min-width: 170px;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: 0 8px 20px rgba(15, 23, 42, .12);
+      padding: 6px;
+      display: none;
+      z-index: 30;
+    }
+    .menu.open { display: block; }
+    .menu .btn { width: 100%; border: 0; text-align: left; }
+    .menu .btn:hover { background: #f3f7fe; }
+
+    .panel {
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 10px;
+      padding: 12px;
+      margin-bottom: 12px;
+    }
+    .panel-title { font-size: 13px; color: var(--muted); margin-bottom: 10px; text-transform: uppercase; letter-spacing: .3px; }
+
+    .entity-table { width: 100%; border-collapse: collapse; user-select: none; }
+    .entity-table th, .entity-table td { border-bottom: 1px solid #edf2f7; padding: 8px; font-size: 12px; text-align: left; }
+    .entity-table th { background: #f8fbff; color: #3a4d64; }
+    .entity-table tr:hover td { background: #f8fbff; cursor: pointer; }
+    .entity-table tr.selected td { background: #eaf1ff; }
+
+    .tree { list-style: none; margin: 0; padding: 0; user-select: none; }
+    .tree-node { border: 1px solid var(--line); border-radius: 8px; margin-bottom: 8px; background: #fff; }
+    .tree-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 10px;
+      cursor: pointer;
+      gap: 8px;
+    }
+    .tree-head.selected { background: #eaf1ff; }
+    .node-left { display: flex; align-items: center; gap: 8px; }
+    .toggle {
+      width: 20px;
+      height: 20px;
+      border: 1px solid #c7d3e6;
+      border-radius: 5px;
+      background: #fff;
+      color: #415a77;
+      padding: 0;
+      font-size: 12px;
+      cursor: pointer;
+    }
+    .tag { font-size: 11px; color: var(--muted); background: #f2f6fb; border-radius: 999px; padding: 2px 7px; }
+    .tree-children { list-style: none; margin: 0; padding: 0 8px 8px 28px; }
+
+    .filter-row { display: grid; grid-template-columns: 180px 1fr; gap: 8px; margin-bottom: 10px; align-items: center; }
+    label { font-size: 12px; color: #46566a; font-weight: 600; }
+    select, input {
+      width: 100%;
+      border: 1px solid #cfd8e3;
+      border-radius: 6px;
+      padding: 7px 8px;
+      font-size: 13px;
+      background: #fff;
+    }
+
+    .wh-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+    .list-box { border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+    .list-head { background: #f8fbff; border-bottom: 1px solid var(--line); padding: 8px; font-size: 12px; font-weight: 700; color: #405269; }
+    .list { list-style: none; max-height: 300px; overflow: auto; user-select: none; }
+    .list li { padding: 8px 10px; border-bottom: 1px solid #eff4fa; font-size: 12px; cursor: pointer; }
+    .list li:hover { background: #f7fbff; }
+    .list li.sel { background: #eaf1ff; font-weight: 600; }
+
+    .status { min-height: 24px; font-size: 13px; font-weight: 600; color: var(--ok); }
+    .status.err { color: var(--danger); }
+    .status.warn { color: var(--warn); }
+
+    .modal-wrap {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, .2);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+      padding: 14px;
+    }
+    .modal {
+      width: 100%;
+      max-width: 520px;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 14px;
+    }
+    .modal h3 { margin-bottom: 10px; }
+    .form-grid { display: grid; gap: 8px; }
+    .form-row { display: grid; grid-template-columns: 160px 1fr; align-items: center; gap: 8px; }
+    .modal-foot { margin-top: 12px; display: flex; justify-content: flex-end; gap: 8px; }
+
+    .muted { color: var(--muted); font-size: 12px; }
+    .tab-komek { margin-left: auto; font-size: 12px; color: var(--muted); }
+    .wh-link-box { border: 1px solid #d6e0ee; border-radius: 8px; padding: 8px; max-height: 220px; overflow: auto; background: #fbfdff; }
+    .wh-link-row { display: grid; grid-template-columns: 1fr auto auto; gap: 8px; align-items: center; padding: 6px 4px; border-bottom: 1px solid #edf2f8; }
+    .wh-link-row:last-child { border-bottom: 0; }
+    .wh-link-empty { font-size: 12px; color: var(--muted); }
+    .wh-link-row label { font-weight: 500; cursor: pointer; }
+    .wh-link-row .tiny { font-size: 11px; color: #61738a; }
+
+    @media (max-width: 1100px) {
+      .sidebar { justify-content: flex-start; }
+      .wh-grid { grid-template-columns: 1fr; }
+      .filter-row, .form-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <span class="logo">SMB ERP</span>
+    <span style="font-size:12px;opacity:.9">Təşkilati və Logistika Struktur Soraqçası</span>
+    <span style="flex:1"></span>
+    <span style="font-size:12px">İstifadəçi</span>
+  </div>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <button class="menu-item active" data-tab="entity">Müəssisə</button>
+      <button class="menu-item" data-tab="branch">Filial</button>
+      <button class="menu-item" data-tab="department">Departament</button>
+      <button class="menu-item" data-tab="warehouse">Anbar / Sahə / Sektor</button>
+      <div class="tab-komek">Parent və səviyyə sahələri avtomatik təyin olunur.</div>
+    </aside>
+
+    <main class="main">
+      <div class="page-head">
+        <div>
+          <div class="title">Təşkilati və Logistika Struktur Soraqçaları</div>
+          <div class="subtitle">Kök: Müəssisə. Tarix formatı: DD.MM.YYYY</div>
+        </div>
+        <div class="actions">
+          <button id="actionsBtn" class="btn primary">Əməliyyatlar</button>
+          <div id="actionsMenu" class="menu">
+            <button id="newBtn" class="btn">Yeni</button>
+            <button id="saveBtn" class="btn">Yadda Saxla</button>
+            <button id="closeBtn" class="btn">Bağla (closed_date)</button>
+            <button id="deleteBtn" class="btn">Sil</button>
+            <button id="exportBtn" class="btn">Çap / İxrac</button>
+          </div>
+        </div>
+      </div>
+
+      <section id="entityTab" class="panel">
+        <div class="panel-title">Müəssisə siyahısı</div>
+        <table class="entity-table" id="entityTable">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Qısa ad</th>
+              <th>Hüquqi ad</th>
+              <th>Ölkə / Şəhər</th>
+              <th>Valyuta</th>
+              <th>ƏDV ödəyicisidir</th>
+              <th>Yaradılma</th>
+              <th>Bağlanma</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </section>
+
+      <section id="branchTab" class="panel" style="display:none">
+        <div class="panel-title">Filial tree (Entity daxilində)</div>
+        <div class="filter-row">
+          <label for="branchEntityFilter">Müəssisə filtri</label>
+          <select id="branchEntityFilter"></select>
+        </div>
+        <ul id="branchTree" class="tree"></ul>
+      </section>
+
+      <section id="departmentTab" class="panel" style="display:none">
+        <div class="panel-title">Departament tree (Branch daxilində)</div>
+        <div class="filter-row">
+          <label for="deptBranchFilter">Filial filtri</label>
+          <select id="deptBranchFilter"></select>
+        </div>
+        <ul id="deptTree" class="tree"></ul>
+      </section>
+
+      <section id="warehouseTab" class="panel" style="display:none">
+        <div class="panel-title">Anbarlar (qlobal) + Filiala bağlama + Sahə/Sektor</div>
+        <div class="wh-grid">
+          <div class="list-box">
+            <div class="list-head">Anbar</div>
+            <ul id="whList" class="list"></ul>
+          </div>
+          <div class="list-box">
+            <div class="list-head">Saxlanma sahəsi</div>
+            <ul id="locList" class="list"></ul>
+          </div>
+          <div class="list-box">
+            <div class="list-head">Saxlanma sektoru</div>
+            <ul id="binList" class="list"></ul>
+          </div>
+        </div>
+      </section>
+
+      <div id="status" class="status"></div>
+    </main>
+  </div>
+
+  <div id="modalWrap" class="modal-wrap">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <h3 id="modalTitle">Yeni qeyd</h3>
+      <div id="modalHint" class="muted" style="margin-bottom:8px"></div>
+      <div id="formGrid" class="form-grid"></div>
+      <div class="modal-foot">
+        <button id="modalCancel" class="btn">Bağla</button>
+        <button id="modalSave" class="btn primary">Yadda Saxla</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const nowDate = () => {
+      const d = new Date();
+      const dd = String(d.getDate()).padStart(2, '0');
+      const mm = String(d.getMonth() + 1).padStart(2, '0');
+      const yyyy = d.getFullYear();
+      return `${dd}.${mm}.${yyyy}`;
+    };
+
+    function parseDateDDMMYYYY(value) {
+      const m = /^(\d{2})\.(\d{2})\.(\d{4})$/.exec(String(value || '').trim());
+      if (!m) return null;
+      const d = Number(m[1]);
+      const mo = Number(m[2]) - 1;
+      const y = Number(m[3]);
+      const dt = new Date(y, mo, d);
+      if (dt.getFullYear() !== y || dt.getMonth() !== mo || dt.getDate() !== d) return null;
+      return dt;
+    }
+
+    function validateDatePair(createdDate, closedDate) {
+      if (!createdDate || !parseDateDDMMYYYY(createdDate)) {
+        return 'Tarix formatı DD.MM.YYYY olmalıdır (created_date).';
+      }
+      if (closedDate) {
+        const c = parseDateDDMMYYYY(createdDate);
+        const cl = parseDateDDMMYYYY(closedDate);
+        if (!cl) return 'Tarix formatı DD.MM.YYYY olmalıdır (closed_date).';
+        if (cl < c) return 'closed_date created_date-dən kiçik ola bilməz.';
+      }
+      return '';
+    }
+
+    function isValidEmail(value) {
+      if (!value) return true;
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+    }
+
+    const state = {
+      activeTab: 'entity',
+      expandedBranch: {},
+      expandedDept: {},
+      selected: { table: null, id: null },
+      modal: { mode: null, table: null, target: null },
+      idSeq: { entity: 3, branch: 5, department: 4, warehouse: 4, location: 4, bin: 4 },
+      countryRef: [
+        { country_id: 31, country_name: 'Azərbaycan' },
+        { country_id: 90, country_name: 'Türkiyə' }
+      ],
+      cityRef: [
+        { city_id: 3101, country_id: 31, city_name: 'Bakı' },
+        { city_id: 3102, country_id: 31, city_name: 'Gəncə' },
+        { city_id: 9001, country_id: 90, city_name: 'Ankara' },
+        { city_id: 9002, country_id: 90, city_name: 'İstanbul' }
+      ],
+      entityFilter: 1,
+      deptBranchFilter: 1,
+      selectedWh: null,
+      selectedLoc: null,
+      selectedBin: null,
+      entities: [
+        { entity_id: 1, abbreviation: 'FARABI', legal_name: 'Farabi Trading MMC', country_id: 31, city_id: 3101, postal_code: 'AZ1000', legal_address: 'Bakı ş., Nizami 10', website: '', email: '', phone: '', base_currency: 'AZN', currency_precision: 2, vat_registered: true, created_date: nowDate(), closed_date: '' },
+        { entity_id: 2, abbreviation: 'NOVA', legal_name: 'Nova Logistics MMC', country_id: 31, city_id: 3101, postal_code: 'AZ1022', legal_address: 'Bakı ş., Xətai 15', website: '', email: '', phone: '', base_currency: 'AZN', currency_precision: 2, vat_registered: true, created_date: nowDate(), closed_date: '' }
+      ],
+      branches: [
+        { branch_id: 1, entity_id: 1, parent_branch_id: null, branch_name: 'Bakı Baş Filial', manager_name: 'Elçin Məmmədov', sort_order: 10, created_date: nowDate(), closed_date: '' },
+        { branch_id: 2, entity_id: 1, parent_branch_id: 1, branch_name: 'Nizami Şöbə', manager_name: '', sort_order: 20, created_date: nowDate(), closed_date: '' },
+        { branch_id: 3, entity_id: 1, parent_branch_id: 1, branch_name: 'Yasamal Şöbə', manager_name: '', sort_order: 30, created_date: nowDate(), closed_date: '' },
+        { branch_id: 4, entity_id: 2, parent_branch_id: null, branch_name: 'Mərkəzi Logistika', manager_name: '', sort_order: 10, created_date: nowDate(), closed_date: '' }
+      ],
+      departments: [
+        { department_id: 1, branch_id: 1, parent_department_id: null, department_name: 'Maliyyə', owner_person: 'Aysel', sort_order: 10, created_date: nowDate(), closed_date: '' },
+        { department_id: 2, branch_id: 1, parent_department_id: 1, department_name: 'Mühasibatlıq', owner_person: '', sort_order: 20, created_date: nowDate(), closed_date: '' },
+        { department_id: 3, branch_id: 2, parent_department_id: null, department_name: 'Satış', owner_person: '', sort_order: 10, created_date: nowDate(), closed_date: '' }
+      ],
+      warehouses: [
+        { warehouse_id: 1, warehouse_name: 'A Anbarı', created_date: nowDate(), closed_date: '' },
+        { warehouse_id: 2, warehouse_name: 'B Anbarı', created_date: nowDate(), closed_date: '' },
+        { warehouse_id: 3, warehouse_name: 'C Anbarı', created_date: nowDate(), closed_date: '' }
+      ],
+      branchWarehouseLinks: [
+        { branch_id: 1, warehouse_id: 1, is_default: true },
+        { branch_id: 1, warehouse_id: 2, is_default: false },
+        { branch_id: 2, warehouse_id: 2, is_default: true },
+        { branch_id: 2, warehouse_id: 3, is_default: false }
+      ],
+      locations: [
+        { location_id: 1, warehouse_id: 1, location_name: 'Zona 01 / Rəf 01', capacity_note: '', created_date: nowDate(), closed_date: '' },
+        { location_id: 2, warehouse_id: 1, location_name: 'Zona 01 / Rəf 02', capacity_note: '', created_date: nowDate(), closed_date: '' },
+        { location_id: 3, warehouse_id: 3, location_name: 'A Blok / Rəf 01', capacity_note: '', created_date: nowDate(), closed_date: '' }
+      ],
+      bins: [
+        { bin_id: 1, location_id: 1, bin_name: 'A sıra / 01 sektor', max_volume: '', max_weight: '', created_date: nowDate(), closed_date: '' },
+        { bin_id: 2, location_id: 1, bin_name: 'A sıra / 02 sektor', max_volume: '', max_weight: '', created_date: nowDate(), closed_date: '' },
+        { bin_id: 3, location_id: 3, bin_name: 'B sıra / 01 sektor', max_volume: '', max_weight: '', created_date: nowDate(), closed_date: '' }
+      ]
+    };
+
+    state.branches.forEach(b => state.expandedBranch[b.branch_id] = true);
+    state.departments.forEach(d => state.expandedDept[d.department_id] = true);
+
+    const refs = {
+      menuItems: [...document.querySelectorAll('.menu-item')],
+      actionsBtn: document.getElementById('actionsBtn'),
+      actionsMenu: document.getElementById('actionsMenu'),
+      status: document.getElementById('status'),
+      entityTableBody: document.querySelector('#entityTable tbody'),
+      branchEntityFilter: document.getElementById('branchEntityFilter'),
+      deptBranchFilter: document.getElementById('deptBranchFilter'),
+      branchTree: document.getElementById('branchTree'),
+      deptTree: document.getElementById('deptTree'),
+      whList: document.getElementById('whList'),
+      locList: document.getElementById('locList'),
+      binList: document.getElementById('binList'),
+      tabEntity: document.getElementById('entityTab'),
+      tabBranch: document.getElementById('branchTab'),
+      tabDept: document.getElementById('departmentTab'),
+      tabWarehouse: document.getElementById('warehouseTab'),
+      modalWrap: document.getElementById('modalWrap'),
+      modalTitle: document.getElementById('modalTitle'),
+      modalHint: document.getElementById('modalHint'),
+      formGrid: document.getElementById('formGrid'),
+      modalSave: document.getElementById('modalSave')
+    };
+
+    document.querySelectorAll('.entity-table, .tree, .list').forEach((area) => {
+      area.addEventListener('copy', (e) => e.preventDefault());
+      area.addEventListener('paste', (e) => e.preventDefault());
+      area.addEventListener('cut', (e) => e.preventDefault());
+    });
+
+    function setStatus(text, type = 'ok') {
+      refs.status.textContent = text;
+      refs.status.className = 'status';
+      if (type === 'err') refs.status.classList.add('err');
+      if (type === 'warn') refs.status.classList.add('warn');
+    }
+
+    function closeActions() { refs.actionsMenu.classList.remove('open'); }
+
+    refs.actionsBtn.onclick = () => refs.actionsMenu.classList.toggle('open');
+
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.actions')) closeActions();
+      if (!e.target.closest('.tree-head') && !e.target.closest('.entity-table tr') && !e.target.closest('.list li') && !e.target.closest('.modal') && !e.target.closest('.actions') && state.selected.table) {
+        state.selected = { table: null, id: null };
+        rerender();
+        setStatus('Seçim təmizləndi. Yeni => root səviyyədə yaradacaq.');
+      }
+    });
+
+    refs.menuItems.forEach(item => {
+      item.onclick = () => {
+        refs.menuItems.forEach(x => x.classList.remove('active'));
+        item.classList.add('active');
+        state.activeTab = item.dataset.tab;
+        refs.tabEntity.style.display = state.activeTab === 'entity' ? 'block' : 'none';
+        refs.tabBranch.style.display = state.activeTab === 'branch' ? 'block' : 'none';
+        refs.tabDept.style.display = state.activeTab === 'department' ? 'block' : 'none';
+        refs.tabWarehouse.style.display = state.activeTab === 'warehouse' ? 'block' : 'none';
+        rerender();
+      };
+    });
+
+    function entityNameById(id) {
+      const e = state.entities.find(x => x.entity_id === id);
+      return e ? e.legal_name : `ID:${id}`;
+    }
+
+    function countryNameById(id) {
+      const c = state.countryRef.find(x => x.country_id === Number(id));
+      return c ? c.country_name : `ID:${id}`;
+    }
+
+    function cityNameById(id) {
+      const c = state.cityRef.find(x => x.city_id === Number(id));
+      return c ? c.city_name : `ID:${id}`;
+    }
+
+    function branchNameById(id) {
+      const b = state.branches.find(x => x.branch_id === id);
+      return b ? b.branch_name : `ID:${id}`;
+    }
+
+    function renderFilters() {
+      refs.branchEntityFilter.innerHTML = state.entities.map(e => `<option value="${e.entity_id}">${e.legal_name}</option>`).join('');
+      refs.branchEntityFilter.value = String(state.entityFilter);
+
+      refs.deptBranchFilter.innerHTML = state.branches.map(b => `<option value="${b.branch_id}">${b.branch_name}</option>`).join('');
+      if (!state.branches.some(b => b.branch_id === state.deptBranchFilter)) state.deptBranchFilter = state.branches[0]?.branch_id || 0;
+      refs.deptBranchFilter.value = String(state.deptBranchFilter || '');
+    }
+
+    refs.branchEntityFilter.onchange = (e) => { state.entityFilter = Number(e.target.value); renderBranchTree(); };
+    refs.deptBranchFilter.onchange = (e) => { state.deptBranchFilter = Number(e.target.value); state.selected = { table: null, id: null }; renderDeptTree(); };
+
+    function renderEntityTable() {
+      refs.entityTableBody.innerHTML = state.entities.map(row => {
+        const selected = state.selected.table === 'entity' && state.selected.id === row.entity_id ? 'selected' : '';
+        return `<tr class="${selected}" data-id="${row.entity_id}">
+          <td>${row.entity_id}</td>
+          <td>${row.abbreviation}</td>
+          <td>${row.legal_name}</td>
+          <td>${countryNameById(row.country_id)} / ${cityNameById(row.city_id)}</td>
+          <td>${row.base_currency}</td>
+          <td>${row.vat_registered ? 'Bəli' : 'Xeyr'}</td>
+          <td>${row.created_date}</td>
+          <td>${row.closed_date || '-'}</td>
+        </tr>`;
+      }).join('');
+
+      [...refs.entityTableBody.querySelectorAll('tr')].forEach(tr => {
+        tr.onclick = () => {
+          state.selected = { table: 'entity', id: Number(tr.dataset.id) };
+          renderEntityTable();
+          setStatus('Müəssisə seçildi.');
+        };
+        tr.ondblclick = () => {
+          const rec = state.entities.find(x => x.entity_id === Number(tr.dataset.id));
+          if (rec) openModal('edit', 'entity', rec);
+        };
+      });
+    }
+
+    function buildTree(items, parentId, parentField) {
+      return items
+        .filter(x => x[parentField] === parentId)
+        .sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
+    }
+
+    function branchNodeHtml(node) {
+      const selected = state.selected.table === 'branch' && state.selected.id === node.branch_id ? 'selected' : '';
+      const expanded = state.expandedBranch[node.branch_id] !== false;
+      const children = buildTree(state.branches.filter(x => x.entity_id === node.entity_id), node.branch_id, 'parent_branch_id');
+      const childHtml = children.map(branchNodeHtml).join('');
+
+      return `<li class="tree-node">
+        <div class="tree-head ${selected}" data-table="branch" data-id="${node.branch_id}">
+          <div class="node-left">
+            <button class="toggle" data-toggle-branch="${node.branch_id}">${expanded ? '▾' : '▸'}</button>
+            <span>${node.branch_name}</span>
+          </div>
+          <span class="tag">Filial</span>
+        </div>
+        <ul class="tree-children" style="display:${expanded ? 'block' : 'none'}">${childHtml}</ul>
+      </li>`;
+    }
+
+    function renderBranchTree() {
+      const roots = state.branches.filter(x => x.entity_id === state.entityFilter && x.parent_branch_id == null).sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
+      refs.branchTree.innerHTML = roots.length ? roots.map(branchNodeHtml).join('') : '<div class="muted">Filial yoxdur.</div>';
+
+      refs.branchTree.querySelectorAll('[data-toggle-branch]').forEach(btn => {
+        btn.onclick = (e) => {
+          e.stopPropagation();
+          const id = Number(btn.dataset.toggleBranch);
+          state.expandedBranch[id] = !(state.expandedBranch[id] !== false);
+          renderBranchTree();
+        };
+      });
+
+      refs.branchTree.querySelectorAll('.tree-head').forEach(head => {
+        head.onclick = () => {
+          state.selected = { table: 'branch', id: Number(head.dataset.id) };
+          renderBranchTree();
+          setStatus('Filial seçildi.');
+        };
+        head.ondblclick = () => {
+          const rec = state.branches.find(x => x.branch_id === Number(head.dataset.id));
+          if (rec) openModal('edit', 'branch', rec);
+        };
+      });
+    }
+
+    function deptNodeHtml(node) {
+      const selected = state.selected.table === 'department' && state.selected.id === node.department_id ? 'selected' : '';
+      const expanded = state.expandedDept[node.department_id] !== false;
+      const children = buildTree(state.departments.filter(x => x.branch_id === node.branch_id), node.department_id, 'parent_department_id');
+      const childHtml = children.map(deptNodeHtml).join('');
+
+      return `<li class="tree-node">
+        <div class="tree-head ${selected}" data-table="department" data-id="${node.department_id}">
+          <div class="node-left">
+            <button class="toggle" data-toggle-dept="${node.department_id}">${expanded ? '▾' : '▸'}</button>
+            <span>${node.department_name}</span>
+          </div>
+          <span class="tag">Departament</span>
+        </div>
+        <ul class="tree-children" style="display:${expanded ? 'block' : 'none'}">${childHtml}</ul>
+      </li>`;
+    }
+
+    function renderDeptTree() {
+      const roots = state.departments.filter(x => x.branch_id === state.deptBranchFilter && x.parent_department_id == null).sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
+      refs.deptTree.innerHTML = roots.length ? roots.map(deptNodeHtml).join('') : '<div class="muted">Departament yoxdur.</div>';
+
+      refs.deptTree.querySelectorAll('[data-toggle-dept]').forEach(btn => {
+        btn.onclick = (e) => {
+          e.stopPropagation();
+          const id = Number(btn.dataset.toggleDept);
+          state.expandedDept[id] = !(state.expandedDept[id] !== false);
+          renderDeptTree();
+        };
+      });
+
+      refs.deptTree.querySelectorAll('.tree-head').forEach(head => {
+        head.onclick = () => {
+          state.selected = { table: 'department', id: Number(head.dataset.id) };
+          renderDeptTree();
+          setStatus('Departament seçildi.');
+        };
+        head.ondblclick = () => {
+          const rec = state.departments.find(x => x.department_id === Number(head.dataset.id));
+          if (rec) openModal('edit', 'department', rec);
+        };
+      });
+    }
+
+    function renderWarehousePanel() {
+      const whItems = state.warehouses;
+      refs.whList.innerHTML = whItems.length
+        ? whItems.map(w => {
+            const links = state.branchWarehouseLinks.filter(x => x.warehouse_id === w.warehouse_id);
+            const defaultBranches = links.filter(x => x.is_default).map(x => branchNameById(x.branch_id));
+            const mark = links.length
+              ? ` (${links.length} filiala bağlı${defaultBranches.length ? `, default: ${defaultBranches.join(', ')}` : ''})`
+              : ' (bağlı deyil)';
+            return `<li data-id="${w.warehouse_id}" class="${state.selectedWh === w.warehouse_id ? 'sel' : ''}">${w.warehouse_name}${mark}</li>`;
+          }).join('')
+        : '<li class="muted">Anbar yoxdur.</li>';
+
+      refs.whList.querySelectorAll('li[data-id]').forEach(li => {
+        li.onclick = () => {
+          state.selectedWh = Number(li.dataset.id);
+          state.selectedLoc = null;
+          state.selectedBin = null;
+          state.selected = { table: 'warehouse', id: state.selectedWh };
+          renderWarehousePanel();
+          setStatus('Anbar seçildi.');
+        };
+        li.ondblclick = () => {
+          const rec = state.warehouses.find(x => x.warehouse_id === Number(li.dataset.id));
+          if (rec) openModal('edit', 'warehouse', rec);
+        };
+      });
+
+      const locItems = state.locations.filter(x => x.warehouse_id === state.selectedWh);
+      refs.locList.innerHTML = locItems.length
+        ? locItems.map(l => `<li data-id="${l.location_id}" class="${state.selectedLoc === l.location_id ? 'sel' : ''}">${l.location_name}</li>`).join('')
+        : '<li class="muted">Saxlanma sahəsi yoxdur.</li>';
+
+      refs.locList.querySelectorAll('li[data-id]').forEach(li => {
+        li.onclick = () => {
+          state.selectedLoc = Number(li.dataset.id);
+          state.selectedBin = null;
+          state.selected = { table: 'location', id: state.selectedLoc };
+          renderWarehousePanel();
+          setStatus('Saxlanma sahəsi seçildi.');
+        };
+        li.ondblclick = () => {
+          const rec = state.locations.find(x => x.location_id === Number(li.dataset.id));
+          if (rec) openModal('edit', 'location', rec);
+        };
+      });
+
+      const binItems = state.bins.filter(x => x.location_id === state.selectedLoc);
+      refs.binList.innerHTML = binItems.length
+        ? binItems.map(b => `<li data-id="${b.bin_id}" class="${state.selectedBin === b.bin_id ? 'sel' : ''}">${b.bin_name}</li>`).join('')
+        : '<li class="muted">Saxlanma sektoru yoxdur.</li>';
+
+      refs.binList.querySelectorAll('li[data-id]').forEach(li => {
+        li.onclick = () => {
+          state.selectedBin = Number(li.dataset.id);
+          state.selected = { table: 'bin', id: state.selectedBin };
+          renderWarehousePanel();
+          setStatus('Saxlanma sektoru seçildi.');
+        };
+        li.ondblclick = () => {
+          const rec = state.bins.find(x => x.bin_id === Number(li.dataset.id));
+          if (rec) openModal('edit', 'bin', rec);
+        };
+      });
+    }
+
+    function openModal(mode, table, target = {}) {
+      state.modal = { mode, table, target };
+      refs.formGrid.innerHTML = '';
+      refs.modalHint.textContent = '';
+      refs.modalTitle.textContent = mode === 'edit' ? 'Qeyd redaktəsi' : 'Yeni qeyd';
+
+      const fields = [];
+
+      if (table === 'entity') {
+        refs.modalHint.textContent = 'Müəssisə üçün əsas sahələr.';
+        fields.push(['abbreviation', 'Qısa ad (abbreviation)', target.abbreviation || '']);
+        fields.push(['legal_name', 'Hüquqi ad', target.legal_name || '']);
+        fields.push(['country_id', 'Ölkə', target.country_id || 31, 'select-country']);
+        fields.push(['city_id', 'Şəhər', target.city_id || 3101, 'select-city']);
+        fields.push(['postal_code', 'Poçt indeksi', target.postal_code || '']);
+        fields.push(['legal_address', 'Hüquqi ünvan', target.legal_address || '']);
+        fields.push(['website', 'Veb sayt', target.website || '']);
+        fields.push(['email', 'E-poçt', target.email || '']);
+        fields.push(['phone', 'Telefon', target.phone || '']);
+        fields.push(['base_currency', 'Əsas valyuta', target.base_currency || 'AZN']);
+        fields.push(['currency_precision', 'Valyuta dəqiqliyi', target.currency_precision || 2]);
+        fields.push(['vat_registered', 'ƏDV ödəyicisidir? (true/false)', String(target.vat_registered ?? true)]);
+        fields.push(['created_date', 'Yaradılma tarixi (DD.MM.YYYY)', target.created_date || nowDate()]);
+        fields.push(['closed_date', 'Bağlanma tarixi (DD.MM.YYYY)', target.closed_date || '']);
+      }
+      if (table === 'branch') {
+        refs.modalHint.textContent = 'parent_branch_id sistem tərəfindən avtomatik götürülür.';
+        fields.push(['entity_id', 'Müəssisə ID (entity_id)', target.entity_id || state.entityFilter]);
+        fields.push(['branch_name', 'Filial adı', target.branch_name || '']);
+        fields.push(['address_id', 'Ünvan ID (address_id)', target.address_id || '']);
+        fields.push(['manager_name', 'Məsul şəxs', target.manager_name || '']);
+        fields.push(['sort_order', 'Sıralama (sort_order)', target.sort_order || '']);
+        fields.push(['warehouse_links', 'Bağlı anbarlar və default seçimi', '', 'warehouse-links']);
+        fields.push(['created_date', 'Yaradılma tarixi (DD.MM.YYYY)', target.created_date || nowDate()]);
+        fields.push(['closed_date', 'Bağlanma tarixi (DD.MM.YYYY)', target.closed_date || '']);
+      }
+      if (table === 'department') {
+        refs.modalHint.textContent = 'parent_department_id sistem tərəfindən avtomatik götürülür.';
+        fields.push(['branch_id', 'Filial ID (branch_id)', target.branch_id || state.deptBranchFilter]);
+        fields.push(['department_name', 'Departament adı', target.department_name || '']);
+        fields.push(['owner_person', 'Məsul şəxs', target.owner_person || '']);
+        fields.push(['sort_order', 'Sıralama (sort_order)', target.sort_order || '']);
+        fields.push(['created_date', 'Yaradılma tarixi (DD.MM.YYYY)', target.created_date || nowDate()]);
+        fields.push(['closed_date', 'Bağlanma tarixi (DD.MM.YYYY)', target.closed_date || '']);
+      }
+      if (table === 'warehouse') {
+        refs.modalHint.textContent = 'Anbar qlobal yaradılır, filiala ayrıca bağlanır.';
+        fields.push(['warehouse_name', 'Anbar adı', target.warehouse_name || '']);
+        fields.push(['created_date', 'Yaradılma tarixi (DD.MM.YYYY)', target.created_date || nowDate()]);
+        fields.push(['closed_date', 'Bağlanma tarixi (DD.MM.YYYY)', target.closed_date || '']);
+      }
+      if (table === 'warehouse_link') {
+        refs.modalHint.textContent = 'Filial və anbar arasında bağ (link) yaradılır; default filial üzrə tək olmalıdır.';
+        fields.push(['branch_id', 'Filial ID (branch_id)', target.branch_id || state.branches[0]?.branch_id || '']);
+        fields.push(['warehouse_id', 'Anbar ID (warehouse_id)', target.warehouse_id || state.selectedWh || '']);
+        fields.push(['is_default', 'Default anbar? (true/false)', String(target.is_default ?? false)]);
+      }
+      if (table === 'location') {
+        refs.modalHint.textContent = 'Saxlanma sahəsi yalnız anbar altında yaradılır.';
+        fields.push(['warehouse_id', 'Anbar ID (warehouse_id)', target.warehouse_id || state.selectedWh || '']);
+        fields.push(['location_name', 'Saxlanma sahəsi adı', target.location_name || '']);
+        fields.push(['capacity_note', 'Tutum qeydi', target.capacity_note || '']);
+        fields.push(['created_date', 'Yaradılma tarixi (DD.MM.YYYY)', target.created_date || nowDate()]);
+        fields.push(['closed_date', 'Bağlanma tarixi (DD.MM.YYYY)', target.closed_date || '']);
+      }
+      if (table === 'bin') {
+        refs.modalHint.textContent = 'Saxlanma sektoru yalnız saxlanma sahəsi altında yaradılır.';
+        fields.push(['location_id', 'Sahə ID (location_id)', target.location_id || state.selectedLoc || '']);
+        fields.push(['bin_name', 'Saxlanma sektoru adı', target.bin_name || '']);
+        fields.push(['max_volume', 'Maksimum həcm', target.max_volume || '']);
+        fields.push(['max_weight', 'Maksimum çəki', target.max_weight || '']);
+        fields.push(['created_date', 'Yaradılma tarixi (DD.MM.YYYY)', target.created_date || nowDate()]);
+        fields.push(['closed_date', 'Bağlanma tarixi (DD.MM.YYYY)', target.closed_date || '']);
+      }
+
+      refs.formGrid.innerHTML = fields.map(([key, label, val, controlType]) => {
+        if (controlType === 'select-country') {
+          const options = state.countryRef.map(c => `<option value="${c.country_id}" ${Number(val) === c.country_id ? 'selected' : ''}>${c.country_name}</option>`).join('');
+          return `
+            <div class="form-row">
+              <label for="f_${key}">${label}</label>
+              <select id="f_${key}" data-key="${key}">${options}</select>
+            </div>
+          `;
+        }
+        if (controlType === 'select-city') {
+          return `
+            <div class="form-row">
+              <label for="f_${key}">${label}</label>
+              <select id="f_${key}" data-key="${key}"></select>
+            </div>
+          `;
+        }
+        if (controlType === 'warehouse-links') {
+          return `
+            <div class="form-row">
+              <label>${label}</label>
+              <div id="f_warehouse_links" class="wh-link-box"></div>
+            </div>
+          `;
+        }
+        return `
+          <div class="form-row">
+            <label for="f_${key}">${label}</label>
+            <input id="f_${key}" data-key="${key}" value="${String(val).replaceAll('"', '&quot;')}" />
+          </div>
+        `;
+      }).join('');
+
+      if (table === 'entity') {
+        const countrySelect = document.getElementById('f_country_id');
+        const citySelect = document.getElementById('f_city_id');
+        const initialCityId = Number(target.city_id || 3101);
+
+        const refillCities = () => {
+          const selectedCountryId = Number(countrySelect.value);
+          const cityOptions = state.cityRef.filter(c => c.country_id === selectedCountryId);
+          citySelect.innerHTML = cityOptions.map(c => `<option value="${c.city_id}">${c.city_name}</option>`).join('');
+          if (cityOptions.some(c => c.city_id === initialCityId)) {
+            citySelect.value = String(initialCityId);
+          }
+        };
+
+        countrySelect.onchange = () => refillCities();
+        refillCities();
+      }
+
+      if (table === 'branch') {
+        const whBox = document.getElementById('f_warehouse_links');
+        const existing = state.branchWarehouseLinks.filter(x => x.branch_id === target.branch_id);
+        const selectedSet = new Set(existing.map(x => x.warehouse_id));
+        const defaultId = existing.find(x => x.is_default)?.warehouse_id;
+
+        if (!state.warehouses.length) {
+          whBox.innerHTML = '<div class="wh-link-empty">Anbar siyahısı boşdur.</div>';
+        } else {
+          whBox.innerHTML = state.warehouses.map(w => `
+            <div class="wh-link-row" data-wh-row="${w.warehouse_id}">
+              <label><input type="checkbox" class="wh-link-check" data-wh-id="${w.warehouse_id}" ${selectedSet.has(w.warehouse_id) ? 'checked' : ''}/> ${w.warehouse_name}</label>
+              <label class="tiny"><input type="checkbox" class="wh-default-check" data-wh-default="${w.warehouse_id}" ${(defaultId === w.warehouse_id) ? 'checked' : ''}/> Default</label>
+              <span class="tiny">ID: ${w.warehouse_id}</span>
+            </div>
+          `).join('');
+        }
+
+        const linkChecks = [...whBox.querySelectorAll('.wh-link-check')];
+        const defaultChecks = [...whBox.querySelectorAll('.wh-default-check')];
+
+        function syncDefaultEnabled() {
+          defaultChecks.forEach(dc => {
+            const id = Number(dc.dataset.whDefault);
+            const lc = whBox.querySelector(`.wh-link-check[data-wh-id="${id}"]`);
+            dc.disabled = !lc?.checked;
+            if (dc.disabled) dc.checked = false;
+          });
+        }
+
+        linkChecks.forEach(lc => {
+          lc.onchange = () => syncDefaultEnabled();
+        });
+
+        defaultChecks.forEach(dc => {
+          dc.onchange = () => {
+            if (!dc.checked) return;
+            defaultChecks.forEach(other => {
+              if (other !== dc) other.checked = false;
+            });
+          };
+        });
+
+        syncDefaultEnabled();
+      }
+
+      refs.modalWrap.style.display = 'flex';
+    }
+
+    function getBranchWarehouseSelection() {
+      const box = document.getElementById('f_warehouse_links');
+      if (!box) return { selectedIds: [], defaultId: null };
+      const selectedIds = [...box.querySelectorAll('.wh-link-check:checked')].map(x => Number(x.dataset.whId));
+      const defaultChecked = box.querySelector('.wh-default-check:checked');
+      const defaultId = defaultChecked ? Number(defaultChecked.dataset.whDefault) : null;
+      return { selectedIds, defaultId };
+    }
+
+    function closeModal() {
+      refs.modalWrap.style.display = 'none';
+      state.modal = { mode: null, table: null, target: null };
+    }
+
+    document.getElementById('modalCancel').onclick = closeModal;
+    refs.modalWrap.onclick = (e) => { if (e.target === refs.modalWrap) closeModal(); };
+
+    function getFormData() {
+      const data = {};
+      refs.formGrid.querySelectorAll('[data-key]').forEach(input => {
+        data[input.dataset.key] = String(input.value).trim();
+      });
+      return data;
+    }
+
+    function nextSortOrder(collection, field, parentId, parentField) {
+      const max = Math.max(0, ...collection.filter(x => x[parentField] === parentId).map(x => Number(x[field] || 0)));
+      return max + 10;
+    }
+
+    function saveModalData() {
+      const { mode, table, target } = state.modal;
+      const f = getFormData();
+
+      if (!mode || !table) return;
+
+      if (table === 'entity') {
+        if (!f.abbreviation || !f.legal_name || !f.country_id || !f.city_id || !f.postal_code || !f.legal_address || !f.base_currency) {
+          return setStatus('E-102: Məcburi sahələr doldurulmayıb.', 'err');
+        }
+        if (!isValidEmail(f.email)) return setStatus('E-poçt formatı yanlışdır.', 'err');
+        const dErr = validateDatePair(f.created_date || nowDate(), f.closed_date || '');
+        if (dErr) return setStatus(dErr, 'err');
+        if (mode === 'new') {
+          const row = {
+            entity_id: state.idSeq.entity++,
+            abbreviation: f.abbreviation,
+            legal_name: f.legal_name,
+            country_id: Number(f.country_id),
+            city_id: Number(f.city_id),
+            postal_code: f.postal_code,
+            legal_address: f.legal_address,
+            website: f.website || '',
+            email: f.email || '',
+            phone: f.phone || '',
+            base_currency: f.base_currency,
+            currency_precision: Number(f.currency_precision || 2),
+            vat_registered: String(f.vat_registered).toLowerCase() === 'true',
+            created_date: f.created_date || nowDate(),
+            closed_date: f.closed_date || ''
+          };
+          state.entities.push(row);
+          state.entityFilter = row.entity_id;
+          closeModal();
+          rerender();
+          return setStatus('Müəssisə əlavə olundu.');
+        }
+        Object.assign(target, {
+          abbreviation: f.abbreviation,
+          legal_name: f.legal_name,
+          country_id: Number(f.country_id),
+          city_id: Number(f.city_id),
+          postal_code: f.postal_code,
+          legal_address: f.legal_address,
+          website: f.website || '',
+          email: f.email || '',
+          phone: f.phone || '',
+          base_currency: f.base_currency,
+          currency_precision: Number(f.currency_precision || 2),
+          vat_registered: String(f.vat_registered).toLowerCase() === 'true',
+          created_date: f.created_date || nowDate(),
+          closed_date: f.closed_date || ''
+        });
+      }
+
+      if (table === 'branch') {
+        if (!f.entity_id || !f.branch_name) return setStatus('E-102: Məcburi sahələr doldurulmayıb.', 'err');
+        const dErr = validateDatePair(f.created_date || nowDate(), f.closed_date || '');
+        if (dErr) return setStatus(dErr, 'err');
+        const bw = getBranchWarehouseSelection();
+        if (bw.defaultId && !bw.selectedIds.includes(bw.defaultId)) {
+          return setStatus('Default anbar yalnız seçilmiş anbarlardan biri ola bilər.', 'err');
+        }
+        if (mode === 'new') {
+          const parentId = state.selected.table === 'branch' ? state.selected.id : null;
+          const parent = parentId ? state.branches.find(x => x.branch_id === parentId) : null;
+          const entityId = parent ? parent.entity_id : Number(f.entity_id);
+          if (parent && parent.entity_id !== entityId) return setStatus('E-202: Parent başqa iyerarxiyaya aiddir.', 'err');
+          const row = {
+            branch_id: state.idSeq.branch++,
+            entity_id: entityId,
+            parent_branch_id: parentId,
+            branch_name: f.branch_name,
+            address_id: f.address_id ? Number(f.address_id) : null,
+            manager_name: f.manager_name || '',
+            sort_order: Number(f.sort_order) || nextSortOrder(state.branches, 'sort_order', parentId, 'parent_branch_id'),
+            created_date: f.created_date || nowDate(),
+            closed_date: f.closed_date || ''
+          };
+          state.branches.push(row);
+
+          state.branchWarehouseLinks = state.branchWarehouseLinks.filter(x => x.branch_id !== row.branch_id);
+          bw.selectedIds.forEach(warehouseId => {
+            state.branchWarehouseLinks.push({
+              branch_id: row.branch_id,
+              warehouse_id: warehouseId,
+              is_default: bw.defaultId ? warehouseId === bw.defaultId : false
+            });
+          });
+
+          state.expandedBranch[row.branch_id] = true;
+          state.entityFilter = entityId;
+          closeModal();
+          rerender();
+          return setStatus('Filial əlavə olundu və anbar bağları saxlanıldı.');
+        }
+        Object.assign(target, {
+          branch_name: f.branch_name,
+          address_id: f.address_id ? Number(f.address_id) : null,
+          manager_name: f.manager_name || '',
+          sort_order: Number(f.sort_order) || target.sort_order || 10,
+          created_date: f.created_date || target.created_date || nowDate(),
+          closed_date: f.closed_date || ''
+        });
+
+        state.branchWarehouseLinks = state.branchWarehouseLinks.filter(x => x.branch_id !== target.branch_id);
+        bw.selectedIds.forEach(warehouseId => {
+          state.branchWarehouseLinks.push({
+            branch_id: target.branch_id,
+            warehouse_id: warehouseId,
+            is_default: bw.defaultId ? warehouseId === bw.defaultId : false
+          });
+        });
+      }
+
+      if (table === 'department') {
+        if (!f.branch_id || !f.department_name) return setStatus('E-301: Filial seçilmədən Departament yaradıla bilməz.', 'err');
+        const dErr = validateDatePair(f.created_date || nowDate(), f.closed_date || '');
+        if (dErr) return setStatus(dErr, 'err');
+        if (mode === 'new') {
+          const parentId = state.selected.table === 'department' ? state.selected.id : null;
+          const parent = parentId ? state.departments.find(x => x.department_id === parentId) : null;
+          const branchId = parent ? parent.branch_id : Number(f.branch_id);
+          if (parent && parent.branch_id !== branchId) return setStatus('E-202: Parent başqa iyerarxiyaya aiddir.', 'err');
+          const row = {
+            department_id: state.idSeq.department++,
+            branch_id: branchId,
+            parent_department_id: parentId,
+            department_name: f.department_name,
+            owner_person: f.owner_person || '',
+            sort_order: Number(f.sort_order) || nextSortOrder(state.departments, 'sort_order', parentId, 'parent_department_id'),
+            created_date: f.created_date || nowDate(),
+            closed_date: f.closed_date || ''
+          };
+          state.departments.push(row);
+          state.expandedDept[row.department_id] = true;
+          state.deptBranchFilter = branchId;
+          closeModal();
+          rerender();
+          return setStatus('Departament əlavə olundu. parent_department_id avtomatik verildi.');
+        }
+        Object.assign(target, {
+          department_name: f.department_name,
+          owner_person: f.owner_person || '',
+          sort_order: Number(f.sort_order) || target.sort_order || 10,
+          created_date: f.created_date || target.created_date || nowDate(),
+          closed_date: f.closed_date || ''
+        });
+      }
+
+      if (table === 'warehouse') {
+        if (!f.warehouse_name) return setStatus('E-102: Məcburi sahələr doldurulmayıb.', 'err');
+        const dErr = validateDatePair(f.created_date || nowDate(), f.closed_date || '');
+        if (dErr) return setStatus(dErr, 'err');
+        if (mode === 'new') {
+          const row = {
+            warehouse_id: state.idSeq.warehouse++,
+            warehouse_name: f.warehouse_name,
+            created_date: f.created_date || nowDate(),
+            closed_date: f.closed_date || ''
+          };
+          state.warehouses.push(row);
+          closeModal();
+          rerender();
+          return setStatus('Anbar əlavə olundu.');
+        }
+        Object.assign(target, {
+          warehouse_name: f.warehouse_name,
+          created_date: f.created_date || target.created_date || nowDate(),
+          closed_date: f.closed_date || ''
+        });
+      }
+
+      if (table === 'warehouse_link') {
+        if (!f.branch_id || !f.warehouse_id) return setStatus('E-701: Filial və anbar seçilməlidir.', 'err');
+        const branchId = Number(f.branch_id);
+        const warehouseId = Number(f.warehouse_id);
+        const isDefault = String(f.is_default).toLowerCase() === 'true';
+        const existing = state.branchWarehouseLinks.find(x => x.branch_id === branchId && x.warehouse_id === warehouseId);
+
+        if (isDefault) {
+          state.branchWarehouseLinks.forEach(x => {
+            if (x.branch_id === branchId) x.is_default = false;
+          });
+        }
+
+        if (existing) {
+          existing.is_default = isDefault;
+        } else {
+          state.branchWarehouseLinks.push({ branch_id: branchId, warehouse_id: warehouseId, is_default: isDefault });
+        }
+
+        closeModal();
+        rerender();
+        return setStatus('Filial-anbar bağı yadda saxlanıldı.');
+      }
+
+      if (table === 'location') {
+        if (!f.warehouse_id || !f.location_name) return setStatus('E-401: Anbar seçilmədən Saxlanma sahəsi yaradıla bilməz.', 'err');
+        const dErr = validateDatePair(f.created_date || nowDate(), f.closed_date || '');
+        if (dErr) return setStatus(dErr, 'err');
+        if (mode === 'new') {
+          const row = {
+            location_id: state.idSeq.location++,
+            warehouse_id: Number(f.warehouse_id),
+            location_name: f.location_name,
+            capacity_note: f.capacity_note || '',
+            created_date: f.created_date || nowDate(),
+            closed_date: f.closed_date || ''
+          };
+          state.locations.push(row);
+          closeModal();
+          rerender();
+          return setStatus('Saxlanma sahəsi əlavə olundu.');
+        }
+        Object.assign(target, {
+          location_name: f.location_name,
+          capacity_note: f.capacity_note || '',
+          created_date: f.created_date || target.created_date || nowDate(),
+          closed_date: f.closed_date || ''
+        });
+      }
+
+      if (table === 'bin') {
+        if (!f.location_id || !f.bin_name) return setStatus('E-501: Saxlanma sahəsi seçilmədən Saxlanma sektoru yaradıla bilməz.', 'err');
+        const dErr = validateDatePair(f.created_date || nowDate(), f.closed_date || '');
+        if (dErr) return setStatus(dErr, 'err');
+        if (mode === 'new') {
+          const row = {
+            bin_id: state.idSeq.bin++,
+            location_id: Number(f.location_id),
+            bin_name: f.bin_name,
+            max_volume: f.max_volume || '',
+            max_weight: f.max_weight || '',
+            created_date: f.created_date || nowDate(),
+            closed_date: f.closed_date || ''
+          };
+          state.bins.push(row);
+          closeModal();
+          rerender();
+          return setStatus('Saxlanma sektoru əlavə olundu.');
+        }
+        Object.assign(target, {
+          bin_name: f.bin_name,
+          max_volume: f.max_volume || '',
+          max_weight: f.max_weight || '',
+          created_date: f.created_date || target.created_date || nowDate(),
+          closed_date: f.closed_date || ''
+        });
+      }
+
+      closeModal();
+      rerender();
+      setStatus('Qeyd yeniləndi.');
+    }
+
+    refs.modalSave.onclick = saveModalData;
+
+    function doNew() {
+      if (state.activeTab === 'entity') return openModal('new', 'entity', {});
+
+      if (state.activeTab === 'branch') {
+        const selectedBranch = state.selected.table === 'branch' ? state.branches.find(x => x.branch_id === state.selected.id) : null;
+        const target = { entity_id: selectedBranch?.entity_id || state.entityFilter };
+        return openModal('new', 'branch', target);
+      }
+
+      if (state.activeTab === 'department') {
+        const selectedDept = state.selected.table === 'department' ? state.departments.find(x => x.department_id === state.selected.id) : null;
+        const target = { branch_id: selectedDept?.branch_id || state.deptBranchFilter };
+        return openModal('new', 'department', target);
+      }
+
+      if (state.activeTab === 'warehouse') {
+        if (state.selected.table === 'warehouse') return openModal('new', 'location', { warehouse_id: state.selected.id });
+        if (state.selected.table === 'location') return openModal('new', 'bin', { location_id: state.selected.id });
+        if (state.selected.table === 'bin') {
+          const selectedBin = state.bins.find(x => x.bin_id === state.selected.id);
+          return openModal('new', 'bin', { location_id: selectedBin?.location_id || state.selectedLoc });
+        }
+        setStatus('Yeni qlobal anbar yaradılır. Filiala bağlama Filial redaktə ekranında edilir.');
+        return openModal('new', 'warehouse', {});
+      }
+    }
+
+    function doEdit() {
+      if (!state.selected.table) return setStatus('Redaktə üçün əvvəlcə qeyd seçin.', 'warn');
+
+      if (state.selected.table === 'entity') return openModal('edit', 'entity', state.entities.find(x => x.entity_id === state.selected.id));
+      if (state.selected.table === 'branch') return openModal('edit', 'branch', state.branches.find(x => x.branch_id === state.selected.id));
+      if (state.selected.table === 'department') return openModal('edit', 'department', state.departments.find(x => x.department_id === state.selected.id));
+      if (state.selected.table === 'warehouse') {
+        if (state.activeTab === 'warehouse') setStatus('Anbarın özünü redaktə edirsiniz. Filial-anbar bağını Filial redaktəsində dəyişin.');
+        return openModal('edit', 'warehouse', state.warehouses.find(x => x.warehouse_id === state.selected.id));
+      }
+      if (state.selected.table === 'location') return openModal('edit', 'location', state.locations.find(x => x.location_id === state.selected.id));
+      if (state.selected.table === 'bin') return openModal('edit', 'bin', state.bins.find(x => x.bin_id === state.selected.id));
+    }
+
+    function doClose() {
+      if (!state.selected.table) return setStatus('Bağlama üçün əvvəlcə qeyd seçin.', 'warn');
+      const d = nowDate();
+      const map = {
+        entity: ['entities', 'entity_id'],
+        branch: ['branches', 'branch_id'],
+        department: ['departments', 'department_id'],
+        warehouse: ['warehouses', 'warehouse_id'],
+        location: ['locations', 'location_id'],
+        bin: ['bins', 'bin_id']
+      };
+      const [arrName, key] = map[state.selected.table];
+      const rec = state[arrName].find(x => x[key] === state.selected.id);
+      if (!rec) return;
+      rec.closed_date = d;
+      rerender();
+      setStatus(`Qeyd bağlandı: ${d}`);
+    }
+
+    function hasChild(table, id) {
+      if (table === 'entity') return state.branches.some(x => x.entity_id === id);
+      if (table === 'branch') return state.branches.some(x => x.parent_branch_id === id) || state.departments.some(x => x.branch_id === id) || state.branchWarehouseLinks.some(x => x.branch_id === id);
+      if (table === 'department') return state.departments.some(x => x.parent_department_id === id);
+      if (table === 'warehouse') return state.locations.some(x => x.warehouse_id === id) || state.branchWarehouseLinks.some(x => x.warehouse_id === id);
+      if (table === 'location') return state.bins.some(x => x.location_id === id);
+      return false;
+    }
+
+    function doDelete() {
+      if (!state.selected.table) return setStatus('Silmək üçün əvvəlcə qeyd seçin.', 'warn');
+
+      if (hasChild(state.selected.table, state.selected.id)) return setStatus('E-601: Qeyd child-lara bağlıdır, silinə bilməz.', 'err');
+
+      const map = {
+        entity: ['entities', 'entity_id'],
+        branch: ['branches', 'branch_id'],
+        department: ['departments', 'department_id'],
+        warehouse: ['warehouses', 'warehouse_id'],
+        location: ['locations', 'location_id'],
+        bin: ['bins', 'bin_id']
+      };
+      const [arrName, key] = map[state.selected.table];
+      state[arrName] = state[arrName].filter(x => x[key] !== state.selected.id);
+      state.selected = { table: null, id: null };
+      rerender();
+      setStatus('Qeyd silindi.');
+    }
+
+    function doExport() {
+      const payload = {
+        exported_at: new Date().toISOString(),
+        entities: state.entities,
+        branches: state.branches,
+        departments: state.departments,
+        warehouses: state.warehouses,
+        branch_warehouse_links: state.branchWarehouseLinks,
+        locations: state.locations,
+        bins: state.bins
+      };
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = 'ORG_STRUCTURE_MASTER_export.json';
+      link.click();
+      URL.revokeObjectURL(link.href);
+      setStatus('İxrac hazırlandı.');
+    }
+
+    document.getElementById('newBtn').onclick = () => { closeActions(); doNew(); };
+    document.getElementById('saveBtn').onclick = () => { closeActions(); doEdit(); };
+    document.getElementById('closeBtn').onclick = () => { closeActions(); doClose(); };
+    document.getElementById('deleteBtn').onclick = () => { closeActions(); doDelete(); };
+    document.getElementById('exportBtn').onclick = () => { closeActions(); doExport(); };
+
+    function rerender() {
+      renderFilters();
+      renderEntityTable();
+      renderBranchTree();
+      renderDeptTree();
+      renderWarehousePanel();
+    }
+
+    rerender();
+    setStatus('Hazırdır. Aktiv tab üzrə Əməliyyatlar menyusundan davam edin.');
+  </script>
+</body>
+</html>

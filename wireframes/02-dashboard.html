@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SMB ERP — Modul seçimi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Display&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+
+/* ── Design System Tokens ─────────────────────────── */
+:root {
+  --clr-primary:         #1B3A5C;
+  --clr-primary-hover:   #24497A;
+  --clr-accent:          #2E6DA4;
+  --clr-secondary:       #8BAFC8;
+  --clr-secondary-light: #9BBDCF;
+  --clr-input-label:     #2A4E70;
+  --clr-text-secondary:  #4A7296;
+  --clr-text-muted:      #7AAFC5;
+  --clr-border:          #C8DCE8;
+  --clr-border-light:    #E0EBF5;
+  --clr-bg-page:         #EEF3F8;
+  --clr-bg-subtle:       #F4F7FB;
+  --clr-accent-bg:       #DBEAFE;
+  --clr-accent-fg:       #1E3A7A;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--clr-bg-page);
+  color: var(--clr-primary);
+  font-size: 14px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+
+/* ══════════════════════════════════════════════════
+   HEADER
+══════════════════════════════════════════════════ */
+.header {
+  height: 56px;
+  background: var(--clr-primary);
+  display: flex;
+  align-items: center;
+  padding: 0 28px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.18);
+}
+
+.header-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+}
+.header-logo-mark {
+  width: 30px; height: 30px;
+  border: 1.5px solid rgba(255,255,255,0.45);
+  border-radius: 7px;
+  display: flex; align-items: center; justify-content: center;
+  position: relative;
+  flex-shrink: 0;
+}
+.header-logo-mark::after {
+  content: '';
+  width: 13px; height: 13px;
+  border: 1.5px solid rgba(255,255,255,0.9);
+  border-radius: 3px;
+  transform: rotate(15deg);
+}
+.header-smb {
+  font-family: 'DM Serif Display', serif;
+  font-size: 20px;
+  color: #fff;
+  letter-spacing: -0.3px;
+}
+.header-erp {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 9px;
+  font-weight: 700;
+  color: rgba(155,189,207,0.8);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  margin-left: -2px;
+}
+
+.header-spacer { flex: 1; }
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.header-user {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 4px 8px 4px 4px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.header-user:hover { background: rgba(255,255,255,0.10); }
+.header-avatar {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--clr-accent), var(--clr-primary));
+  border: 1.5px solid rgba(255,255,255,0.30);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700; color: #fff;
+  flex-shrink: 0;
+}
+.header-user-info { display: flex; flex-direction: column; }
+.header-user-name { font-size: 12px; font-weight: 600; color: #fff; line-height: 1.2; }
+.header-user-role { font-size: 10px; color: rgba(155,189,207,0.75); line-height: 1.2; }
+
+.header-divider {
+  width: 1px; height: 22px;
+  background: rgba(255,255,255,0.12);
+  margin: 0 4px;
+}
+
+.btn-logout {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 14px;
+  height: 34px;
+  border-radius: 7px;
+  border: 1px solid rgba(255,255,255,0.18);
+  background: transparent;
+  color: rgba(255,255,255,0.75);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.btn-logout:hover {
+  background: rgba(239,68,68,0.15);
+  border-color: rgba(239,68,68,0.35);
+  color: #FCA5A5;
+}
+
+/* ══════════════════════════════════════════════════
+   HUB PAGE
+══════════════════════════════════════════════════ */
+.hub {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 48px 28px 80px;
+}
+
+/* Welcome block */
+.hub-welcome {
+  margin-bottom: 44px;
+}
+.hub-greeting {
+  font-family: 'Instrument Serif', serif;
+  font-style: italic;
+  font-size: 38px;
+  color: var(--clr-primary);
+  letter-spacing: -0.5px;
+  line-height: 1.1;
+  margin-bottom: 8px;
+}
+.hub-greeting span {
+  font-style: normal;
+  font-family: 'DM Serif Display', serif;
+  color: var(--clr-accent);
+}
+.hub-subtext {
+  font-size: 14px;
+  color: var(--clr-text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.hub-date {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--clr-text-muted);
+  padding: 3px 10px;
+  background: var(--clr-bg-subtle);
+  border: 1px solid var(--clr-border-light);
+  border-radius: 6px;
+}
+
+/* Section label */
+.hub-section-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.10em;
+  color: var(--clr-text-muted);
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.hub-section-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--clr-border-light);
+}
+
+/* Module grid */
+.module-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 40px;
+}
+
+/* Module card */
+.module-card {
+  background: #fff;
+  border: 1.5px solid var(--clr-border);
+  border-radius: 14px;
+  padding: 24px 22px 20px;
+  cursor: pointer;
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.2s, box-shadow 0.2s, transform 0.15s;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  position: relative;
+  overflow: hidden;
+}
+.module-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: var(--card-accent, var(--clr-border));
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.module-card:hover {
+  border-color: var(--card-accent, var(--clr-accent));
+  box-shadow: 0 6px 24px rgba(27,58,92,0.10);
+  transform: translateY(-2px);
+}
+.module-card:hover::before { opacity: 1; }
+
+/* Icon container */
+.module-icon-wrap {
+  width: 46px; height: 46px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+  background: var(--card-icon-bg, var(--clr-accent-bg));
+  color: var(--card-icon-color, var(--clr-accent));
+  transition: background 0.2s, transform 0.2s;
+  flex-shrink: 0;
+}
+.module-card:hover .module-icon-wrap {
+  background: var(--card-accent, var(--clr-accent));
+  color: #fff;
+  transform: scale(1.08);
+}
+
+.module-name {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--clr-primary);
+  margin-bottom: 5px;
+  letter-spacing: -0.2px;
+}
+.module-desc {
+  font-size: 12px;
+  color: var(--clr-text-secondary);
+  line-height: 1.5;
+  flex: 1;
+  margin-bottom: 16px;
+}
+.module-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.module-submeta {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--clr-text-muted);
+}
+.module-arrow {
+  width: 26px; height: 26px;
+  border-radius: 7px;
+  border: 1px solid var(--clr-border);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--clr-text-muted);
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  flex-shrink: 0;
+}
+.module-card:hover .module-arrow {
+  background: var(--card-accent, var(--clr-accent));
+  border-color: var(--card-accent, var(--clr-accent));
+  color: #fff;
+}
+
+/* Utility grid — settings + help at bottom */
+.utility-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+.utility-card {
+  background: #fff;
+  border: 1.5px solid var(--clr-border);
+  border-radius: 14px;
+  padding: 18px 22px;
+  cursor: pointer;
+  text-decoration: none;
+  color: inherit;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+}
+.utility-card:hover {
+  border-color: var(--clr-border);
+  background: var(--clr-bg-subtle);
+  box-shadow: 0 2px 10px rgba(27,58,92,0.06);
+}
+.utility-icon {
+  width: 38px; height: 38px;
+  border-radius: 10px;
+  background: var(--clr-bg-subtle);
+  border: 1px solid var(--clr-border-light);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--clr-text-secondary);
+  flex-shrink: 0;
+}
+.utility-name { font-size: 13.5px; font-weight: 600; color: var(--clr-primary); }
+.utility-desc { font-size: 11.5px; color: var(--clr-text-secondary); }
+
+/* ── Responsive ───────────────────────────────────── */
+
+/* Tablet */
+@media (max-width: 1024px) {
+  .module-grid { grid-template-columns: repeat(3, 1fr); }
+  .hub { padding: 36px 24px 60px; }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  /* Header */
+  .header { padding: 0 16px; gap: 8px; }
+  .header-user-info { display: none; }
+  .logout-label { display: none; }
+  .btn-logout { padding: 0 10px; }
+  .header-divider { display: none; }
+  .header-spacer { flex: 1; }
+
+  /* Module grid */
+  .module-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .hub { padding: 24px 16px 48px; }
+
+  /* Welcome */
+  .hub-greeting { font-size: 28px; }
+  .hub-subtext { flex-direction: column; align-items: flex-start; gap: 6px; }
+
+  /* Section labels */
+  .hub-section-label { font-size: 10px; }
+
+  /* Module cards — more compact */
+  .module-card { padding: 18px 16px 16px; }
+  .module-icon-wrap { width: 38px; height: 38px; border-radius: 10px; margin-bottom: 12px; }
+  .module-icon-wrap svg { width: 18px; height: 18px; }
+  .module-name { font-size: 13.5px; }
+  .module-desc { font-size: 11.5px; margin-bottom: 12px; }
+
+  /* Utility cards */
+  .utility-grid { grid-template-columns: 1fr; gap: 10px; }
+}
+
+/* Small phones */
+@media (max-width: 480px) {
+  .module-grid { grid-template-columns: 1fr; gap: 10px; }
+  .hub-greeting { font-size: 24px; }
+  .hub-date { font-size: 10px; }
+  .module-card { padding: 16px 14px 14px; flex-direction: row; align-items: center; gap: 12px; }
+  .module-icon-wrap { margin-bottom: 0; flex-shrink: 0; }
+  .module-desc { display: none; }
+  .module-footer { display: none; }
+  .module-name { margin-bottom: 0; }
+}
+
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════
+     HEADER
+════════════════════════════════════════════════ -->
+<header class="header">
+
+  <a href="#" class="header-logo" style="gap:8px;display:flex;align-items:baseline;">
+    <div class="header-logo-mark"></div>
+    <span class="header-smb">SMB</span>
+    <span class="header-erp">ERP</span>
+  </a>
+
+  <div class="header-spacer"></div>
+
+  <div class="header-right">
+
+    <!-- Notifications — always visible -->
+    <button style="width:34px;height:34px;border-radius:8px;border:none;background:transparent;color:rgba(255,255,255,0.65);display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;transition:background 0.15s;" title="Bildirişlər" onmouseover="this.style.background='rgba(255,255,255,0.10)'" onmouseout="this.style.background='transparent'">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      <span style="width:7px;height:7px;border-radius:50%;background:#F59E0B;border:1.5px solid var(--clr-primary);position:absolute;top:5px;right:5px;"></span>
+    </button>
+
+    <div class="header-divider"></div>
+
+    <div class="header-user">
+      <div class="header-avatar">AR</div>
+      <div class="header-user-info">
+        <span class="header-user-name">Admin Rəhimov</span>
+        <span class="header-user-role">Sistem administratoru</span>
+      </div>
+    </div>
+
+    <div class="header-divider"></div>
+
+    <button class="btn-logout" onclick="window.location.href='01-login.html'">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      <span class="logout-label">Çıxış</span>
+    </button>
+
+  </div>
+</header>
+
+<!-- ═══════════════════════════════════════════════
+     HUB CONTENT
+════════════════════════════════════════════════ -->
+<div class="hub">
+
+  <!-- Welcome -->
+  <div class="hub-welcome">
+    <div class="hub-greeting">Xoş gəldiniz, <span>Admin</span></div>
+    <div class="hub-subtext">
+      Hansı modulla işləmək istərsiniz?
+      <span class="hub-date" id="hubDate"></span>
+    </div>
+  </div>
+
+  <!-- Main modules -->
+  <div class="hub-section-label">İş modulları</div>
+
+  <div class="module-grid">
+
+    <!-- Maliyyə — clr-primary -->
+    <a class="module-card" href="03-module.html?m=maliyye" style="--card-accent:var(--clr-primary);--card-icon-bg:var(--clr-bg-page);--card-icon-color:var(--clr-primary);">
+      <div class="module-icon-wrap">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+      </div>
+      <div class="module-name">Maliyyə</div>
+      <div class="module-desc">Hesablar planı, jurnal qeydləri, büdcə planlaması və maliyyə hesabatları.</div>
+      <div class="module-footer">
+        <span class="module-submeta">4 alt-modul</span>
+        <div class="module-arrow"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
+      </div>
+    </a>
+
+    <!-- Satış — clr-accent -->
+    <a class="module-card" href="03-module.html?m=satis" style="--card-accent:var(--clr-accent);--card-icon-bg:var(--clr-accent-bg);--card-icon-color:var(--clr-accent-fg);">
+      <div class="module-icon-wrap">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      </div>
+      <div class="module-name">Satış</div>
+      <div class="module-desc">Satış sifarişləri, fakturalar, müştəri reyestri və qiymət siyahıları.</div>
+      <div class="module-footer">
+        <span class="module-submeta">4 alt-modul</span>
+        <div class="module-arrow"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
+      </div>
+    </a>
+
+    <!-- Alış — clr-input-label -->
+    <a class="module-card" href="03-module.html?m=alis" style="--card-accent:var(--clr-input-label);--card-icon-bg:var(--clr-border-light);--card-icon-color:var(--clr-primary);">
+      <div class="module-icon-wrap">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+      </div>
+      <div class="module-name">Alış</div>
+      <div class="module-desc">Alış sifarişləri, daxil olan fakturalar və təchizatçı idarəetməsi.</div>
+      <div class="module-footer">
+        <span class="module-submeta">3 alt-modul</span>
+        <div class="module-arrow"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
+      </div>
+    </a>
+
+    <!-- Anbar — success green (design system status color) -->
+    <a class="module-card" href="03-module.html?m=anbar" style="--card-accent:#22C55E;--card-icon-bg:#D1FAE5;--card-icon-color:#065F46;">
+      <div class="module-icon-wrap">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+      </div>
+      <div class="module-name">Anbar</div>
+      <div class="module-desc">Məhsul ehtiyatları, qəbul-buraxılış əməliyyatları və inventar sayımı.</div>
+      <div class="module-footer">
+        <span class="module-submeta">4 alt-modul</span>
+        <div class="module-arrow"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
+      </div>
+    </a>
+
+    <!-- Bank — clr-secondary -->
+    <a class="module-card" href="03-module.html?m=bank" style="--card-accent:var(--clr-secondary);--card-icon-bg:var(--clr-bg-subtle);--card-icon-color:var(--clr-input-label);">
+      <div class="module-icon-wrap">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+      </div>
+      <div class="module-name">Bank</div>
+      <div class="module-desc">Bank hesabları, ödənişlər, köçürmələr və məzənnə əməliyyatları.</div>
+      <div class="module-footer">
+        <span class="module-submeta">4 alt-modul</span>
+        <div class="module-arrow"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
+      </div>
+    </a>
+
+    <!-- Hesabatlar — warning amber (design system status color) -->
+    <a class="module-card" href="03-module.html?m=hesabatlar" style="--card-accent:#F59E0B;--card-icon-bg:#FEF3C7;--card-icon-color:#92400E;">
+      <div class="module-icon-wrap">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      </div>
+      <div class="module-name">Hesabatlar</div>
+      <div class="module-desc">Maliyyə, satış, anbar və vergi hesabatları. Xülasə və analitika.</div>
+      <div class="module-footer">
+        <span class="module-submeta">4 alt-modul</span>
+        <div class="module-arrow"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
+      </div>
+    </a>
+
+    <!-- Kontragentlər — clr-text-secondary -->
+    <a class="module-card" href="03-module.html?m=kontragentler" style="--card-accent:var(--clr-text-secondary);--card-icon-bg:var(--clr-border-light);--card-icon-color:var(--clr-primary);">
+      <div class="module-icon-wrap">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      </div>
+      <div class="module-name">Kontragentlər</div>
+      <div class="module-desc">Müştərilər, təchizatçılar, əlaqə şəxsləri və müqavilə reyestri.</div>
+      <div class="module-footer">
+        <span class="module-submeta">3 alt-modul</span>
+        <div class="module-arrow"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
+      </div>
+    </a>
+
+    <!-- Məhsul kataloqu — error red (design system status color) -->
+    <a class="module-card" href="03-module.html?m=mehsul" style="--card-accent:#EF4444;--card-icon-bg:#FEE2E2;--card-icon-color:#991B1B;">
+      <div class="module-icon-wrap">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+      </div>
+      <div class="module-name">Məhsul kataloqu</div>
+      <div class="module-desc">Məhsul və xidmət reyestri, qiymətlər, kateqoriyalar və vahid ölçüləri.</div>
+      <div class="module-footer">
+        <span class="module-submeta">3 alt-modul</span>
+        <div class="module-arrow">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </div>
+      </div>
+    </a>
+
+  </div>
+
+  <!-- Utility modules -->
+  <div class="hub-section-label">Sistem</div>
+
+  <div class="utility-grid">
+
+    <a class="utility-card" href="#">
+      <div class="utility-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 0-14.14 0M4 12H2M22 12h-2M12 2v2M12 20v2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41M17.66 17.66l1.41 1.41M4.93 4.93l1.41 1.41"/></svg>
+      </div>
+      <div>
+        <div class="utility-name">Parametrlər</div>
+        <div class="utility-desc">Şirkət məlumatları, istifadəçilər, rollar və inteqrasiyalar</div>
+      </div>
+    </a>
+
+    <a class="utility-card" href="#">
+      <div class="utility-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      </div>
+      <div>
+        <div class="utility-name">Kömək mərkəzi</div>
+        <div class="utility-desc">Sənədlər, təlimatlar, dəstək ilə əlaqə</div>
+      </div>
+    </a>
+
+  </div>
+
+</div>
+
+<script>
+/* Live date */
+const d = new Date();
+const days   = ['Bazar','B.ertəsi','Çərşənbə ax.','Çərşənbə','Cümə ax.','Cümə','Şənbə'];
+const months = ['yanvar','fevral','mart','aprel','may','iyun','iyul','avqust','sentyabr','oktyabr','noyabr','dekabr'];
+document.getElementById('hubDate').textContent =
+  `${days[d.getDay()]}, ${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
+</script>
+
+</body>
+</html>

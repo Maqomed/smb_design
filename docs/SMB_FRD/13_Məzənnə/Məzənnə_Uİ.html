@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Məzənnə</title>
+  <style>
+    :root {
+      --bg: #f4f7fb;
+      --card: #fff;
+      --line: #d9e2ec;
+      --text: #243144;
+      --muted: #66758a;
+      --primary: #2563eb;
+      --ok: #0f766e;
+      --warn: #92400e;
+      --danger: #b91c1c;
+      --soft: #eef4ff;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: "Segoe UI", Arial, sans-serif; background: var(--bg); color: var(--text); }
+    .page { max-width: 1360px; margin: 0 auto; padding: 20px; }
+    h1 { margin: 0; font-size: 24px; }
+    .subtitle { margin: 6px 0 16px; color: var(--muted); font-size: 13px; }
+    .warning { margin-bottom: 16px; background: #fff7ed; border: 1px solid #fdba74; color: var(--warn); border-radius: 12px; padding: 12px 14px; font-size: 13px; }
+    .summary { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px; }
+    .metric, .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04); }
+    .metric { padding: 14px 16px; }
+    .metric span { display: block; color: var(--muted); font-size: 12px; margin-bottom: 8px; }
+    .metric strong { font-size: 22px; }
+    .layout { display: grid; grid-template-columns: 1.15fr .95fr; gap: 16px; }
+    .card-head { padding: 14px 16px; border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; align-items: center; }
+    .card-head h2 { margin: 0; font-size: 16px; }
+    .filters, .form-grid { display: grid; gap: 12px; }
+    .filters { grid-template-columns: 1fr .9fr .9fr .9fr .8fr; padding: 14px 16px; border-bottom: 1px solid var(--line); background: #fbfcfe; }
+    .body-pad { padding: 16px; }
+    .field label { display: block; margin-bottom: 6px; font-size: 12px; color: var(--muted); font-weight: 600; }
+    .field input, .field select { width: 100%; border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; font-size: 14px; background: #fff; }
+    .form-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
+    .span-2 { grid-column: span 2; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th, td { padding: 11px 12px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+    th { font-size: 11px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); background: #fbfcfe; }
+    tbody tr { cursor: pointer; }
+    tbody tr.selected { background: var(--soft); }
+    tbody tr:hover { background: #fafcff; }
+    .pill { display: inline-flex; padding: 4px 8px; border-radius: 999px; font-size: 12px; font-weight: 600; background: #eff6ff; color: #1d4ed8; }
+    .pill.ok { background: #ecfdf5; color: var(--ok); }
+    .pill.off { background: #fef2f2; color: var(--danger); }
+    .actions { display: flex; gap: 8px; flex-wrap: wrap; padding-top: 8px; }
+    button { height: 38px; border-radius: 10px; border: 1px solid var(--line); background: #fff; padding: 0 14px; cursor: pointer; }
+    .primary { background: var(--primary); border-color: var(--primary); color: #fff; }
+    .danger { background: #fff5f5; border-color: #fecaca; color: var(--danger); }
+    .status { min-height: 20px; color: var(--muted); font-size: 13px; padding-top: 6px; }
+    .status.ok { color: var(--ok); }
+    .status.err { color: var(--danger); }
+    @media (max-width: 1180px) { .summary, .layout, .filters, .form-grid { grid-template-columns: 1fr; } .span-2 { grid-column: span 1; } }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <h1>Məzənnə</h1>
+    <div class="subtitle">Valyutalararası məzənnə Bank sənədləri, Alış sənədləri və Satış sənədləri üçün ayrıca əsas məlumat mənbəyi kimi xidmət edir.</div>
+    <div class="warning">Bu ekran maket xarakterlidir. Məqsəd valyuta kartını məzənnədən ayırmaq və bank hesabı ilə bank-spesifik məzənnə əlaqəsini göstərməkdir.</div>
+
+    <div class="summary" id="summary"></div>
+
+    <div class="layout">
+      <section class="card">
+        <div class="card-head">
+          <h2>Məzənnə siyahısı</h2>
+          <span class="pill">Məzənnə</span>
+        </div>
+        <div class="filters">
+          <div class="field">
+            <label for="search">Axtarış</label>
+            <input id="search" placeholder="Valyuta cütü və ya bank hesabı" />
+          </div>
+          <div class="field">
+            <label for="date-filter">Tarix</label>
+            <input id="date-filter" placeholder="31.03.2026" />
+          </div>
+          <div class="field">
+            <label for="source-filter">Mənbə</label>
+            <select id="source-filter">
+              <option value="ALL">Hamısı</option>
+              <option value="CBAR">CBAR</option>
+              <option value="MANUAL">Əl ilə</option>
+              <option value="BANK_SPECIFIC">Bank-spesifik</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="pair-filter">Valyuta cütü</label>
+            <select id="pair-filter"></select>
+          </div>
+          <div class="field">
+            <label for="status-filter">Status</label>
+            <select id="status-filter">
+              <option value="ALL">Hamısı</option>
+              <option value="ACTIVE">Aktiv</option>
+              <option value="CLOSED">Bağlı</option>
+            </select>
+          </div>
+        </div>
+        <div style="max-height: 620px; overflow: auto;">
+          <table>
+            <thead>
+              <tr>
+                <th>Tarix</th>
+                <th>Cüt</th>
+                <th>Mənbə</th>
+                <th>Tip</th>
+                <th>Bank hesabı</th>
+                <th>Dəyər</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="table-body"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card-head">
+          <h2>Məzənnə kartı</h2>
+          <span class="pill ok">Valyuta + Bank</span>
+        </div>
+        <div class="body-pad">
+          <div class="form-grid">
+            <div class="field">
+              <label for="rate_date">Tarix</label>
+              <input id="rate_date" placeholder="31.03.2026" />
+            </div>
+            <div class="field">
+              <label for="rate_source">Mənbə</label>
+              <select id="rate_source">
+                <option value="CBAR">CBAR</option>
+                <option value="MANUAL">Əl ilə</option>
+                <option value="BANK_SPECIFIC">Bank-spesifik</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="from_currency_id">Mənbə valyuta</label>
+              <select id="from_currency_id"></select>
+            </div>
+            <div class="field">
+              <label for="to_currency_id">Hədəf valyuta</label>
+              <select id="to_currency_id"></select>
+            </div>
+            <div class="field">
+              <label for="rate_type">Tip</label>
+              <select id="rate_type">
+                <option value="ACCOUNTING">Mühasibat</option>
+                <option value="BUY">Alış</option>
+                <option value="SELL">Satış</option>
+                <option value="AVERAGE">Orta</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="bank_account_id">Bank hesabı</label>
+              <select id="bank_account_id"></select>
+            </div>
+            <div class="field">
+              <label for="rate_value">Məzənnə dəyəri</label>
+              <input id="rate_value" type="number" min="0" step="0.000001" />
+            </div>
+            <div class="field span-2">
+              <label for="note_text">Qeyd</label>
+              <input id="note_text" placeholder="CBAR gündəlik məzənnə və ya bank xüsusi kursu" />
+            </div>
+            <div class="field">
+              <label for="created_date">Yaradılma tarixi</label>
+              <input id="created_date" placeholder="31.03.2026" />
+            </div>
+            <div class="field">
+              <label for="closed_date">Bağlanma tarixi</label>
+              <input id="closed_date" placeholder="" />
+            </div>
+          </div>
+          <div class="actions">
+            <button id="btn-new">Yeni</button>
+            <button id="btn-save" class="primary">Yadda Saxla</button>
+            <button id="btn-close">Bağla</button>
+            <button id="btn-delete" class="danger">Sil</button>
+          </div>
+          <div id="status" class="status">Hazırdır.</div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    const state = {
+      idSeq: 4,
+      selectedId: null,
+      currencies: [
+        { id: 1, code: 'AZN', name: 'Azərbaycan Manatı' },
+        { id: 2, code: 'USD', name: 'ABŞ Dolları' },
+        { id: 3, code: 'EUR', name: 'Avro' }
+      ],
+      bankAccounts: [
+        { id: 1, label: 'ABB-AZN-4521 — ABB / AZN' },
+        { id: 2, label: 'KAP-USD-8834 — Kapital Bank / USD' },
+        { id: 3, label: 'PASA-EUR-2201 — PAŞA Bank / EUR' }
+      ],
+      rows: [
+        { rate_id: 1, rate_date: '31.03.2026', from_currency_id: 2, to_currency_id: 1, rate_source: 'CBAR', rate_type: 'ACCOUNTING', bank_account_id: null, rate_value: 1.700000, note_text: 'CBAR USD/AZN', created_date: '31.03.2026', closed_date: '' },
+        { rate_id: 2, rate_date: '31.03.2026', from_currency_id: 3, to_currency_id: 1, rate_source: 'CBAR', rate_type: 'ACCOUNTING', bank_account_id: null, rate_value: 1.850000, note_text: 'CBAR EUR/AZN', created_date: '31.03.2026', closed_date: '' },
+        { rate_id: 3, rate_date: '31.03.2026', from_currency_id: 2, to_currency_id: 1, rate_source: 'BANK_SPECIFIC', rate_type: 'SELL', bank_account_id: 2, rate_value: 1.705500, note_text: 'Kapital Bank satış kursu', created_date: '31.03.2026', closed_date: '' },
+        { rate_id: 4, rate_date: '31.03.2026', from_currency_id: 3, to_currency_id: 1, rate_source: 'BANK_SPECIFIC', rate_type: 'SELL', bank_account_id: 3, rate_value: 1.861200, note_text: 'PAŞA Bank satış kursu', created_date: '31.03.2026', closed_date: '' }
+      ]
+    };
+
+    const refs = {
+      summary: document.getElementById('summary'),
+      tableBody: document.getElementById('table-body'),
+      search: document.getElementById('search'),
+      dateFilter: document.getElementById('date-filter'),
+      sourceFilter: document.getElementById('source-filter'),
+      pairFilter: document.getElementById('pair-filter'),
+      statusFilter: document.getElementById('status-filter'),
+      rateDate: document.getElementById('rate_date'),
+      rateSource: document.getElementById('rate_source'),
+      fromCurrencyId: document.getElementById('from_currency_id'),
+      toCurrencyId: document.getElementById('to_currency_id'),
+      rateType: document.getElementById('rate_type'),
+      bankAccountId: document.getElementById('bank_account_id'),
+      rateValue: document.getElementById('rate_value'),
+      noteText: document.getElementById('note_text'),
+      createdDate: document.getElementById('created_date'),
+      closedDate: document.getElementById('closed_date'),
+      status: document.getElementById('status')
+    };
+
+    function setStatus(text, type = '') {
+      refs.status.textContent = text;
+      refs.status.className = `status ${type}`.trim();
+    }
+
+    function active(row) {
+      return !String(row.closed_date || '').trim();
+    }
+
+    function currency(id) {
+      return state.currencies.find(item => item.id === Number(id));
+    }
+
+    function currencyLabel(id) {
+      const item = currency(id);
+      return item ? item.code : '-';
+    }
+
+    function pairLabel(row) {
+      return `${currencyLabel(row.from_currency_id)}/${currencyLabel(row.to_currency_id)}`;
+    }
+
+    function bankLabel(id) {
+      return state.bankAccounts.find(item => item.id === Number(id))?.label || '-';
+    }
+
+    function rateSourceLabel(value) {
+      return { CBAR: 'CBAR', MANUAL: 'Əl ilə', BANK_SPECIFIC: 'Bank-spesifik' }[value] || value;
+    }
+
+    function rateTypeLabel(value) {
+      return { ACCOUNTING: 'Mühasibat', BUY: 'Alış', SELL: 'Satış', AVERAGE: 'Orta' }[value] || value;
+    }
+
+    function populateRefs() {
+      const currencyOptions = state.currencies.map(item => `<option value="${item.id}">${item.code} — ${item.name}</option>`).join('');
+      refs.fromCurrencyId.innerHTML = currencyOptions;
+      refs.toCurrencyId.innerHTML = currencyOptions;
+      refs.bankAccountId.innerHTML = '<option value="">— Bank-spesifik deyil —</option>' + state.bankAccounts.map(item => `<option value="${item.id}">${item.label}</option>`).join('');
+      const pairs = Array.from(new Set(state.rows.map(pairLabel)));
+      refs.pairFilter.innerHTML = '<option value="ALL">Bütün cütlər</option>' + pairs.map(pair => `<option value="${pair}">${pair}</option>`).join('');
+    }
+
+    function metrics() {
+      const rows = state.rows;
+      const bankSpecific = rows.filter(row => row.rate_source === 'BANK_SPECIFIC').length;
+      const cbarCount = rows.filter(row => row.rate_source === 'CBAR').length;
+      const activeCount = rows.filter(active).length;
+      refs.summary.innerHTML = [
+        { label: 'Cəmi məzənnə', value: rows.length },
+        { label: 'CBAR mənbəyi', value: cbarCount },
+        { label: 'Bank-spesifik', value: bankSpecific },
+        { label: 'Aktiv məzənnə', value: activeCount }
+      ].map(item => `<div class="metric"><span>${item.label}</span><strong>${item.value}</strong></div>`).join('');
+    }
+
+    function filteredRows() {
+      const q = refs.search.value.trim().toLowerCase();
+      const date = refs.dateFilter.value.trim();
+      const source = refs.sourceFilter.value;
+      const pair = refs.pairFilter.value;
+      const status = refs.statusFilter.value;
+      return state.rows.filter(row => {
+        const haystack = `${pairLabel(row)} ${bankLabel(row.bank_account_id)} ${row.note_text}`.toLowerCase();
+        if (q && !haystack.includes(q)) return false;
+        if (date && row.rate_date !== date) return false;
+        if (source !== 'ALL' && row.rate_source !== source) return false;
+        if (pair !== 'ALL' && pairLabel(row) !== pair) return false;
+        if (status === 'ACTIVE' && !active(row)) return false;
+        if (status === 'CLOSED' && active(row)) return false;
+        return true;
+      });
+    }
+
+    function renderTable() {
+      refs.tableBody.innerHTML = filteredRows().map(row => `
+        <tr data-id="${row.rate_id}" class="${state.selectedId === row.rate_id ? 'selected' : ''}">
+          <td>${row.rate_date}</td>
+          <td><strong>${pairLabel(row)}</strong></td>
+          <td>${rateSourceLabel(row.rate_source)}</td>
+          <td>${rateTypeLabel(row.rate_type)}</td>
+          <td>${row.bank_account_id ? bankLabel(row.bank_account_id) : '<span style="color:var(--muted)">Ümumi</span>'}</td>
+          <td>${Number(row.rate_value).toFixed(6)}</td>
+          <td>${active(row) ? '<span class="pill ok">Aktiv</span>' : '<span class="pill off">Bağlı</span>'}</td>
+        </tr>
+      `).join('');
+      refs.tableBody.querySelectorAll('tr').forEach(tr => tr.addEventListener('click', () => openRecord(Number(tr.dataset.id))));
+    }
+
+    function fillForm(row) {
+      refs.rateDate.value = row?.rate_date || '31.03.2026';
+      refs.rateSource.value = row?.rate_source || 'CBAR';
+      refs.fromCurrencyId.value = String(row?.from_currency_id || 2);
+      refs.toCurrencyId.value = String(row?.to_currency_id || 1);
+      refs.rateType.value = row?.rate_type || 'ACCOUNTING';
+      refs.bankAccountId.value = row?.bank_account_id ? String(row.bank_account_id) : '';
+      refs.rateValue.value = row?.rate_value ?? 1;
+      refs.noteText.value = row?.note_text || '';
+      refs.createdDate.value = row?.created_date || '31.03.2026';
+      refs.closedDate.value = row?.closed_date || '';
+      syncBankField();
+    }
+
+    function syncBankField() {
+      refs.bankAccountId.disabled = refs.rateSource.value !== 'BANK_SPECIFIC';
+      if (refs.rateSource.value !== 'BANK_SPECIFIC') {
+        refs.bankAccountId.value = '';
+      }
+    }
+
+    function openRecord(id) {
+      const row = state.rows.find(item => item.rate_id === id);
+      if (!row) return;
+      state.selectedId = id;
+      fillForm(row);
+      renderTable();
+      setStatus(`Məzənnə açıldı: ${pairLabel(row)} / ${rateSourceLabel(row.rate_source)}`);
+    }
+
+    function resetForm() {
+      state.selectedId = null;
+      fillForm(null);
+      renderTable();
+      setStatus('Yeni məzənnə forması hazırdır.');
+    }
+
+    function validateDate(value) {
+      if (!String(value || '').trim()) return true;
+      return /^(\d{2})\.(\d{2})\.(\d{4})$/.test(value);
+    }
+
+    function compareDates(a, b) {
+      const [ad, am, ay] = a.split('.').map(Number);
+      const [bd, bm, by] = b.split('.').map(Number);
+      return new Date(ay, am - 1, ad) - new Date(by, bm - 1, bd);
+    }
+
+    function collectForm() {
+      return {
+        rate_id: state.selectedId,
+        rate_date: refs.rateDate.value.trim(),
+        rate_source: refs.rateSource.value,
+        from_currency_id: Number(refs.fromCurrencyId.value || 0),
+        to_currency_id: Number(refs.toCurrencyId.value || 0),
+        rate_type: refs.rateType.value,
+        bank_account_id: refs.bankAccountId.value ? Number(refs.bankAccountId.value) : null,
+        rate_value: Number(refs.rateValue.value || 0),
+        note_text: refs.noteText.value.trim(),
+        created_date: refs.createdDate.value.trim(),
+        closed_date: refs.closedDate.value.trim()
+      };
+    }
+
+    function validateForm(payload) {
+      if (!validateDate(payload.rate_date) || !validateDate(payload.created_date) || (payload.closed_date && !validateDate(payload.closed_date))) return 'Tarix formatı DD.MM.YYYY olmalıdır.';
+      if (payload.closed_date && compareDates(payload.closed_date, payload.created_date) < 0) return 'Bağlanma tarixi yaradılma tarixindən kiçik ola bilməz.';
+      if (payload.from_currency_id === payload.to_currency_id) return 'E-1301: Valyuta cütü eyni ola bilməz.';
+      if (!(payload.rate_value > 0)) return 'E-1302: Məzənnə dəyəri sıfırdan böyük olmalıdır.';
+      if (payload.rate_source === 'BANK_SPECIFIC' && !payload.bank_account_id) return 'E-1303: Bank-spesifik məzənnə üçün bank hesabı seçilməlidir.';
+      if (payload.rate_source !== 'BANK_SPECIFIC' && payload.bank_account_id) return 'Bank-spesifik olmayan mənbə üçün bank hesabı boş olmalıdır.';
+      const duplicate = state.rows.find(row => row.rate_id !== payload.rate_id && row.rate_date === payload.rate_date && row.from_currency_id === payload.from_currency_id && row.to_currency_id === payload.to_currency_id && row.rate_source === payload.rate_source && row.rate_type === payload.rate_type && (row.bank_account_id || null) === (payload.bank_account_id || null));
+      if (duplicate) return 'E-1304: Eyni tarix və kontekst üçün dublikat məzənnə var.';
+      return '';
+    }
+
+    function saveForm() {
+      const payload = collectForm();
+      const error = validateForm(payload);
+      if (error) {
+        setStatus(error, 'err');
+        return;
+      }
+      if (payload.rate_id) {
+        const idx = state.rows.findIndex(row => row.rate_id === payload.rate_id);
+        state.rows[idx] = { ...state.rows[idx], ...payload };
+        setStatus('Məzənnə yeniləndi.', 'ok');
+      } else {
+        payload.rate_id = ++state.idSeq;
+        state.rows.unshift(payload);
+        state.selectedId = payload.rate_id;
+        setStatus('Yeni məzənnə yaradıldı.', 'ok');
+      }
+      populateRefs();
+      metrics();
+      renderTable();
+    }
+
+    function closeRecord() {
+      if (!state.selectedId) {
+        setStatus('Bağlamaq üçün əvvəlcə qeyd seçin.', 'err');
+        return;
+      }
+      const row = state.rows.find(item => item.rate_id === state.selectedId);
+      row.closed_date = row.closed_date || '31.03.2026';
+      refs.closedDate.value = row.closed_date;
+      metrics();
+      renderTable();
+      setStatus('Məzənnə passivləşdirildi.', 'ok');
+    }
+
+    function deleteRecord() {
+      if (!state.selectedId) {
+        setStatus('Silmək üçün qeyd seçin.', 'err');
+        return;
+      }
+      state.rows = state.rows.filter(row => row.rate_id !== state.selectedId);
+      populateRefs();
+      metrics();
+      resetForm();
+      setStatus('Qeyd mockup siyahısından silindi.', 'ok');
+    }
+
+    refs.search.addEventListener('input', renderTable);
+    refs.dateFilter.addEventListener('input', renderTable);
+    refs.sourceFilter.addEventListener('change', renderTable);
+    refs.pairFilter.addEventListener('change', renderTable);
+    refs.statusFilter.addEventListener('change', renderTable);
+    refs.rateSource.addEventListener('change', syncBankField);
+    document.getElementById('btn-new').addEventListener('click', resetForm);
+    document.getElementById('btn-save').addEventListener('click', saveForm);
+    document.getElementById('btn-close').addEventListener('click', closeRecord);
+    document.getElementById('btn-delete').addEventListener('click', deleteRecord);
+
+    populateRefs();
+    metrics();
+    renderTable();
+    resetForm();
+  </script>
+</body>
+</html>

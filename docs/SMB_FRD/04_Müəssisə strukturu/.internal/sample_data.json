@@ -1,0 +1,167 @@
+{
+  "object_types": [
+    {"kod": "ENTITY", "ad": "Müəssisə (Entity)"},
+    {"kod": "BRANCH", "ad": "Filial (Branch)"},
+    {"kod": "DEPARTMENT", "ad": "Departament (Department)"},
+    {"kod": "WAREHOUSE", "ad": "Anbar (Warehouse)"},
+    {"kod": "LOCATION", "ad": "Saxlanma sahəsi (Location)"},
+    {"kod": "BIN", "ad": "Rəf/Hüceyrə (Bin)"}
+  ],
+  "branch_types": [
+    {"kod": "HEAD", "ad": "Baş ofis"},
+    {"kod": "REGIONAL", "ad": "Regional filial"},
+    {"kod": "STORE", "ad": "Mağaza/əməliyyat nöqtəsi"}
+  ],
+  "department_types": [
+    {"kod": "ADMIN", "ad": "Administrasiya"},
+    {"kod": "SALES", "ad": "Satış"},
+    {"kod": "PROCUREMENT", "ad": "Satınalma"},
+    {"kod": "FINANCE", "ad": "Maliyyə"},
+    {"kod": "OPERATIONS", "ad": "Əməliyyat"},
+    {"kod": "OTHER", "ad": "Digər"}
+  ],
+  "warehouse_types": [
+    {"kod": "MAIN", "ad": "Əsas anbar"},
+    {"kod": "TRANSIT", "ad": "Tranzit anbar"},
+    {"kod": "RETURNS", "ad": "Qaytarma anbarı"},
+    {"kod": "PRODUCTION", "ad": "İstehsal anbarı"},
+    {"kod": "CONSIGNMENT", "ad": "Konsiqnasiya anbarı"}
+  ],
+  "location_types": [
+    {"kod": "ZONE", "ad": "Zona"},
+    {"kod": "RACK", "ad": "Rəf"},
+    {"kod": "FLOOR", "ad": "Sahə/Floor"},
+    {"kod": "COLD", "ad": "Soyuq sahə"},
+    {"kod": "QUARANTINE", "ad": "Karantin sahəsi"},
+    {"kod": "OTHER", "ad": "Digər"}
+  ],
+  "bin_types": [
+    {"kod": "PICK", "ad": "Toplama bin-i"},
+    {"kod": "RESERVE", "ad": "Rezerv bin-i"},
+    {"kod": "DAMAGE", "ad": "Zədəli mal bin-i"},
+    {"kod": "RETURN", "ad": "Qaytarma bin-i"},
+    {"kod": "OTHER", "ad": "Digər"}
+  ],
+  "records": {
+    "entities": [
+      {
+        "id": 1,
+        "object_type": "ENTITY",
+        "abreviatura": "FARABI",
+        "ad": "Farabi Trading",
+        "legal_name": "Farabi Trading MMC",
+        "country_id": 31,
+        "city_id": 3101,
+        "postal_code": "AZ1000",
+        "legal_address": "Bakı ş., Nizami küç. 10",
+        "website": "https://farabi.example",
+        "email": "info@farabi.example",
+        "phone": "+994501112233",
+        "base_currency": "AZN",
+        "currency_precision": 2,
+        "taxpayer_group": "PROFIT_TAX",
+        "vat_registered": true,
+        "created_date": "2026-01-01",
+        "closed_date": null,
+        "qeyd": "Əsas hüquqi şəxs"
+      }
+    ],
+    "entity_tax_history": [
+      {
+        "tax_hist_id": 10001,
+        "entity_id": 1,
+        "tax_id": "1401234561",
+        "effective_from": "2026-01-01",
+        "effective_to": null,
+        "is_current": true
+      }
+    ],
+    "branches": [
+      {
+        "id": 11,
+        "object_type": "BRANCH",
+        "entity_id": 1,
+        "ad": "Bakı Baş Filial",
+        "branch_type": "HEAD",
+        "manager_name": "Aydın Məmmədov",
+        "address_id": 9101,
+        "created_date": "2026-01-01",
+        "closed_date": null
+      },
+      {
+        "id": 12,
+        "object_type": "BRANCH",
+        "entity_id": 1,
+        "ad": "Gəncə Filialı",
+        "branch_type": "REGIONAL",
+        "manager_name": "Elvin Quliyev",
+        "address_id": 9102,
+        "created_date": "2026-02-10",
+        "closed_date": null
+      }
+    ],
+    "departments": [
+      {
+        "id": 21,
+        "object_type": "DEPARTMENT",
+        "branch_id": 11,
+        "parent_department_id": null,
+        "ad": "Maliyyə şöbəsi",
+        "department_type": "FINANCE",
+        "cost_owner": "CFO",
+        "sort_order": 10,
+        "created_date": "2026-01-05",
+        "closed_date": null
+      },
+      {
+        "id": 22,
+        "object_type": "DEPARTMENT",
+        "branch_id": 11,
+        "parent_department_id": 21,
+        "ad": "Satınalma şöbəsi",
+        "department_type": "PROCUREMENT",
+        "cost_owner": "Procurement Manager",
+        "sort_order": 20,
+        "created_date": "2026-01-05",
+        "closed_date": null
+      }
+    ],
+    "warehouses": [
+      {
+        "id": 31,
+        "object_type": "WAREHOUSE",
+        "branch_id": 11,
+        "ad": "Mərkəzi anbar",
+        "warehouse_type": "MAIN",
+        "is_default": true,
+        "created_date": "2026-01-07",
+        "closed_date": null
+      }
+    ],
+    "locations": [
+      {
+        "id": 41,
+        "object_type": "LOCATION",
+        "warehouse_id": 31,
+        "ad": "Zona 01 / Rəf 01",
+        "location_type": "RACK",
+        "capacity_note": "Kiçik qablaşdırma malları üçün",
+        "created_date": "2026-01-08",
+        "closed_date": null
+      }
+    ],
+    "bins": [
+      {
+        "id": 51,
+        "object_type": "BIN",
+        "location_id": 41,
+        "ad": "A sıra / 01 qutu",
+        "bin_type": "PICK",
+        "max_volume": 12.5,
+        "max_weight": 100,
+        "created_date": "2026-01-08",
+        "closed_date": null
+      }
+    ]
+  }
+}

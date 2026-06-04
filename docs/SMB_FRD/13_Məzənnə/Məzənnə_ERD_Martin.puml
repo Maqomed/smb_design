@@ -1,0 +1,82 @@
+@startuml
+hide circle
+skinparam linetype ortho
+skinparam monochrome true
+skinparam shadowing false
+skinparam class {
+  BackgroundColor White
+  BorderColor Black
+  ArrowColor Black
+}
+
+entity "Valyuta (from ref)" as currency_from {
+  *currency_id : int
+  --
+  abbreviation : varchar(3)
+  currency_name : varchar(80)
+}
+
+entity "Valyuta (to ref)" as currency_to {
+  *currency_id : int
+  --
+  abbreviation : varchar(3)
+  currency_name : varchar(80)
+}
+
+entity "Bank hesabı (ref)" as bank_account {
+  *bank_account_id : int
+  --
+  account_no : varchar(40)
+  bank_name : varchar(120)
+}
+
+entity "Məzənnə" as exchange_rate {
+  *rate_id : int
+  --
+  rate_date : date
+  from_currency_id : int
+  to_currency_id : int
+  rate_source : varchar(30)
+  rate_type : varchar(20)
+  bank_account_id : int
+  rate_value : decimal(18,6)
+  note_text : varchar(250)
+  created_date : date
+  closed_date : date
+}
+
+entity "Bank əməliyyatı (ref)" as bank_transaction {
+  *bank_txn_id : int
+  --
+  document_date : date
+  currency_id : int
+  source_exchange_rate_id : int
+  exchange_rate : decimal(18,6)
+}
+
+entity "Alış sənədi (ref)" as purchase_document {
+  *purchase_id : int
+  --
+  document_date : date
+  currency_id : int
+  source_exchange_rate_id : int
+  exchange_rate : decimal(18,6)
+}
+
+entity "Satış sənədi (ref)" as sales_document {
+  *sales_id : int
+  --
+  document_date : date
+  currency_id : int
+  source_exchange_rate_id : int
+  exchange_rate : decimal(18,6)
+}
+
+currency_from ||..o{ exchange_rate : from_currency_id
+currency_to ||..o{ exchange_rate : to_currency_id
+bank_account ||..o{ exchange_rate : bank_account_id
+exchange_rate ||..o{ bank_transaction : source_exchange_rate_id
+exchange_rate ||..o{ purchase_document : source_exchange_rate_id
+exchange_rate ||..o{ sales_document : source_exchange_rate_id
+
+@enduml

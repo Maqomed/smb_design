@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Kontragentlər</title>
+<style>
+body{margin:0;font-family:Segoe UI,Arial,sans-serif;background:#f6f8fc;color:#111827}.page{max-width:1320px;margin:16px auto;padding:0 12px}.title{font-size:20px;font-weight:700}.card{background:#fff;border:1px solid #dde3ee;border-radius:10px;padding:12px}.toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px}.toolbar input,.toolbar select{height:34px;border:1px solid #dbe1ea;border-radius:8px;padding:0 10px;font-size:13px}.toolbar input{min-width:240px}table{width:100%;border-collapse:collapse}th,td{padding:8px;border-bottom:1px solid #eef2f7;text-align:left;font-size:13px}th{font-size:12px;color:#6b7280}.sel{background:#eef4ff}.head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}.actions{display:flex;gap:8px;flex-wrap:wrap}button{height:34px;border:1px solid #d1d9e6;background:#fff;border-radius:8px;padding:0 12px;cursor:pointer}.p{background:#2563eb;color:#fff;border-color:#2563eb}.w{background:#fff7ed;color:#9a3412;border-color:#fed7aa}.d{background:#fff1f2;color:#be123c;border-color:#fecdd3}.status{margin-top:8px;font-size:12px;min-height:16px;color:#0f766e}
+.mockup-note{margin:8px 0 12px;padding:10px 12px;border:1px solid #facc15;background:#fffbeb;color:#854d0e;border-radius:8px;font-size:12px;line-height:1.5}
+.modal-wrap{position:fixed;inset:0;background:rgba(15,23,42,.35);display:none;align-items:center;justify-content:center;padding:16px;z-index:30}.modal{background:#fff;border:1px solid #dbe1ea;border-radius:12px;width:min(1120px,100%);max-height:90vh;overflow:auto;padding:14px}.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:10px;flex-wrap:wrap}.modal-head-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.head-check{display:flex;align-items:center;gap:6px;font-size:12px;color:#334155}.head-check input{width:12px;height:12px}.btn-sm{height:28px;padding:0 10px;font-size:12px;border-radius:7px}.grid{display:grid;grid-template-columns:repeat(3,minmax(180px,1fr));gap:8px}.f label{display:block;font-size:12px;color:#64748b;margin-bottom:4px}.f input:not([type="checkbox"]),.f select{width:100%;height:34px;border:1px solid #dbe1ea;border-radius:8px;padding:0 10px;font-size:13px}.line{grid-column:1/-1;border-top:1px solid #eef2f7;margin-top:4px;padding-top:8px;font-size:12px;color:#6b7280;font-weight:600}.modal-actions{margin-top:10px;display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}@media(max-width:1150px){.grid{grid-template-columns:repeat(2,minmax(150px,1fr))}}
+</style>
+</head>
+<body>
+<div class="page">
+  <h1 class="title">Kontragentlər</h1>
+  <div class="mockup-note"><b>Qeyd:</b> Bu interfeys istehsal (Production) səviyyəsi üçün son dizayn deyil; yalnız nümayiş və müzakirə məqsədli mockup nümunəsidir.</div>
+  <section class="card">
+    <div class="toolbar">
+      <input id="searchBox" placeholder="Search: kod, qısa ad, tam ad">
+      <select id="filterType"><option value="">Tip: hamısı</option><option value="LEGAL">Hüquqi</option><option value="PHYSICAL">Fiziki</option></select>
+      <select id="filterRes"><option value="">Rezidentlik: hamısı</option><option value="RESIDENT">Rezident</option><option value="NON_RESIDENT">Qeyri-rezident</option></select>
+    </div>
+    <div class="head">
+      <strong>Kontragent siyahısı</strong>
+      <div class="actions">
+        <button id="btnNew" class="p">Yeni</button>
+        <button id="btnDelete" class="d">Sil</button>
+      </div>
+    </div>
+    <table id="tbl"><thead><tr><th>Kod</th><th>Qısa ad</th><th>Ad</th><th>Tip</th><th>Rezidentlik</th><th>Aktivlik</th></tr></thead><tbody></tbody></table>
+    <div id="status" class="status">Hazırdır.</div>
+  </section>
+</div>
+
+<div class="modal-wrap" id="modalWrap">
+  <div class="modal">
+    <div class="modal-head">
+      <strong id="modalTitle">Yeni kontragent</strong>
+      <div class="modal-head-right">
+        <label class="head-check"><input id="is_customer" type="checkbox" checked> Müştəri</label>
+        <label class="head-check"><input id="is_vendor" type="checkbox" checked> Tədarükçü</label>
+        <button id="btnModalX" class="btn-sm">Bağla</button>
+      </div>
+    </div>
+    <div class="grid">
+      <div class="f"><label>Kod</label><input id="counterparty_code"></div>
+      <div class="f"><label>Qısa ad</label><input id="counterparty_short_name"></div>
+      <div class="f"><label>Tam ad</label><input id="counterparty_name"></div>
+      <div class="f"><label>Tip</label><select id="counterparty_type"><option value="LEGAL">Hüquqi şəxs</option><option value="PHYSICAL">Fiziki şəxs</option></select></div>
+      <div class="f"><label>Rezidentlik</label><select id="residency_status"><option value="RESIDENT">Rezident</option><option value="NON_RESIDENT">Qeyri-rezident</option></select></div>
+      <div class="f"><label>VÖEN</label><input id="tax_id"></div>
+      <div class="f"><label>Ölkə</label><select id="country_id"><option value="31">Azərbaycan</option><option value="90">Türkiyə</option></select></div>
+      <div class="f"><label>Şəhər</label><select id="city_id"><option value="3101">Bakı</option><option value="3102">Gəncə</option><option value="9001">Ankara</option></select></div>
+      <div class="f"><label>Qeydiyyat No</label><input id="registration_no"></div>
+      <div class="f"><label>Telefon</label><input id="phone"></div>
+      <div class="f"><label>Email</label><input id="email"></div>
+      <div class="f"><label>Veb sayt</label><input id="website"></div>
+      <div class="f"><label>Hüquqi ünvan</label><input id="legal_address"></div>
+      <div class="f"><label>Faktiki ünvan</label><input id="actual_address"></div>
+      <div class="f"><label>Yaradılma tarixi</label><input id="created_date" value="30.03.2026"></div>
+      <div class="f"><label>Bağlanma tarixi</label><input id="closed_date" placeholder="DD.MM.YYYY"></div>
+
+      <div class="line">Rol üzrə hesab təyinatı</div>
+      <div class="f"><label>Müştəri: Debitor hesabı</label><select id="customer_receivable_account_id"></select></div>
+      <div class="f"><label>Müştəri: Alınmış avans hesabı</label><select id="customer_advance_received_account_id"></select></div>
+      <div class="f"><label>Tədarükçü: Kreditor hesabı</label><select id="vendor_payable_account_id"></select></div>
+      <div class="f"><label>Tədarükçü: Verilmiş avans hesabı</label><select id="vendor_advance_paid_account_id"></select></div>
+
+      <div class="line">Məsul şəxs</div>
+      <div class="f"><label>Ad</label><input id="responsible_first_name"></div>
+      <div class="f"><label>Soyad</label><input id="responsible_last_name"></div>
+      <div class="f"><label>Ata adı</label><input id="responsible_father_name"></div>
+      <div class="f"><label>Vəzifə</label><input id="responsible_position"></div>
+      <div class="f"><label>Mobil</label><input id="responsible_phone_mobile"></div>
+      <div class="f"><label>İş telefonu</label><input id="responsible_phone_work"></div>
+      <div class="f"><label>Məsul email</label><input id="responsible_email"></div>
+    </div>
+    <div class="modal-actions">
+      <button id="btnModalCancel">İmtina</button>
+      <button class="p" id="btnSave">Yadda Saxla</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const coa=[
+  {id:'211',name:'Alıcıların və sifarişçilərin qısamüddətli debitor borcları',role:'customer_receivable'},
+  {id:'171',name:'Alıcıların və sifarişçilərin uzunmüddətli debitor borcları',role:'customer_receivable'},
+  {id:'543',name:'Alınmış qısamüddətli avanslar',role:'customer_advance_received'},
+  {id:'443',name:'Alınmış uzunmüddətli avanslar',role:'customer_advance_received'},
+  {id:'531',name:'Malsatan və podratçılara qısamüddətli kreditor borcları',role:'vendor_payable'},
+  {id:'431',name:'Malsatan və podratçılara uzunmüddətli kreditor borcları',role:'vendor_payable'},
+  {id:'243',name:'Verilmiş qısamüddətli avanslar',role:'vendor_advance_paid'},
+  {id:'192',name:'Verilmiş uzunmüddətli avanslar',role:'vendor_advance_paid'}
+];
+const rows=[
+  {id:1,code:'KNT-001',short:'ABC',name:'ABC MMC',type:'LEGAL',res:'RESIDENT',tax:'1002003001',country:'31',city:'3101',registration_no:'REG-001',phone:'+994501112233',email:'info@abc.az',website:'',legal_address:'Bakı',actual_address:'Bakı',created_date:'30.03.2026',closed_date:'',is_customer:true,is_vendor:true,cr:'211',ca:'543',vp:'531',va:'243',responsible_first_name:'Əli',responsible_last_name:'Məmmədov',responsible_father_name:'Rza',responsible_position:'Direktor',responsible_phone_mobile:'',responsible_phone_work:'',responsible_email:''},
+  {id:2,code:'KNT-002',short:'ALFA',name:'Alfa Trade',type:'LEGAL',res:'NON_RESIDENT',tax:'',country:'90',city:'9001',registration_no:'REG-002',phone:'+905551112233',email:'contact@alfa.com',website:'',legal_address:'Ankara',actual_address:'Ankara',created_date:'30.03.2026',closed_date:'',is_customer:true,is_vendor:false,cr:'171',ca:'443',vp:'',va:'',responsible_first_name:'',responsible_last_name:'',responsible_father_name:'',responsible_position:'',responsible_phone_mobile:'',responsible_phone_work:'',responsible_email:''}
+];
+let selected=null;
+let editId=null;
+const tb=document.querySelector('#tbl tbody');
+const st=document.getElementById('status');
+const modalWrap=document.getElementById('modalWrap');
+function s(t,e=false){st.textContent=t;st.style.color=e?'#b91c1c':'#0f766e';}
+function filteredRows(){
+  const q=document.getElementById('searchBox').value.trim().toLowerCase();
+  const type=document.getElementById('filterType').value;
+  const res=document.getElementById('filterRes').value;
+  return rows.filter(r=>{
+    const hit=!q||[r.code,r.short||'',r.name].join(' ').toLowerCase().includes(q);
+    const typeOk=!type||r.type===type;
+    const resOk=!res||r.res===res;
+    return hit&&typeOk&&resOk;
+  });
+}
+function render(){
+  tb.innerHTML=filteredRows().map(r=>`<tr data-id="${r.id}" class="${selected===r.id?'sel':''}"><td>${r.code}</td><td>${r.short||'-'}</td><td>${r.name}</td><td>${r.type==='LEGAL'?'Hüquqi':'Fiziki'}</td><td>${r.res==='RESIDENT'?'Rezident':'Qeyri-rezident'}</td><td>${r.closed_date?('Bağlı: '+r.closed_date):'Aktiv'}</td></tr>`).join('');
+  [...tb.querySelectorAll('tr')].forEach(tr=>{
+    tr.onclick=()=>{selected=Number(tr.dataset.id);render();s('Qeyd seçildi.');};
+    tr.ondblclick=()=>openEdit(Number(tr.dataset.id));
+  });
+}
+function isEmail(v){if(!v) return true;return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)}
+function byRole(role){return coa.filter(x=>x.role===role)}
+function fillAccountSelect(id,role){const sel=document.getElementById(id);sel.innerHTML=['<option value="">- Seçin -</option>',...byRole(role).map(a=>`<option value="${a.id}">${a.id} - ${a.name}</option>`)].join('');}
+function fillAllAccounts(){fillAccountSelect('customer_receivable_account_id','customer_receivable');fillAccountSelect('customer_advance_received_account_id','customer_advance_received');fillAccountSelect('vendor_payable_account_id','vendor_payable');fillAccountSelect('vendor_advance_paid_account_id','vendor_advance_paid');}
+function setGroupState(prefix,enabled){
+  const fields=prefix==='customer'
+    ?['customer_receivable_account_id','customer_advance_received_account_id']
+    :['vendor_payable_account_id','vendor_advance_paid_account_id'];
+  fields.forEach(id=>{const el=document.getElementById(id);el.disabled=!enabled;if(!enabled)el.value='';});
+}
+function syncRoleAccounts(){setGroupState('customer',document.getElementById('is_customer').checked);setGroupState('vendor',document.getElementById('is_vendor').checked);}
+function openModal(edit){document.getElementById('modalTitle').textContent=edit?'Kontragent redaktəsi':'Yeni kontragent';modalWrap.style.display='flex';syncRoleAccounts();}
+function closeModal(){modalWrap.style.display='none';}
+function clearForm(){
+  editId=null;
+  document.querySelectorAll('.modal input').forEach(i=>{if(i.type==='checkbox'){i.checked=true;}else{i.value='';}});
+  document.querySelectorAll('.modal select').forEach(x=>{if(x.id==='counterparty_type')x.value='LEGAL';else if(x.id==='residency_status')x.value='RESIDENT';else if(x.id==='country_id')x.value='31';else if(x.id==='city_id')x.value='3101';else x.value='';});
+  document.getElementById('created_date').value='30.03.2026';
+  syncRoleAccounts();
+}
+function openEdit(id){
+  const r=rows.find(x=>x.id===id);if(!r)return;
+  editId=id;
+  document.getElementById('counterparty_code').value=r.code;
+  document.getElementById('counterparty_short_name').value=r.short||'';
+  document.getElementById('counterparty_name').value=r.name;
+  document.getElementById('counterparty_type').value=r.type;
+  document.getElementById('residency_status').value=r.res;
+  document.getElementById('tax_id').value=r.tax||'';
+  document.getElementById('country_id').value=r.country||'31';
+  document.getElementById('city_id').value=r.city||'3101';
+  document.getElementById('registration_no').value=r.registration_no||'';
+  document.getElementById('phone').value=r.phone||'';
+  document.getElementById('email').value=r.email||'';
+  document.getElementById('website').value=r.website||'';
+  document.getElementById('legal_address').value=r.legal_address||'';
+  document.getElementById('actual_address').value=r.actual_address||'';
+  document.getElementById('created_date').value=r.created_date||'30.03.2026';
+  document.getElementById('closed_date').value=r.closed_date||'';
+  document.getElementById('is_customer').checked=!!r.is_customer;
+  document.getElementById('is_vendor').checked=!!r.is_vendor;
+  syncRoleAccounts();
+  document.getElementById('customer_receivable_account_id').value=r.cr||'';
+  document.getElementById('customer_advance_received_account_id').value=r.ca||'';
+  document.getElementById('vendor_payable_account_id').value=r.vp||'';
+  document.getElementById('vendor_advance_paid_account_id').value=r.va||'';
+  document.getElementById('responsible_first_name').value=r.responsible_first_name||'';
+  document.getElementById('responsible_last_name').value=r.responsible_last_name||'';
+  document.getElementById('responsible_father_name').value=r.responsible_father_name||'';
+  document.getElementById('responsible_position').value=r.responsible_position||'';
+  document.getElementById('responsible_phone_mobile').value=r.responsible_phone_mobile||'';
+  document.getElementById('responsible_phone_work').value=r.responsible_phone_work||'';
+  document.getElementById('responsible_email').value=r.responsible_email||'';
+  openModal(true);
+}
+
+document.getElementById('searchBox').oninput=render;
+document.getElementById('filterType').onchange=render;
+document.getElementById('filterRes').onchange=render;
+document.getElementById('btnNew').onclick=()=>{clearForm();openModal(false);s('Yeni kontragent rejimi.');};
+document.getElementById('btnModalX').onclick=closeModal;
+document.getElementById('btnModalCancel').onclick=closeModal;
+modalWrap.onclick=(e)=>{if(e.target===modalWrap)closeModal();};
+document.getElementById('is_customer').onchange=syncRoleAccounts;
+document.getElementById('is_vendor').onchange=syncRoleAccounts;
+
+document.getElementById('btnSave').onclick=()=>{
+  const code=document.getElementById('counterparty_code').value.trim();
+  const name=document.getElementById('counterparty_name').value.trim();
+  const type=document.getElementById('counterparty_type').value;
+  const tax=document.getElementById('tax_id').value.trim();
+  const email=document.getElementById('email').value.trim();
+  const phone=document.getElementById('phone').value.trim();
+  const c=document.getElementById('is_customer').checked;
+  const v=document.getElementById('is_vendor').checked;
+  const cr=document.getElementById('customer_receivable_account_id').value;
+  const ca=document.getElementById('customer_advance_received_account_id').value;
+  const vp=document.getElementById('vendor_payable_account_id').value;
+  const va=document.getElementById('vendor_advance_paid_account_id').value;
+  const closedDate=document.getElementById('closed_date').value.trim();
+
+  if(!code||!name) return s('E-102: Məcburi sahələr doldurulmayıb.',true);
+  if(!phone&&!email) return s('E-103: Telefon və ya email tələb olunur.',true);
+  if(!isEmail(email)||!isEmail(document.getElementById('responsible_email').value.trim())) return s('E-104: Email formatı yanlışdır.',true);
+  if(type==='LEGAL'&&!tax) return s('E-107: Hüquqi şəxs üçün VÖEN məcburidir.',true);
+  if(!c&&!v) return s('E-105: Ən azı bir rol seçilməlidir.',true);
+  if(c&&(!cr||!ca)) return s('E-202: Müştəri üçün Debitor və Alınmış avans hesabları məcburidir.',true);
+  if(v&&(!vp||!va)) return s('E-203: Tədarükçü üçün Kreditor və Verilmiş avans hesabları məcburidir.',true);
+
+  const payload={
+    code,short:document.getElementById('counterparty_short_name').value.trim(),name,type,res:document.getElementById('residency_status').value,
+    tax:tax,country:document.getElementById('country_id').value,city:document.getElementById('city_id').value,registration_no:document.getElementById('registration_no').value.trim(),
+    phone,email,website:document.getElementById('website').value.trim(),legal_address:document.getElementById('legal_address').value.trim(),actual_address:document.getElementById('actual_address').value.trim(),
+    created_date:document.getElementById('created_date').value.trim(),closed_date:closedDate,is_customer:c,is_vendor:v,cr,ca,vp,va,
+    responsible_first_name:document.getElementById('responsible_first_name').value.trim(),responsible_last_name:document.getElementById('responsible_last_name').value.trim(),
+    responsible_father_name:document.getElementById('responsible_father_name').value.trim(),responsible_position:document.getElementById('responsible_position').value.trim(),
+    responsible_phone_mobile:document.getElementById('responsible_phone_mobile').value.trim(),responsible_phone_work:document.getElementById('responsible_phone_work').value.trim(),
+    responsible_email:document.getElementById('responsible_email').value.trim()
+  };
+  if(editId){
+    const idx=rows.findIndex(x=>x.id===editId);
+    if(idx>-1) rows[idx]={...rows[idx],...payload};
+  }else{
+    const id=Math.max(...rows.map(x=>x.id))+1;
+    rows.push({id,...payload});
+  }
+  s(editId?'Kontragent yeniləndi (demo).':'Kontragent yaradıldı (demo).');
+  closeModal();
+  render();
+};
+
+document.getElementById('btnDelete').onclick=()=>s('Silmə referens yoxlaması ilə icra olunur (demo).');
+fillAllAccounts();
+render();
+</script>
+</body>
+</html>

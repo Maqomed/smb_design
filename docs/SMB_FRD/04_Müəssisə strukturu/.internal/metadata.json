@@ -1,0 +1,24 @@
+{
+  "kod": "ORG_STRUCTURE_MASTER",
+  "ad": "Təşkilati və Logistika Struktur Master Data",
+  "layihe": "SMB ERP",
+  "sened_nomresi": "FRD-ORG-LOGI-001",
+  "movzu": "Müəssisə (Entity), Filial (Branch), Departament (Department), Anbar (Warehouse), Saxlanma sahəsi (Location), Rəf/Hüceyrə (Bin) soraqçalarının əlaqəli idarə olunması",
+  "tarix": "2026-03-30",
+  "versiya": "3.2",
+  "status": "frd-package-ready",
+  "dil": "az",
+  "owner": "SRS",
+  "objects": [
+    "ENTITY",
+    "BRANCH",
+    "DEPARTMENT",
+    "WAREHOUSE",
+    "LOCATION",
+    "BIN"
+  ],
+  "hierarchy": "Müəssisə (Entity) > Filial (Branch) > Departament (Department); Filial (Branch) > Anbar (Warehouse) > Saxlanma sahəsi (Location) > Rəf/Hüceyrə (Bin)",
+  "ui_scope": "functional-schema-only",
+  "workflow_model": "status/təsdiq yoxdur; tarix əsaslı aktivlik",
+  "notes": "Hər obyekt ayrı cədvəldə saxlanılır, yalnız referens əlaqələr tətbiq olunur. Departament (Department) tree-view iyerarxiyası məcburidir."
+}

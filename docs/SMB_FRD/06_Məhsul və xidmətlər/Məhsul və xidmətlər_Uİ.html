@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Məhsul və Xidmət soraqçası</title>
+  <style>
+    body{margin:0;font-family:Segoe UI,Arial,sans-serif;background:#f5f7fb;color:#1f2937}
+    .page{max-width:1240px;margin:16px auto;padding:0 12px}
+    .title{font-size:20px;font-weight:700;margin:0 0 12px}
+    .mockup-note{margin:0 0 12px;padding:10px 12px;border:1px solid #facc15;background:#fffbeb;color:#854d0e;border-radius:8px;font-size:12px;line-height:1.5}
+    .card{background:#fff;border:1px solid #dbe1ea;border-radius:10px;padding:12px}
+    .toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
+    .toolbar input,.toolbar select{height:34px;border:1px solid #dbe1ea;border-radius:8px;padding:0 10px}
+    .toolbar input{min-width:240px}
+    .head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+    table{width:100%;border-collapse:collapse;font-size:13px}
+    th,td{padding:8px;border-bottom:1px solid #eef2f7;text-align:left}
+    th{font-size:12px;color:#64748b}
+    tr.sel{background:#eef4ff}
+    .actions{display:flex;gap:8px;flex-wrap:wrap}
+    button{height:34px;border:1px solid #d1d9e6;background:#fff;border-radius:8px;padding:0 12px;cursor:pointer}
+    .p{background:#2563eb;color:#fff;border-color:#2563eb}
+    .w{background:#fff7ed;color:#9a3412;border-color:#fed7aa}
+    .d{background:#fff1f2;color:#be123c;border-color:#fecdd3}
+    .status{margin-top:8px;font-size:12px;color:#475569;min-height:16px}
+
+    .modal-wrap{position:fixed;inset:0;background:rgba(15,23,42,.35);display:none;align-items:center;justify-content:center;padding:16px;z-index:30}
+    .modal{background:#fff;border:1px solid #dbe1ea;border-radius:12px;width:min(1020px,100%);max-height:90vh;overflow:auto;padding:14px}
+    .modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:10px;flex-wrap:wrap}
+    .modal-head-right{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+    .head-check{display:flex;align-items:center;gap:6px;font-size:12px;color:#334155}
+    .head-check input[type="checkbox"]{width:14px;height:14px}
+    .grid{display:grid;grid-template-columns:repeat(3,minmax(180px,1fr));gap:10px}
+    .f label{display:block;font-size:12px;color:#64748b;margin-bottom:5px}
+    .f input:not([type="checkbox"]),.f select,.f textarea{width:100%;height:34px;border:1px solid #dbe1ea;border-radius:8px;padding:0 10px;font-size:13px}
+    .f textarea{height:68px;padding-top:8px;resize:vertical}
+    .f.full{grid-column:1 / -1}
+    .account-dd{position:relative}
+    .account-dd input{width:100%;height:34px;border:1px solid #dbe1ea;border-radius:8px;padding:0 10px;font-size:13px}
+    .account-list{position:absolute;top:36px;left:0;right:0;background:#fff;border:1px solid #dbe1ea;border-radius:8px;max-height:170px;overflow:auto;z-index:20;display:none}
+    .account-item{padding:8px 10px;font-size:13px;border-bottom:1px solid #eef2f7;cursor:pointer}
+    .account-item:last-child{border-bottom:none}
+    .account-item:hover{background:#eef4ff}
+    .account-empty{padding:8px 10px;font-size:12px;color:#64748b}
+    .chkrow{display:flex;gap:10px;align-items:center;margin-top:2px}
+    .chkrow input[type="checkbox"]{width:14px;height:14px}
+    .hint{font-size:12px;color:#64748b}
+    @media (max-width:1000px){.grid{grid-template-columns:repeat(2,minmax(150px,1fr))}}
+  </style>
+</head>
+<body>
+<div class="page">
+  <h1 class="title">Məhsul və Xidmət soraqçası</h1>
+  <div class="mockup-note"><b>Qeyd:</b> Bu interfeys istehsal səviyyəsi üçün son dizayn deyil; yalnız nümayiş və müzakirə məqsədli maket nümunəsidir.</div>
+  <section class="card">
+    <div class="toolbar">
+      <input id="searchBox" placeholder="Axtarış: kod, qısa ad, tam ad" />
+      <select id="filterCategory">
+        <option value="">Bütün kateqoriyalar</option>
+        <option>ƏSAS_VƏSAİT</option>
+        <option>İNVENTAR</option>
+        <option>XİDMƏT</option>
+        <option>MƏSRƏF</option>
+      </select>
+      <select id="filterStorable">
+        <option value="">Saxlanıla bilən: hamısı</option>
+        <option value="true">Saxlanıla bilən=true</option>
+        <option value="false">Saxlanıla bilən=false</option>
+      </select>
+    </div>
+
+    <div class="head">
+      <strong>Məhsul və xidmət siyahısı</strong>
+      <div class="actions">
+        <button id="btnNew" class="p">Yeni</button>
+        <button id="btnClose" class="w">Ləğv et</button>
+        <button id="btnDelete" class="d">Sil</button>
+        <button id="btnExport">Çap/İxrac</button>
+      </div>
+    </div>
+
+    <table id="tbl">
+      <thead><tr><th>Kod</th><th>Qısa ad</th><th>Tam ad</th><th>Kateqoriya</th><th>Saxlanıla bilən</th><th>Ölçü vahidi</th><th>Gəlir hesabı</th><th>Aktivlik</th></tr></thead>
+      <tbody></tbody>
+    </table>
+    <div id="status" class="status">Hazırdır. Redaktə üçün sətirə iki dəfə klik edin.</div>
+  </section>
+</div>
+
+<div class="modal-wrap" id="modalWrap">
+  <div class="modal">
+    <div class="modal-head">
+      <strong id="modalTitle">Yeni məhsul/xidmət</strong>
+      <div class="modal-head-right">
+        <label class="head-check"><input id="storable" type="checkbox" checked> Saxlanıla bilən</label>
+        <label class="head-check"><input id="active" type="checkbox" checked> Aktiv</label>
+        <button id="btnModalX">Bağla</button>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="f"><label>Məhsul kodu</label><input id="item_code"></div>
+      <div class="f"><label>Qısa ad</label><input id="item_short_name"></div>
+      <div class="f"><label>Tam ad</label><input id="item_name"></div>
+      <div class="f">
+        <label>Kateqoriya</label>
+        <select id="item_category_code">
+          <option>ƏSAS_VƏSAİT</option>
+          <option>İNVENTAR</option>
+          <option>XİDMƏT</option>
+          <option>MƏSRƏF</option>
+        </select>
+      </div>
+      <div class="f"><label>Ölçü vahidi</label><select id="uom_id"><option value="1">ədəd</option><option value="2">kq</option><option value="3">metr</option></select></div>
+
+      <div class="f"><label>Şəkil (link/yol)</label><input id="image_url" placeholder="https://... və ya /images/item.png"></div>
+      <div class="f"><label>Brend</label><input id="brand_name"></div>
+      <div class="f"><label>Model</label><input id="model_name"></div>
+
+      <div class="f"><label>Alış qiyməti</label><input id="purchase_price" type="number" min="0" step="0.0001"></div>
+      <div class="f"><label>Satış qiyməti</label><input id="sales_price" type="number" min="0" step="0.0001"></div>
+      <div class="f"><label>Valyuta</label><select id="currency_code"><option>AZN</option><option>USD</option><option>EUR</option></select></div>
+
+      <div class="f">
+        <label>Saxlanma hesabı</label>
+        <div class="account-dd" id="storageAccountDd">
+          <input id="storage_account_search" placeholder="Hesab axtar: kod və ya ad" autocomplete="off">
+          <input id="storage_account_id" type="hidden">
+          <div id="storage_account_list" class="account-list"></div>
+        </div>
+      </div>
+
+      <div class="f">
+        <label>Gəlir hesabı</label>
+        <div class="account-dd" id="revenueAccountDd">
+          <input id="revenue_account_search" placeholder="Hesab axtar: kod və ya ad" autocomplete="off">
+          <input id="revenue_account_id" type="hidden">
+          <div id="revenue_account_list" class="account-list"></div>
+        </div>
+      </div>
+
+      <div class="f full"><label>Təsvir</label><textarea id="description"></textarea></div>
+    </div>
+
+    <div class="actions" style="margin-top:10px">
+      <button id="btnModalCancel">İmtina</button>
+      <button class="p" id="btnSave">Yadda Saxla</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const rows=[
+ {item_id:1,item_code:'ITM-001',item_short_name:'Un',item_name:'Buğda unu',item_category_code:'İNVENTAR',storable:true,active:true,uom:'kq',storage_account_id:'205',revenue_account_id:'611'},
+ {item_id:2,item_code:'ITM-010',item_short_name:'Masa',item_name:'Ofis masası',item_category_code:'ƏSAS_VƏSAİT',storable:true,active:true,uom:'ədəd',storage_account_id:'111',revenue_account_id:''},
+ {item_id:3,item_code:'ITM-030',item_short_name:'Ofis xidməti',item_name:'Kargüzarlıq xidməti',item_category_code:'XİDMƏT',storable:false,active:true,uom:'ədəd',storage_account_id:'721',revenue_account_id:'611'}
+];
+const coaAccounts=[
+  {id:'111',name:'Torpaq, tikili və avadanlıqların dəyəri',category:'ƏSAS_VƏSAİT'},
+  {id:'121',name:'İnvestisiya mülkiyyətinin dəyəri',category:'ƏSAS_VƏSAİT'},
+  {id:'201',name:'Material ehtiyatları',category:'İNVENTAR'},
+  {id:'204',name:'Hazır məhsul',category:'İNVENTAR'},
+  {id:'205',name:'Mallar',category:'İNVENTAR'},
+  {id:'611',name:'Məhsul və xidmət satış gəliri',category:'XİDMƏT'},
+  {id:'701',name:'Satışın maya dəyəri üzrə xidmətlər',category:'XİDMƏT'},
+  {id:'721',name:'İnzibati xidmətlər',category:'XİDMƏT'},
+  {id:'731',name:'Sair əməliyyat xərcləri',category:'MƏSRƏF'},
+  {id:'751',name:'Maliyyə xərcləri',category:'MƏSRƏF'}
+];
+const UOM={1:'ədəd',2:'kq',3:'metr'};
+let selectedId=null;
+let editId=null;
+const refs={
+  tbody:document.querySelector('#tbl tbody'),status:document.getElementById('status'),
+  modalWrap:document.getElementById('modalWrap'),modalTitle:document.getElementById('modalTitle'),
+  searchBox:document.getElementById('searchBox'),filterCategory:document.getElementById('filterCategory'),filterStorable:document.getElementById('filterStorable')
+};
+function setStatus(t,err=false){refs.status.textContent=t;refs.status.style.color=err?'#b91c1c':'#0f766e';}
+function allowedByStorable(storable){return storable?['ƏSAS_VƏSAİT','İNVENTAR']:['XİDMƏT','MƏSRƏF'];}
+function accountText(acc){return `${acc.id} - ${acc.name}`;}
+function filteredAccountsByCategory(category,query=''){
+  const q=query.trim().toLowerCase();
+  return coaAccounts.filter(a=>a.category===category && (!q || accountText(a).toLowerCase().includes(q)));
+}
+function closeAccountList(){document.getElementById('storage_account_list').style.display='none';}
+function openAccountList(){document.getElementById('storage_account_list').style.display='block';}
+function renderAccountList(){
+  const cat=document.getElementById('item_category_code').value;
+  const q=document.getElementById('storage_account_search').value;
+  const list=document.getElementById('storage_account_list');
+  const items=filteredAccountsByCategory(cat,q);
+  if(!items.length){
+    list.innerHTML='<div class="account-empty">Uyğun hesab tapılmadı</div>';
+    openAccountList();
+    return;
+  }
+  list.innerHTML=items.map(a=>`<div class="account-item" data-id="${a.id}">${accountText(a)}</div>`).join('');
+  [...list.querySelectorAll('.account-item')].forEach(el=>{
+    el.onclick=()=>{
+      const id=el.dataset.id;
+      const acc=coaAccounts.find(a=>a.id===id);
+      document.getElementById('storage_account_id').value=id;
+      document.getElementById('storage_account_search').value=acc?accountText(acc):id;
+      closeAccountList();
+    };
+  });
+  openAccountList();
+}
+function syncStorageAccountByCategory(){
+  const cat=document.getElementById('item_category_code').value;
+  const storageId=document.getElementById('storage_account_id').value;
+  const matched=coaAccounts.find(a=>a.id===storageId && a.category===cat);
+  if(!matched){
+    document.getElementById('storage_account_id').value='';
+    document.getElementById('storage_account_search').value='';
+  }else{
+    document.getElementById('storage_account_search').value=accountText(matched);
+  }
+  renderAccountList();
+}
+function closeRevenueAccountList(){document.getElementById('revenue_account_list').style.display='none';}
+function openRevenueAccountList(){document.getElementById('revenue_account_list').style.display='block';}
+function renderRevenueAccountList(){
+  const cat=document.getElementById('item_category_code').value;
+  const q=document.getElementById('revenue_account_search').value;
+  const list=document.getElementById('revenue_account_list');
+  const items=filteredAccountsByCategory(cat,q);
+  if(!items.length){
+    list.innerHTML='<div class="account-empty">Uyğun hesab tapılmadı</div>';
+    openRevenueAccountList();
+    return;
+  }
+  list.innerHTML=items.map(a=>`<div class="account-item" data-id="${a.id}">${accountText(a)}</div>`).join('');
+  [...list.querySelectorAll('.account-item')].forEach(el=>{
+    el.onclick=()=>{
+      const id=el.dataset.id;
+      const acc=coaAccounts.find(a=>a.id===id);
+      document.getElementById('revenue_account_id').value=id;
+      document.getElementById('revenue_account_search').value=acc?accountText(acc):id;
+      closeRevenueAccountList();
+    };
+  });
+  openRevenueAccountList();
+}
+function syncRevenueAccountByCategory(){
+  const cat=document.getElementById('item_category_code').value;
+  const revenueId=document.getElementById('revenue_account_id').value;
+  const matched=coaAccounts.find(a=>a.id===revenueId && a.category===cat);
+  if(!matched){
+    document.getElementById('revenue_account_id').value='';
+    document.getElementById('revenue_account_search').value='';
+  }else{
+    document.getElementById('revenue_account_search').value=accountText(matched);
+  }
+  renderRevenueAccountList();
+}
+function syncCategoryOptions(){
+  const storable=document.getElementById('storable').checked;
+  const sel=document.getElementById('item_category_code');
+  const keep=sel.value;
+  const opts=allowedByStorable(storable);
+  sel.innerHTML=opts.map(o=>`<option>${o}</option>`).join('');
+  sel.value=opts.includes(keep)?keep:opts[0];
+  syncStorageAccountByCategory();
+  syncRevenueAccountByCategory();
+}
+function filteredRows(){
+  const q=refs.searchBox.value.trim().toLowerCase();
+  const cat=refs.filterCategory.value;
+  const st=refs.filterStorable.value;
+  return rows.filter(r=>{
+    const hit=!q || [r.item_code,r.item_short_name||'',r.item_name].join(' ').toLowerCase().includes(q);
+    const catOk=!cat || r.item_category_code===cat;
+    const stOk=!st || String(r.storable)===st;
+    return hit&&catOk&&stOk;
+  });
+}
+function render(){
+  refs.tbody.innerHTML=filteredRows().map(r=>`<tr data-id="${r.item_id}" class="${selectedId===r.item_id?'sel':''}"><td>${r.item_code}</td><td>${r.item_short_name||'-'}</td><td>${r.item_name}</td><td>${r.item_category_code}</td><td>${r.storable}</td><td>${r.uom}</td><td>${r.revenue_account_id||'-'}</td><td>${r.active?'Aktiv':'Passiv'}</td></tr>`).join('');
+  [...refs.tbody.querySelectorAll('tr')].forEach(tr=>{
+    tr.onclick=()=>{selectedId=Number(tr.dataset.id);render();setStatus('Qeyd seçildi.');};
+    tr.ondblclick=()=>openEdit(Number(tr.dataset.id));
+  });
+}
+function openModal(edit){refs.modalTitle.textContent=edit?'Məhsul/xidmət redaktəsi':'Yeni məhsul/xidmət';refs.modalWrap.style.display='flex';}
+function closeModal(){refs.modalWrap.style.display='none';}
+function clearModal(){editId=null;document.querySelectorAll('.modal input,.modal textarea').forEach(i=>{if(i.type==='checkbox'){i.checked=true}else{i.value=''}});document.getElementById('uom_id').value='1';document.getElementById('currency_code').value='AZN';syncCategoryOptions();}
+function openEdit(id){
+  const r=rows.find(x=>x.item_id===id);if(!r)return;
+  editId=id;
+  document.getElementById('item_code').value=r.item_code;
+  document.getElementById('item_short_name').value=r.item_short_name||'';
+  document.getElementById('item_name').value=r.item_name;
+  document.getElementById('storable').checked=!!r.storable;
+  document.getElementById('active').checked=r.active!==false;
+  syncCategoryOptions();
+  document.getElementById('item_category_code').value=r.item_category_code;
+  document.getElementById('storage_account_id').value=r.storage_account_id||'';
+  syncStorageAccountByCategory();
+  document.getElementById('revenue_account_id').value=r.revenue_account_id||'';
+  syncRevenueAccountByCategory();
+  document.getElementById('uom_id').value=Object.entries(UOM).find(([k,v])=>v===r.uom)?.[0]||'1';
+  openModal(true);
+}
+function validate(){
+  const code=document.getElementById('item_code').value.trim();
+  const name=document.getElementById('item_name').value.trim();
+  const cat=document.getElementById('item_category_code').value;
+  const storable=document.getElementById('storable').checked;
+  const pp=Number(document.getElementById('purchase_price').value||0);
+  const sp=Number(document.getElementById('sales_price').value||0);
+  const storage=document.getElementById('storage_account_id').value.trim();
+  const revenue=document.getElementById('revenue_account_id').value.trim();
+  if(!code||!name) return 'E-102: Məcburi sahələr doldurulmayıb.';
+  const allowed=allowedByStorable(storable);
+  if(!allowed.includes(cat)) return 'E-104: Saxlanıla bilən və kateqoriya uyğunluğu yanlışdır.';
+  if(pp<0||sp<0) return 'E-102: Qiymət mənfi ola bilməz.';
+  const dup=rows.find(r=>r.item_code===code&&r.active!==false&&r.item_id!==editId);
+  if(dup) return 'E-101: Item kodu artıq mövcuddur.';
+  if(cat==='İNVENTAR'&&!storage) return 'E-202: İNVENTAR kateqoriyası üçün saxlanma hesabı məcburidir.';
+  if(['İNVENTAR','XİDMƏT'].includes(cat) && !revenue) return 'E-204: İNVENTAR/XİDMƏT kateqoriyası üçün gəlir hesabı məcburidir.';
+  return null;
+}
+
+refs.searchBox.oninput=render;refs.filterCategory.onchange=render;refs.filterStorable.onchange=render;
+document.getElementById('storable').onchange=syncCategoryOptions;
+document.getElementById('item_category_code').onchange=()=>{syncStorageAccountByCategory();syncRevenueAccountByCategory();};
+document.getElementById('storage_account_search').onfocus=renderAccountList;
+document.getElementById('storage_account_search').oninput=renderAccountList;
+document.getElementById('revenue_account_search').onfocus=renderRevenueAccountList;
+document.getElementById('revenue_account_search').oninput=renderRevenueAccountList;
+document.addEventListener('click',(e)=>{
+  if(!document.getElementById('storageAccountDd').contains(e.target)){closeAccountList();}
+  if(!document.getElementById('revenueAccountDd').contains(e.target)){closeRevenueAccountList();}
+});
+document.getElementById('btnNew').onclick=()=>{clearModal();openModal(false);};
+document.getElementById('btnModalX').onclick=closeModal;
+document.getElementById('btnModalCancel').onclick=closeModal;
+refs.modalWrap.onclick=(e)=>{if(e.target===refs.modalWrap)closeModal();};
+document.getElementById('btnSave').onclick=()=>{
+  const err=validate(); if(err) return setStatus(err,true);
+  setStatus(editId? 'Item yeniləndi (demo).':'Item yaradıldı (demo).');
+  closeModal();
+};
+document.getElementById('btnClose').onclick=()=>setStatus('Qeyd aktivlik checkbox-u ilə passiv edilir (demo).');
+document.getElementById('btnDelete').onclick=()=>setStatus('Silmə referens yoxlaması ilə icra olunur (demo).');
+document.getElementById('btnExport').onclick=()=>setStatus('İxrac/çap funksiyası növbəti mərhələ.');
+render();
+</script>
+</body>
+</html>

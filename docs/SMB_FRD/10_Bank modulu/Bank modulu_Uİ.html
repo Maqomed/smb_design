@@ -1,0 +1,1293 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SMB — Bank Əməliyyatları</title>
+<!-- Lookup mənbələri (SRS soraqçaları):
+  - Kontragent: counterparty_card (07_Kontragentlər)
+  - Hesab: coa_account (05_Hesablar planı)
+  - Valyuta: currency.abbreviation (01_Valyuta)
+  - Bank hesabı: bank_account.account_no (11_Bank hesabları)
+  - Əməliyyat tipi: bank_operation_type.operation_type_code (12_Bank əməliyyat tipləri)
+  - Məzənnə: exchange_rate.rate_value (13_Məzənnə)
+  - Sənəd linkləri: purchase_document (08), sales_document (09)
+-->
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Segoe UI', system-ui, sans-serif; font-size: 13px; background: #f3f4f6; color: #1f2937; }
+
+/* ── TOPBAR ── */
+.topbar { background: #1e3a5f; color: #fff; padding: 0 20px; display: flex; align-items: center; height: 40px; gap: 24px; }
+.topbar .logo { font-size: 15px; font-weight: 700; letter-spacing: .5px; }
+.topbar nav span { font-size: 12px; opacity: .7; cursor: pointer; padding: 0 4px; }
+.topbar nav span:hover { opacity: 1; }
+.topbar nav span.sep { opacity: .3; cursor: default; }
+.topbar nav span.current { opacity: 1; font-weight: 600; }
+.mockup-note { margin: 8px 20px 0; padding: 10px 12px; border: 1px solid #facc15; background: #fffbeb; color: #854d0e; border-radius: 8px; font-size: 12px; line-height: 1.5; }
+
+/* ── LAYOUT ── */
+.layout { min-height: calc(100vh - 88px); display: flex; }
+
+/* ── SIDEBAR ── */
+.sidebar { width: 220px; background: #162e4a; color: #cbd5e1; flex-shrink: 0; padding-top: 8px; }
+.sidebar .section-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .8px; padding: 12px 16px 4px; color: #64748b; }
+.sidebar .nav-item { padding: 8px 16px; font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 8px; border-left: 3px solid transparent; }
+.sidebar .nav-item:hover { background: rgba(255,255,255,.06); color: #fff; }
+.sidebar .nav-item.active { background: rgba(255,255,255,.1); border-left-color: #3b82f6; color: #fff; font-weight: 600; }
+
+/* ── MAIN ── */
+.main { flex: 1; max-width: 1280px; margin: 0 auto; overflow: auto; }
+
+/* ── BREADCRUMB ── */
+.breadcrumb { background: #fff; border-bottom: 1px solid #e5e7eb; padding: 7px 20px; font-size: 12px; color: #6b7280; display: flex; align-items: center; gap: 2px; }
+.breadcrumb span { cursor: pointer; padding: 1px 3px; border-radius: 3px; }
+.breadcrumb span:hover { background: #f3f4f6; color: #1e3a5f; }
+.breadcrumb span.sep { cursor: default; opacity: .4; padding: 0 2px; }
+.breadcrumb span.current { color: #111827; font-weight: 600; cursor: default; }
+
+/* ── NOTIF ── */
+.notif { display: none; padding: 8px 20px; font-size: 12px; font-weight: 600; border-bottom: 2px solid transparent; }
+.notif.error   { display: block; background: #fef2f2; color: #dc2626; border-color: #fca5a5; }
+.notif.warn    { display: block; background: #fffbeb; color: #92400e; border-color: #fde68a; }
+.notif.success { display: block; background: #f0fdf4; color: #166534; border-color: #86efac; }
+
+/* ── COMMAND BAR ── */
+.command-bar { background: #fff; border-bottom: 1px solid #e5e7eb; padding: 8px 20px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.btn { border: 1px solid #d1d5db; background: #fff; border-radius: 4px; padding: 5px 13px; font-size: 12px; cursor: pointer; transition: all .15s; white-space: nowrap; }
+.btn:hover { background: #f9fafb; border-color: #9ca3af; }
+.btn.primary { background: #1e3a5f; color: #fff; border-color: #1e3a5f; }
+.btn.primary:hover { background: #162e4a; }
+.btn.danger { color: #dc2626; border-color: #fca5a5; }
+.btn.danger:hover { background: #fef2f2; }
+.btn.dd::after { content: ' ▾'; font-size: 10px; }
+.btn-sep { width: 1px; height: 22px; background: #e5e7eb; margin: 0 2px; }
+
+/* ── BADGE ── */
+.badge { display: inline-block; padding: 2px 9px; border-radius: 999px; font-size: 11px; font-weight: 600; white-space: nowrap; }
+.badge.draft     { background: #f3f4f6; color: #6b7280; }
+.badge.confirmed { background: #dcfce7; color: #16a34a; }
+.badge.cancelled { background: #fee2e2; color: #dc2626; }
+.badge.closed    { background: #dbeafe; color: #1d4ed8; }
+
+/* ── SCREENS ── */
+.screen { display: none; }
+.screen.active { display: block; }
+
+/* ════════ SCREEN 1: SİYAHI ════════ */
+.list-toolbar { background: #fff; border-bottom: 1px solid #e5e7eb; padding: 10px 20px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.search-box { border: 1px solid #d1d5db; border-radius: 4px; padding: 5px 10px; font-size: 12px; width: 260px; }
+.search-box:focus { outline: none; border-color: #1e3a5f; }
+.list-toolbar select { border: 1px solid #d1d5db; background: #fff; border-radius: 4px; padding: 5px 10px; font-size: 12px; min-width: 150px; }
+.list-summary { margin-left: auto; font-size: 12px; color: #6b7280; }
+
+.list-wrap { padding: 16px 20px; }
+.data-table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 6px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+.data-table th { background: #f9fafb; padding: 9px 12px; text-align: left; font-size: 11px; font-weight: 700; color: #6b7280; text-transform: uppercase; letter-spacing: .4px; border-bottom: 1px solid #e5e7eb; white-space: nowrap; }
+.data-table td { padding: 9px 12px; border-bottom: 1px solid #f3f4f6; font-size: 12px; vertical-align: middle; }
+.data-table tr:hover td { background: #f9fafb; cursor: pointer; }
+.data-table tr:last-child td { border-bottom: none; }
+.data-table .doc-link { color: #1e3a5f; font-weight: 600; }
+.data-table .num { text-align: right; font-variant-numeric: tabular-nums; }
+
+.pagination { display: flex; align-items: center; gap: 4px; padding: 12px 20px; justify-content: flex-end; font-size: 12px; color: #6b7280; }
+.pagination button { border: 1px solid #d1d5db; background: #fff; border-radius: 4px; padding: 4px 9px; font-size: 12px; cursor: pointer; }
+.pagination button.active { background: #1e3a5f; color: #fff; border-color: #1e3a5f; }
+
+/* ════════ SCREEN 2: FORMA ════════ */
+.form-wrap { max-width: 980px; margin: 16px auto; background: #fff; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,.1); overflow: hidden; }
+
+.status-bar { display: flex; align-items: center; padding: 12px 20px 10px; border-bottom: 1px solid #f3f4f6; background: #f9fafb; gap: 0; }
+.status-step { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #9ca3af; font-weight: 500; }
+.status-step .dot { width: 12px; height: 12px; border-radius: 50%; border: 2px solid #d1d5db; background: #fff; flex-shrink: 0; }
+.s-active    { color: #1e3a5f !important; font-weight: 700 !important; }
+.s-active .dot    { background: #1e3a5f !important; border-color: #1e3a5f !important; }
+.s-done      { color: #6b7280 !important; }
+.s-done .dot { background: #6b7280 !important; border-color: #6b7280 !important; }
+.s-confirmed { color: #16a34a !important; font-weight: 700 !important; }
+.s-confirmed .dot { background: #16a34a !important; border-color: #16a34a !important; }
+.s-closed    { color: #1d4ed8 !important; font-weight: 700 !important; }
+.s-closed .dot { background: #1d4ed8 !important; border-color: #1d4ed8 !important; }
+.s-cancelled { color: #dc2626 !important; font-weight: 600 !important; }
+.s-cancelled .dot { background: #dc2626 !important; border-color: #dc2626 !important; }
+.status-connector { flex: 1; max-width: 70px; height: 1px; background: #d1d5db; margin: 0 8px; }
+.status-connector.done { background: #6b7280; }
+
+.form-body { padding: 18px 20px 0; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 14px; }
+.form-row.three { grid-template-columns: 1fr 1fr 1fr; }
+.field { display: flex; flex-direction: column; gap: 4px; }
+.field label { font-size: 11px; font-weight: 700; color: #6b7280; text-transform: uppercase; letter-spacing: .4px; }
+.field .req { color: #ef4444; }
+.field input, .field select, .field textarea { border: 1px solid #d1d5db; border-radius: 4px; padding: 6px 9px; font-size: 13px; background: #fff; color: #111827; }
+.field input:focus, .field select:focus { outline: none; border-color: #1e3a5f; box-shadow: 0 0 0 2px rgba(30,58,95,.12); }
+.field input[readonly], .field input:disabled, .field select:disabled { background: #f9fafb; color: #6b7280; cursor: not-allowed; }
+.field .hint { font-size: 11px; color: #9ca3af; margin-top: 2px; }
+.field .hint.strong { color: #475569; }
+.field-inline { display: flex; gap: 4px; }
+.currency { width: 48px !important; text-align: center; background: #f3f4f6 !important; font-weight: 700 !important; flex-shrink: 0; }
+
+.tabs { border-bottom: 2px solid #e5e7eb; display: flex; gap: 0; margin-top: 16px; }
+.tab { padding: 9px 18px; font-size: 12px; font-weight: 600; cursor: pointer; color: #6b7280; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all .15s; }
+.tab:hover { color: #1e3a5f; }
+.tab.active { color: #1e3a5f; border-bottom-color: #1e3a5f; }
+.tab-pane { display: none; padding: 16px 0; min-height: 190px; }
+.tab-pane.active { display: block; }
+
+.ref-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.ref-table th { background: #f9fafb; padding: 7px 10px; text-align: left; font-size: 11px; color: #6b7280; border-bottom: 1px solid #e5e7eb; font-weight: 700; text-transform: uppercase; letter-spacing: .3px; }
+.ref-table td { padding: 7px 10px; border-bottom: 1px solid #f3f4f6; }
+.ref-table tr:hover td { background: #f9fafb; }
+.ref-table input[type=text] { border: 1px solid #d1d5db; border-radius: 3px; padding: 3px 6px; width: 110px; font-size: 12px; }
+.tag { display: inline-block; padding: 2px 7px; border-radius: 3px; font-size: 11px; font-weight: 600; }
+.tag.open    { background: #fef9c3; color: #854d0e; }
+.tag.partial { background: #ffe4e6; color: #9f1239; }
+
+.history { display: flex; flex-direction: column; gap: 12px; }
+.hist-item { display: flex; gap: 10px; }
+.hist-dot { width: 8px; height: 8px; border-radius: 50%; background: #6b7280; margin-top: 4px; flex-shrink: 0; }
+.hist-dot.green { background: #16a34a; }
+.hist-dot.red   { background: #dc2626; }
+.hist-content { font-size: 12px; color: #374151; }
+.hist-time { font-size: 11px; color: #9ca3af; margin-top: 2px; }
+.hist-actions { display: flex; gap: 8px; margin-top: 12px; }
+.hist-actions button { font-size: 12px; padding: 4px 10px; border: 1px solid #d1d5db; border-radius: 4px; background: #fff; cursor: pointer; }
+.hist-actions button:hover { background: #f9fafb; }
+
+/* FACT-BOX */
+.fact-box { position: fixed; right: 0; top: 88px; bottom: 0; width: 270px; background: #fff; border-left: 1px solid #e5e7eb; padding: 16px; overflow-y: auto; box-shadow: -4px 0 16px rgba(0,0,0,.1); transform: translateX(100%); transition: transform .22s; z-index: 50; }
+.fact-box.open { transform: translateX(0); }
+.fact-box h4 { font-size: 13px; font-weight: 700; margin-bottom: 12px; color: #1e3a5f; display: flex; justify-content: space-between; }
+.fact-box h4 button { background: none; border: none; cursor: pointer; font-size: 16px; color: #6b7280; }
+.fb-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #f3f4f6; font-size: 12px; }
+.fb-row .fl { color: #6b7280; }
+.fb-row .fv { font-weight: 600; }
+.fb-btns { margin-top: 14px; display: flex; flex-direction: column; gap: 8px; }
+.fb-btns button { width: 100%; padding: 7px; border-radius: 4px; font-size: 12px; cursor: pointer; font-weight: 600; border: 1px solid #d1d5db; background: #fff; }
+.fb-btns button:hover { background: #f9fafb; }
+.fb-btns button.primary { background: #1e3a5f; color: #fff; border-color: #1e3a5f; }
+.fb-btns button.danger  { color: #dc2626; border-color: #fca5a5; }
+
+/* ── MODAL ── */
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 100; align-items: center; justify-content: center; }
+.modal-overlay.open { display: flex; }
+.modal { background: #fff; border-radius: 8px; padding: 24px; width: 380px; box-shadow: 0 8px 32px rgba(0,0,0,.2); }
+.modal h3 { font-size: 15px; font-weight: 700; margin-bottom: 8px; }
+.modal p  { font-size: 13px; color: #6b7280; margin-bottom: 14px; line-height: 1.5; }
+.modal textarea { width: 100%; border: 1px solid #d1d5db; border-radius: 4px; padding: 8px; font-size: 13px; min-height: 70px; resize: vertical; margin-bottom: 14px; }
+.modal textarea:focus { outline: none; border-color: #1e3a5f; }
+.modal-btns { display: flex; justify-content: flex-end; gap: 8px; }
+
+/* ── DEMO BAR ── */
+.demo-bar { display: none; }
+.demo-bar strong { color: #e2e8f0; }
+.demo-bar button { padding: 3px 10px; border-radius: 3px; border: 1px solid rgba(255,255,255,.2); background: transparent; color: #cbd5e1; cursor: pointer; font-size: 11px; }
+.demo-bar button:hover { background: rgba(255,255,255,.1); }
+.demo-bar button.da { background: rgba(255,255,255,.18); color: #fff; font-weight: 700; border-color: rgba(255,255,255,.4); }
+.demo-sep { opacity: .3; }
+</style>
+</head>
+<body>
+
+<!-- DEMO BAR -->
+<div class="demo-bar">
+  <strong>Nümayiş:</strong>
+  <span>Ekran:</span>
+  <button onclick="goScreen('list')"  id="db-list" class="da">Siyahı</button>
+  <button onclick="goScreen('form')"  id="db-form">Forma</button>
+  <span class="demo-sep">|</span>
+  <span>Forma statusu:</span>
+  <button onclick="setStatus('draft')"     id="fs-draft"     class="da">Qaralama</button>
+  <button onclick="setStatus('confirmed')" id="fs-confirmed">Təsdiqlənmiş</button>
+  <button onclick="setStatus('closed')"    id="fs-closed">Bağlandı</button>
+  <button onclick="setStatus('cancelled')" id="fs-cancelled">Ləğv edilmiş</button>
+</div>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <span class="logo">SMB</span>
+  <nav>
+    <span onclick="goScreen('list')">Maliyyə</span>
+    <span class="sep">›</span>
+    <span id="tn-mod" onclick="goScreen('list')" class="current">Bank Əməliyyatları</span>
+    <span class="sep" id="tn-sep2" style="display:none">›</span>
+    <span id="tn-doc" class="current" style="display:none"></span>
+  </nav>
+</div>
+<div class="mockup-note"><b>Qeyd:</b> Bu interfeys istehsal səviyyəsi üçün son dizayn deyil; yalnız nümayiş və müzakirə məqsədli maket nümunəsidir.</div>
+
+<div class="layout">
+  <div class="sidebar">
+    <div class="section-label">Maliyyə</div>
+    <div class="nav-item active" id="nav-list" onclick="goScreen('list')">Bank Əməliyyatları</div>
+  </div>
+
+  <div class="main">
+
+    <!-- ═══════════════════════════════════════
+         EKRAN 1 — SİYAHI
+    ═══════════════════════════════════════ -->
+    <div class="screen active" id="screen-list">
+      <div class="breadcrumb">
+        <span class="current">Bank Əməliyyatları</span>
+      </div>
+      <div class="notif" id="n-list"></div>
+      <div class="command-bar">
+        <button class="btn primary" onclick="newBankDocument()">Yeni</button>
+        <div class="btn-sep"></div>
+        <button class="btn" onclick="clearListFilters()">Filtrləri təmizlə</button>
+      </div>
+      <div class="list-toolbar">
+        <input class="search-box" id="list-search" type="text" placeholder="Axtarış — nömrə, kontragent, bank...">
+        <select id="list-status-filter">
+          <option value="">Bütün statuslar</option>
+          <option value="draft">Qaralama</option>
+          <option value="confirmed">Təsdiqlənmiş</option>
+          <option value="closed">Bağlandı</option>
+          <option value="cancelled">Ləğv edilmiş</option>
+        </select>
+        <select id="list-doc-filter">
+          <option value="">Bütün sənəd tipləri</option>
+          <option value="Ödəniş">Ödəniş</option>
+          <option value="Daxilolma">Daxilolma</option>
+        </select>
+        <select id="list-optype-filter">
+          <option value="">Bütün əməliyyat tipləri</option>
+        </select>
+        <div class="list-summary"><span id="list-summary-count">0</span> sənəd göstərilir</div>
+      </div>
+      <div class="list-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th><input type="checkbox"></th>
+              <th>Nömrə</th><th>Sənəd tipi</th><th>Əməliyyat tipi</th><th>Tarix</th>
+              <th>Bank hesabı</th><th>Kontragent</th><th>Valyuta</th>
+              <th class="num">Məbləğ</th><th class="num">Qalıq</th><th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="bank-list-body"></tbody>
+        </table>
+        <div class="pagination">
+          <span id="list-pagination-text" style="margin-right:8px">0 sənəd</span>
+          <button class="active">1</button><button>2</button>
+          <button>3</button><button>…</button><button>24</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════
+         EKRAN 2 — SƏNƏD FORMASI
+    ═══════════════════════════════════════ -->
+    <div class="screen" id="screen-form">
+      <div class="breadcrumb">
+        <span onclick="goScreen('list')">Bank Əməliyyatları</span>
+        <span class="sep">›</span>
+        <span class="current" id="bc-doc">BANK-2026-00142</span>
+      </div>
+      <div class="notif" id="n-form"></div>
+      <div class="command-bar">
+        <button class="btn primary" id="fb-saxla"    onclick="doSave()">Saxla</button>
+        <button class="btn"         id="fb-imtina"   onclick="hideNotif('n-form')">İmtina et</button>
+        <div    class="btn-sep"     id="fb-sep"></div>
+        <button class="btn primary" id="fb-tesdiqle" onclick="openModal('m-confirm')">Təsdiqlə</button>
+        <button class="btn"         id="fb-qaralama" onclick="openModal('m-draft')">Qaralamaya qayıt</button>
+        <button class="btn danger"  id="fb-eks"      onclick="openModal('m-eks')">Əks Yazılış</button>
+        <div class="btn-sep"></div>
+        <button class="btn dd">Çap / İxrac</button>
+        <button class="btn">⋮</button>
+      </div>
+
+      <div class="form-wrap">
+        <!-- STATUS BAR -->
+        <div class="status-bar" style="display:none">
+          <div class="status-step" id="ss-draft"><div class="dot"></div>Qaralama</div>
+          <div class="status-connector" id="sc-1"></div>
+          <div class="status-step" id="ss-confirmed"><div class="dot"></div>Təsdiqlənmiş</div>
+          <div class="status-connector" id="sc-2"></div>
+          <div class="status-step" id="ss-closed"><div class="dot"></div>Bağlandı</div>
+        </div>
+
+        <!-- FIELDS -->
+        <div class="form-body">
+          <div class="form-row">
+            <div class="field">
+              <label>Sənəd tipi <span class="req">*</span></label>
+              <select id="f-tip">
+                <option value="Ödəniş">Ödəniş</option>
+                <option value="Daxilolma">Daxilolma</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Sənəd nömrəsi</label>
+              <input type="text" id="f-docno" value="BANK-2026-00142" readonly>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="field">
+              <label>Tarix <span class="req">*</span></label>
+              <input type="date" id="f-tarix" value="2026-03-25">
+            </div>
+            <div class="field">
+              <label>Bank hesabı <span class="req">*</span></label>
+              <select id="f-bank">
+                <option>ABB — AZN cari hesabı ***4521</option>
+                <option>Kapital Bank — USD hesabı ***8834</option>
+                <option>PAŞA Bank — EUR hesabı ***2201</option>
+              </select>
+              <span class="hint">Ödənişdə sənəd valyutası bank hesabının valyutası ilə yoxlanılır.</span>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="field">
+              <label>Əməliyyat tipi <span class="req">*</span></label>
+              <select id="f-optype"></select>
+              <span class="hint strong" id="f-optype-hint">Əməliyyat tipi seçilmiş sənəd tipinə görə avtomatik filtr olunur.</span>
+            </div>
+            <div class="field">
+              <label>İcra tarixi</label>
+              <input type="date" id="f-icra-tarixi" value="2026-03-25">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="field">
+              <label>Kontragent <span class="req">*</span></label>
+              <select id="f-ktg"></select>
+              <span class="hint" id="f-ktg-hint">Kontragentlər soraqçasından sənəd tipinə uyğun kontragentlər göstərilir.</span>
+            </div>
+            <div class="field">
+              <label>Əlaqəli hesab <span class="req">*</span></label>
+              <select id="f-relacc"></select>
+              <span class="hint strong" id="f-relacc-hint">Sənəd tipi və kontragent hesab parametrlərinə görə uyğun hesablar gətirilir.</span>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="field">
+              <label>Məbləğ <span class="req">*</span></label>
+              <div class="field-inline">
+                <input type="text" class="currency" value="AZN" readonly>
+                <input type="text" id="f-mebleg" value="12 400,00" style="flex:1">
+              </div>
+              <label style="margin-top:8px">ƏDV</label>
+              <div class="field-inline" style="margin-top:4px">
+                <input type="text" class="currency" value="AZN" readonly>
+                <input type="text" id="f-vat" value="2 232,00" style="flex:1">
+              </div>
+              <span class="hint">Təsdiqdə bank komissiyası, bank xərci və konvertasiya xərci ayrıca avtomatik formalaşa bilər.</span>
+            </div>
+            <div class="field">
+              <label>Ödəniş məqsədi</label>
+              <input type="text" id="f-meqsed_inline" value="Mart 2026 — xidmət haqqı">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="field">
+              <label>Qeyd</label>
+              <input type="text" id="f-meqsed" value="Mart 2026 — xidmət haqqı">
+            </div>
+          </div>
+
+          <!-- TABS -->
+          <div class="tabs">
+            <div class="tab active" onclick="switchTab('ref',this)">İstinad Sənədləri</div>
+            <div class="tab" onclick="switchTab('advance',this)">Avans</div>
+            <div class="tab" onclick="switchTab('fx',this)">Valyuta</div>
+            <div class="tab" onclick="switchTab('notes',this)">Qeydlər</div>
+            <div class="tab" onclick="switchTab('hist',this)">Tarixçə</div>
+          </div>
+
+          <div class="tab-pane active" id="tab-ref">
+            <table class="ref-table">
+              <thead>
+                <tr><th>✓</th><th>Sənəd nömrəsi</th><th>Tarix</th><th>Məbləğ</th><th>ƏDV</th><th>Qalıq məbləğ</th><th>Qalıq ƏDV</th><th>Sənəd üzrə bağlanan</th><th>ƏDV üzrə bağlanan</th><th>Status</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><input type="checkbox" checked></td>
+                  <td style="color:#1e3a5f;font-weight:600;cursor:pointer">ALI-2026-00088</td>
+                  <td>10.03.2026</td><td>10 700,00</td><td>1 926,00</td><td>10 700,00</td><td>1 926,00</td>
+                  <td><input type="text" value="10 700,00"></td>
+                  <td><input type="text" value="1 700,00"></td>
+                  <td><span class="tag open">Açıq</span></td>
+                </tr>
+                <tr>
+                  <td><input type="checkbox" checked></td>
+                  <td style="color:#1e3a5f;font-weight:600;cursor:pointer">ALI-2026-00091</td>
+                  <td>18.03.2026</td><td>4 800,00</td><td>864,00</td><td>4 000,00</td><td>720,00</td>
+                  <td><input type="text" value="4 000,00"></td>
+                  <td><input type="text" value="532,00"></td>
+                  <td><span class="tag partial">Qismən</span></td>
+                </tr>
+                <tr>
+                  <td><input type="checkbox"></td>
+                  <td style="color:#1e3a5f;font-weight:600;cursor:pointer">ALI-2026-00094</td>
+                  <td>22.03.2026</td><td>3 200,00</td><td>576,00</td><td>3 200,00</td><td>576,00</td>
+                  <td><input type="text" value="0,00"></td>
+                  <td><input type="text" value="0,00"></td>
+                  <td><span class="tag open">Açıq</span></td>
+                </tr>
+              </tbody>
+            </table>
+            <div class="notif warn" style="display:block; margin-top:10px; border:1px solid #fde68a;">
+              ⚠ Qalıq məbləğ və ƏDV qalıqları varsa, sənəd təsdiqlənərkən istifadəçidən təsdiq alınaraq avtomatik avansa oturdula bilər.
+            </div>
+          </div>
+
+          <div class="tab-pane" id="tab-advance">
+            <div id="advance-summary" class="notif warn" style="display:block; margin-bottom:10px; border:1px solid #fde68a;">
+              İstinad sənədlərinə bağlanmayan qalıqlar burada avans kimi izlənir.
+            </div>
+            <table class="ref-table">
+              <thead>
+                <tr><th>Avans №</th><th>Tarix</th><th>Avans hesabı</th><th>Sənəd üzrə məbləğ</th><th>ƏDV üzrə məbləğ</th><th>Cəmi</th><th>Status</th></tr>
+              </thead>
+              <tbody id="advance-rows"></tbody>
+            </table>
+            <div style="display:flex;justify-content:flex-end;margin-top:10px">
+              <button class="btn primary" id="btn-advance-confirm" style="display:none" onclick="openPendingAdvancePrompt()">Qalığı avans kimi təsdiqlə</button>
+            </div>
+          </div>
+
+          <div class="tab-pane" id="tab-fx">
+            <div class="form-row three">
+              <div class="field"><label>Valyuta</label><input type="text" id="fx-currency" value="AZN" readonly></div>
+              <div class="field"><label>Məzənnə</label><input type="text" id="fx-rate" value="1,0000" readonly></div>
+              <div class="field"><label>AZN ekvivalenti</label><input type="text" id="fx-base-amount" value="12 400,00" readonly></div>
+            </div>
+            <div class="form-row">
+              <div class="field">
+                <label>Valyuta fərqi</label>
+                <input type="text" id="fx-diff" value="0,00" readonly>
+                <span class="hint" id="fx-hint">Hesab AZN olduğundan valyuta fərqi hesablanmır.</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="tab-pane" id="tab-notes">
+            <div class="field">
+              <label>Daxili qeyd</label>
+              <textarea id="f-note" rows="4" style="width:100%;resize:vertical">Mart axırı ödənişi — maliyyə rəhbərinin şifahi təlimatı əsasında.</textarea>
+              <span class="hint">Yalnız daxili görünür. Çap şablonunda əks olunmur.</span>
+            </div>
+          </div>
+
+          <div class="tab-pane" id="tab-hist">
+            <div class="history" id="histlog">
+              <div class="hist-item">
+                <div class="hist-dot green"></div>
+                <div class="hist-content">Sənəd yaradıldı
+                  <div class="hist-time">Əli Məmmədov · 25.03.2026 · 09:14</div>
+                </div>
+              </div>
+            </div>
+            <div class="hist-actions">
+              <button onclick="addHistNote()">Qeyd əlavə et</button>
+              <button>Mesaj göndər</button>
+            </div>
+          </div>
+          <div style="height:24px"></div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /main -->
+</div><!-- /layout -->
+
+<!-- FACT-BOX -->
+<div class="fact-box" id="fact-box">
+  <h4>Sətir Detalları <button onclick="closeFB()">✕</button></h4>
+  <div id="fb-content"></div>
+  <div class="fb-btns" id="fb-btns"></div>
+</div>
+
+<!-- MODALS -->
+<div class="modal-overlay" id="m-confirm">
+  <div class="modal">
+    <h3>Sənəd təsdiqlənsin?</h3>
+    <p>Mühasibat qeydi yazılacaq, bank balansına təsir edəcək və uyğun hallarda bank komissiyası / konvertasiya xərci avtomatik yaranacaq.</p>
+    <div class="modal-btns">
+      <button class="btn" onclick="closeModal('m-confirm')">Ləğv et</button>
+      <button class="btn primary" onclick="doConfirm()">Təsdiqlə</button>
+    </div>
+  </div>
+</div>
+<div class="modal-overlay" id="m-advance-confirm">
+  <div class="modal">
+    <h3>Avans kimi oturtma təsdiqi</h3>
+    <p id="advance-confirm-text">Sənədə bağlanmayan qalıq avans kimi oturdulsun?</p>
+    <div class="modal-btns">
+      <button class="btn" onclick="cancelAdvancePosting()">Hələ yox</button>
+      <button class="btn primary" onclick="confirmAdvancePosting()">Bəli, avansa oturt</button>
+    </div>
+  </div>
+</div>
+<div class="modal-overlay" id="m-draft">
+  <div class="modal">
+    <h3>Qaralamaya qayıdılsın?</h3>
+    <p>Mühasibat qeydi ləğv ediləcək. Sənəd yenidən redaktə edilə bilər.</p>
+    <div class="modal-btns">
+      <button class="btn" onclick="closeModal('m-draft')">Xeyr</button>
+      <button class="btn primary" onclick="doDraft()">Bəli, qayıt</button>
+    </div>
+  </div>
+</div>
+<div class="modal-overlay" id="m-eks">
+  <div class="modal">
+    <h3>Əks Yazılış</h3>
+    <p>Əks yazılışın səbəbini daxil edin. Hər iki sənədin tarixçəsində görünəcək.</p>
+    <textarea id="eks-reason" placeholder="Səbəb (mütləq)..."></textarea>
+    <div class="modal-btns">
+      <button class="btn" onclick="closeModal('m-eks')">Ləğv et</button>
+      <button class="btn danger" onclick="doEks()">Davam et</button>
+    </div>
+  </div>
+</div>
+<script>
+let curStatus = 'draft';
+let currentDocId = null;
+let pendingAdvancePayload = null;
+
+const bankAccountCatalog = {
+  'ABB_AZN_4521': { label:'ABB — AZN cari hesabı ***4521', currency:'AZN', rate:1 },
+  'KAPITAL_USD_8834': { label:'Kapital Bank — USD hesabı ***8834', currency:'USD', rate:1.7 },
+  'PASA_EUR_2201': { label:'PAŞA Bank — EUR hesabı ***2201', currency:'EUR', rate:1.85 }
+};
+
+const operationTypeMap = {
+  'Ödəniş': ['Təchizatçı ödənişi', 'Əmək haqqı ödənişi', 'Avans', 'Təhtəlhesab'],
+  'Daxilolma': ['Müştərilərdən daxilolma', 'Digər əməliyyat gəlirləri']
+};
+
+const counterpartyCatalog = [
+  {
+    id: 1,
+    name: 'AZERFON MMC',
+    isCustomer: false,
+    isVendor: true,
+    customerReceivableAccount: null,
+    customerAdvanceAccount: null,
+    vendorPayableAccount: '531.01 — Təchizatçılar üzrə kreditor borcu',
+    vendorAdvanceAccount: '243.01 — Verilmiş avanslar / Təchizatçı'
+  },
+  {
+    id: 2,
+    name: 'Bakcell ASC',
+    isCustomer: true,
+    isVendor: false,
+    customerReceivableAccount: '211.01 — Müştəri debitor borcu',
+    customerAdvanceAccount: '411.01 — Alınmış avanslar / Müştəri',
+    vendorPayableAccount: null,
+    vendorAdvanceAccount: null
+  },
+  {
+    id: 3,
+    name: 'Nar Mobile',
+    isCustomer: true,
+    isVendor: true,
+    customerReceivableAccount: '211.05 — Müştəri debitor borcu',
+    customerAdvanceAccount: '411.05 — Alınmış avanslar / Müştəri',
+    vendorPayableAccount: '531.05 — Təchizatçılar üzrə kreditor borcu',
+    vendorAdvanceAccount: '243.05 — Verilmiş avanslar / Təchizatçı'
+  },
+  {
+    id: 4,
+    name: 'Azercell Telecom',
+    isCustomer: true,
+    isVendor: false,
+    customerReceivableAccount: '211.08 — Müştəri debitor borcu',
+    customerAdvanceAccount: '411.08 — Alınmış avanslar / Müştəri',
+    vendorPayableAccount: null,
+    vendorAdvanceAccount: null
+  },
+  {
+    id: 5,
+    name: 'Beta MMC',
+    isCustomer: true,
+    isVendor: false,
+    customerReceivableAccount: '211.12 — Müştəri debitor borcu',
+    customerAdvanceAccount: '411.12 — Alınmış avanslar / Müştəri',
+    vendorPayableAccount: null,
+    vendorAdvanceAccount: null
+  }
+];
+
+const paymentReferenceRows = [
+  { docNo:'ALI-2026-00088', date:'10.03.2026', amount:10700, vat:1926, openAmount:10700, openVat:1926, applyAmount:10700, applyVat:1700, status:'Açıq', statusClass:'open' },
+  { docNo:'ALI-2026-00091', date:'18.03.2026', amount:4800, vat:864, openAmount:4000, openVat:720, applyAmount:4000, applyVat:532, status:'Qismən', statusClass:'partial' },
+  { docNo:'ALI-2026-00094', date:'22.03.2026', amount:3200, vat:576, openAmount:3200, openVat:576, applyAmount:0, applyVat:0, status:'Açıq', statusClass:'open' }
+];
+
+const receiptReferenceRows = [
+  { docNo:'SAT-2026-00055', date:'22.03.2026', amount:15600, vat:2808, openAmount:9000, openVat:1620, applyAmount:5200, applyVat:936, status:'Qismən', statusClass:'partial' },
+  { docNo:'SAT-2026-00056', date:'24.03.2026', amount:7500, vat:1350, openAmount:7500, openVat:1350, applyAmount:0, applyVat:0, status:'Açıq', statusClass:'open' }
+];
+
+let bankTransactions = [
+  { id: 142, documentNo:'BANK-2026-00142', docType:'Ödəniş', operationType:'Təchizatçı ödənişi', documentDate:'2026-03-25', valueDate:'2026-03-25', bankAccount:'ABB_AZN_4521', counterpartyId:1, relatedAccount:'531.01 — Təchizatçılar üzrə kreditor borcu', amount:12400, vatAmount:2232, openAmount:0, openVatAmount:0, advanceRecords:[], advancePending:null, status:'confirmed', purpose:'Mart 2026 — xidmət haqqı', note:'Mart axırı ödənişi — maliyyə rəhbərinin şifahi təlimatı əsasında.' },
+  { id: 141, documentNo:'BANK-2026-00141', docType:'Daxilolma', operationType:'Müştərilərdən daxilolma', documentDate:'2026-03-24', valueDate:'2026-03-24', bankAccount:'KAPITAL_USD_8834', counterpartyId:2, relatedAccount:'211.01 — Müştəri debitor borcu', amount:5200, vatAmount:936, openAmount:6136, openVatAmount:936, advanceRecords:[], advancePending:null, status:'draft', purpose:'Mart 2026 satış daxilolması', note:'Daxilolma qaralama olaraq saxlanılıb.' },
+  { id: 140, documentNo:'BANK-2026-00140', docType:'Ödəniş', operationType:'Əmək haqqı ödənişi', documentDate:'2026-03-23', valueDate:'2026-03-23', bankAccount:'ABB_AZN_4521', counterpartyId:3, relatedAccount:'531.05 — Təchizatçılar üzrə kreditor borcu', amount:85, vatAmount:0, openAmount:0, openVatAmount:0, advanceRecords:[], advancePending:null, status:'confirmed', purpose:'Əmək haqqı üzrə köçürmə', note:'Toplu ödəniş faylı əsasında.' },
+  { id: 139, documentNo:'BANK-2026-00139', docType:'Ödəniş', operationType:'Avans', documentDate:'2026-03-22', valueDate:'2026-03-22', bankAccount:'PASA_EUR_2201', counterpartyId:3, relatedAccount:'243.05 — Verilmiş avanslar / Təchizatçı', amount:3000, vatAmount:540, openAmount:0, openVatAmount:0, advanceRecords:[{ advanceNo:'AVS-2026-00021', date:'22.03.2026', account:'243.05 — Verilmiş avanslar / Təchizatçı', docAmount:3000, vatAmount:540, totalAmount:3540, status:'CONFIRMED' }], advancePending:null, status:'closed', purpose:'Avans ödənişi', note:'Müqavilə üzrə ilkin ödəniş.' },
+  { id: 138, documentNo:'BANK-2026-00138', docType:'Daxilolma', operationType:'Digər əməliyyat gəlirləri', documentDate:'2026-03-21', valueDate:'2026-03-21', bankAccount:'ABB_AZN_4521', counterpartyId:5, relatedAccount:'411.12 — Alınmış avanslar / Müştəri', amount:10000, vatAmount:1800, openAmount:0, openVatAmount:0, advanceRecords:[], advancePending:null, status:'cancelled', purpose:'Digər gəlir', note:'Ləğv edilmiş test sənədidir.' },
+  { id: 137, documentNo:'BANK-2026-00137', docType:'Daxilolma', operationType:'Müştərilərdən daxilolma', documentDate:'2026-03-20', valueDate:'2026-03-20', bankAccount:'KAPITAL_USD_8834', counterpartyId:4, relatedAccount:'211.08 — Müştəri debitor borcu', amount:8750, vatAmount:1575, openAmount:0, openVatAmount:0, advanceRecords:[], advancePending:null, status:'confirmed', purpose:'Fevral qaimələri üzrə daxilolma', note:'Müştəri qalıqları bağlanıb.' }
+];
+
+/* ── UTIL ── */
+function formatMoney(value){
+  return Number(value || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).replace(/,/g,' ').replace(/\./g,',');
+}
+function parseMoney(value){
+  return Number(String(value || '0').replace(/\s/g,'').replace(/,/g,'.')) || 0;
+}
+function statusLabel(status){
+  return { draft:'Qaralama', confirmed:'Təsdiqlənmiş', closed:'Bağlandı', cancelled:'Ləğv edilmiş' }[status] || status;
+}
+function findCounterparty(id){
+  return counterpartyCatalog.find(cp => String(cp.id) === String(id)) || null;
+}
+function getCurrentBankAccount(){
+  return bankAccountCatalog[document.getElementById('f-bank')?.value] || bankAccountCatalog.ABB_AZN_4521;
+}
+function getRelatedAccountOptions(docType, counterpartyId){
+  const cp = findCounterparty(counterpartyId);
+  if(!cp) return [];
+  if(docType === 'Daxilolma'){
+    return [cp.customerReceivableAccount, cp.customerAdvanceAccount].filter(Boolean);
+  }
+  return [cp.vendorPayableAccount, cp.vendorAdvanceAccount].filter(Boolean);
+}
+function getAdvanceAccount(docType, counterpartyId){
+  const cp = findCounterparty(counterpartyId);
+  if(!cp) return '';
+  return docType === 'Daxilolma' ? (cp.customerAdvanceAccount || '') : (cp.vendorAdvanceAccount || '');
+}
+function generateDocNo(){
+  const maxId = bankTransactions.reduce((max, row) => Math.max(max, Number(row.id) || 0), 0) + 1;
+  return `BANK-2026-${String(maxId).padStart(5,'0')}`;
+}
+function generateAdvanceNo(){
+  const allAdvanceCounts = bankTransactions.flatMap(row => row.advanceRecords || []).length + 1;
+  return `AVS-2026-${String(allAdvanceCounts).padStart(5,'0')}`;
+}
+function setFieldValue(id, value){
+  const el = document.getElementById(id);
+  if(el) el.value = value ?? '';
+}
+function v(id, show) { const el = document.getElementById(id); if (el) el.style.display = show ? '' : 'none'; }
+
+/* ── SCREENS ── */
+function goScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + name)?.classList.add('active');
+  ['list','form'].forEach(n => document.getElementById('db-'+n)?.classList.remove('da'));
+  document.getElementById('db-' + name)?.classList.add('da');
+  const sep2 = document.getElementById('tn-sep2');
+  const doc  = document.getElementById('tn-doc');
+  if (name === 'form') {
+    sep2.style.display = ''; doc.style.display = '';
+    doc.textContent = document.getElementById('bc-doc').textContent;
+  } else {
+    sep2.style.display = 'none'; doc.style.display = 'none';
+  }
+  closeFB();
+}
+
+/* ── LIST ── */
+function populateListOperationFilter(){
+  const sel = document.getElementById('list-optype-filter');
+  if(!sel) return;
+  const allOptions = [...new Set(Object.values(operationTypeMap).flat())];
+  const current = sel.value;
+  sel.innerHTML = `<option value="">Bütün əməliyyat tipləri</option>${allOptions.map(op => `<option value="${op}">${op}</option>`).join('')}`;
+  if(allOptions.includes(current)) sel.value = current;
+}
+
+function getFilteredTransactions(){
+  const q = (document.getElementById('list-search')?.value || '').trim().toLowerCase();
+  const status = document.getElementById('list-status-filter')?.value || '';
+  const docType = document.getElementById('list-doc-filter')?.value || '';
+  const opType = document.getElementById('list-optype-filter')?.value || '';
+  return bankTransactions.filter(row => {
+    const cp = findCounterparty(row.counterpartyId);
+    const bankLabel = bankAccountCatalog[row.bankAccount]?.label || '';
+    const matchesSearch = !q || [row.documentNo, row.docType, row.operationType, cp?.name || '', bankLabel].some(v => String(v).toLowerCase().includes(q));
+    const matchesStatus = !status || row.status === status;
+    const matchesDoc = !docType || row.docType === docType;
+    const matchesOp = !opType || row.operationType === opType;
+    return matchesSearch && matchesStatus && matchesDoc && matchesOp;
+  }).sort((a,b) => String(b.documentDate).localeCompare(String(a.documentDate)) || b.id - a.id);
+}
+
+function renderBankList(){
+  const tbody = document.getElementById('bank-list-body');
+  const rows = getFilteredTransactions();
+  if(!tbody) return;
+  tbody.innerHTML = rows.length ? rows.map(row => {
+    const cp = findCounterparty(row.counterpartyId);
+    const bankLabel = bankAccountCatalog[row.bankAccount]?.label || row.bankAccount;
+    const bank = bankAccountCatalog[row.bankAccount];
+    return `
+      <tr onclick="openDocById(${row.id})">
+        <td><input type="checkbox" onclick="event.stopPropagation()"></td>
+        <td class="doc-link">${row.documentNo}</td>
+        <td>${row.docType}</td>
+        <td>${row.operationType}</td>
+        <td>${formatDate(row.documentDate)}</td>
+        <td>${bankLabel}</td>
+        <td>${cp?.name || '—'}</td>
+        <td>${bank?.currency || 'AZN'}</td>
+        <td class="num">${formatMoney(row.amount)}</td>
+        <td class="num">${formatMoney(row.openAmount)}</td>
+        <td><span class="badge ${row.status}">${statusLabel(row.status)}</span></td>
+      </tr>`;
+  }).join('') : '<tr><td colspan="10" style="text-align:center;color:#64748b;padding:18px">Filtrə uyğun sənəd tapılmadı.</td></tr>';
+  document.getElementById('list-summary-count').textContent = rows.length;
+  document.getElementById('list-pagination-text').textContent = `${rows.length} sənəd`;
+}
+
+function clearListFilters(){
+  setFieldValue('list-search','');
+  setFieldValue('list-status-filter','');
+  setFieldValue('list-doc-filter','');
+  setFieldValue('list-optype-filter','');
+  renderBankList();
+}
+
+/* ── FORM SUPPORT ── */
+function formatDate(iso){
+  if(!iso) return '—';
+  const [y,m,d] = String(iso).split('-');
+  return `${d}.${m}.${y}`;
+}
+
+function renderReferenceDocs(docType){
+  const tbody = document.querySelector('#tab-ref tbody');
+  if(!tbody) return;
+  const rows = (docType === 'Daxilolma' ? receiptReferenceRows : paymentReferenceRows);
+  tbody.innerHTML = rows.map((row, index) => `
+    <tr>
+      <td><input type="checkbox" ${index < 2 ? 'checked' : ''}></td>
+      <td style="color:#1e3a5f;font-weight:600;cursor:pointer">${row.docNo}</td>
+      <td>${row.date}</td><td>${formatMoney(row.amount)}</td><td>${formatMoney(row.vat)}</td><td>${formatMoney(row.openAmount)}</td><td>${formatMoney(row.openVat)}</td>
+      <td><input type="text" value="${formatMoney(row.applyAmount)}"></td>
+      <td><input type="text" value="${formatMoney(row.applyVat)}"></td>
+      <td><span class="tag ${row.statusClass}">${row.status}</span></td>
+    </tr>`).join('');
+  refreshAdvancePreview();
+}
+
+function getAllocationSummary(){
+  const totalDoc = parseMoney(document.getElementById('f-mebleg')?.value || 0);
+  const totalVat = parseMoney(document.getElementById('f-vat')?.value || 0);
+  let allocatedDoc = 0;
+  let allocatedVat = 0;
+  document.querySelectorAll('#tab-ref tbody tr').forEach(tr => {
+    const checkbox = tr.querySelector('input[type="checkbox"]');
+    if(!checkbox || !checkbox.checked) return;
+    const inputs = tr.querySelectorAll('input[type="text"]');
+    allocatedDoc += parseMoney(inputs[0]?.value || 0);
+    allocatedVat += parseMoney(inputs[1]?.value || 0);
+  });
+  const remainingDoc = Math.max(0, totalDoc - allocatedDoc);
+  const remainingVat = Math.max(0, totalVat - allocatedVat);
+  return {
+    totalDoc,
+    totalVat,
+    allocatedDoc,
+    allocatedVat,
+    remainingDoc,
+    remainingVat,
+    remainingTotal: remainingDoc + remainingVat
+  };
+}
+
+function renderAdvanceTab(doc){
+  const summary = getAllocationSummary();
+  const advanceSummary = document.getElementById('advance-summary');
+  const tbody = document.getElementById('advance-rows');
+  const confirmBtn = document.getElementById('btn-advance-confirm');
+  if(!tbody || !advanceSummary || !confirmBtn) return;
+  const tx = doc || bankTransactions.find(row => row.id === currentDocId) || { advanceRecords:[], advancePending:null, docType:document.getElementById('f-tip')?.value, counterpartyId:document.getElementById('f-ktg')?.value };
+  const records = tx.advanceRecords || [];
+  const pending = tx.advancePending;
+
+  let rows = records.map(item => `
+    <tr>
+      <td>${item.advanceNo}</td>
+      <td>${item.date}</td>
+      <td>${item.account}</td>
+      <td>${formatMoney(item.docAmount)}</td>
+      <td>${formatMoney(item.vatAmount)}</td>
+      <td>${formatMoney(item.totalAmount)}</td>
+      <td><span class="tag ${item.status === 'CONFIRMED' ? 'open' : 'partial'}">${item.status === 'CONFIRMED' ? 'Təsdiqlənib' : 'Gözləyir'}</span></td>
+    </tr>`).join('');
+
+  if(pending){
+    rows = `
+      <tr>
+        <td>—</td>
+        <td>${pending.date}</td>
+        <td>${pending.account}</td>
+        <td>${formatMoney(pending.docAmount)}</td>
+        <td>${formatMoney(pending.vatAmount)}</td>
+        <td>${formatMoney(pending.totalAmount)}</td>
+        <td><span class="tag partial">Təsdiq gözləyir</span></td>
+      </tr>` + rows;
+  }
+
+  if(!rows){
+    rows = '<tr><td colspan="7" style="text-align:center;color:#64748b;padding:16px">Bu sənəd üzrə avans qeydi yoxdur.</td></tr>';
+  }
+  tbody.innerHTML = rows;
+
+  if(pending){
+    advanceSummary.className = 'notif warn';
+    advanceSummary.textContent = `${formatMoney(pending.totalAmount)} məbləğində qalıq avansa oturdulmaq üçün istifadəçi təsdiqi gözləyir.`;
+    confirmBtn.style.display = curStatus === 'confirmed' ? '' : 'none';
+  } else if(summary.remainingTotal > 0 && curStatus === 'draft'){
+    advanceSummary.className = 'notif warn';
+    advanceSummary.textContent = `Cari hesablamaya görə ${formatMoney(summary.remainingTotal)} bağlanmayan məbləğ var. Təsdiqdən sonra avansa yönləndirilə bilər.`;
+    confirmBtn.style.display = 'none';
+  } else if(records.length){
+    advanceSummary.className = 'notif success';
+    advanceSummary.textContent = `Bu sənəd üzrə ${records.length} avans qeydi formalaşıb.`;
+    confirmBtn.style.display = 'none';
+  } else {
+    advanceSummary.className = 'notif warn';
+    advanceSummary.textContent = 'İstinad sənədlərinə bağlanmayan qalıqlar burada avans kimi izlənir.';
+    confirmBtn.style.display = 'none';
+  }
+}
+
+function refreshAdvancePreview(){
+  const tx = bankTransactions.find(row => row.id === currentDocId);
+  renderAdvanceTab(tx);
+}
+
+function buildPendingAdvancePayload(doc){
+  const summary = getAllocationSummary();
+  const account = getAdvanceAccount(doc.docType, doc.counterpartyId);
+  if(summary.remainingTotal <= 0 || !account) return null;
+  return {
+    docId: doc.id,
+    date: formatDate(doc.documentDate),
+    account,
+    docAmount: summary.remainingDoc,
+    vatAmount: summary.remainingVat,
+    totalAmount: summary.remainingTotal,
+    createdAt: doc.documentDate
+  };
+}
+
+function openPendingAdvancePrompt(){
+  const tx = bankTransactions.find(row => row.id === currentDocId);
+  if(!tx) return;
+  pendingAdvancePayload = tx.advancePending || buildPendingAdvancePayload(tx);
+  if(!pendingAdvancePayload){
+    const summary = getAllocationSummary();
+    if(summary.remainingTotal > 0){
+      showNotif('n-form','error','Avans hesabı tapılmadığından bağlanmayan məbləğ avansa oturdula bilmədi.');
+    } else {
+      showNotif('n-form','warn','Avansa oturdulacaq bağlanmayan məbləğ yoxdur.');
+    }
+    return;
+  }
+  document.getElementById('advance-confirm-text').innerHTML = `Bu sənəddə <b>${formatMoney(pendingAdvancePayload.totalAmount)}</b> bağlanmayan məbləğ qalır.<br><br>Bu qalıq <b>${pendingAdvancePayload.account}</b> hesabına avans kimi oturdulsun?`;
+  openModal('m-advance-confirm');
+}
+
+function confirmAdvancePosting(){
+  closeModal('m-advance-confirm');
+  if(!pendingAdvancePayload) return;
+  const idx = bankTransactions.findIndex(row => row.id === pendingAdvancePayload.docId);
+  if(idx < 0) return;
+  const tx = bankTransactions[idx];
+  tx.advanceRecords = tx.advanceRecords || [];
+  tx.advanceRecords.unshift({
+    advanceNo: generateAdvanceNo(),
+    date: pendingAdvancePayload.date,
+    account: pendingAdvancePayload.account,
+    docAmount: pendingAdvancePayload.docAmount,
+    vatAmount: pendingAdvancePayload.vatAmount,
+    totalAmount: pendingAdvancePayload.totalAmount,
+    status: 'CONFIRMED'
+  });
+  tx.advancePending = null;
+  tx.openAmount = 0;
+  tx.openVatAmount = 0;
+  addHist('green',`Bağlanmayan məbləğ avans kimi oturduldu → ${pendingAdvancePayload.account} (${formatMoney(pendingAdvancePayload.totalAmount)})`,'Sistem · 31.03.2026 · 10:05');
+  pendingAdvancePayload = null;
+  loadForm(tx);
+  renderBankList();
+  showNotif('n-form','success','Bağlanmayan məbləğ avans hesabına oturduldu.');
+}
+
+function cancelAdvancePosting(){
+  closeModal('m-advance-confirm');
+  if(!pendingAdvancePayload) return;
+  const idx = bankTransactions.findIndex(row => row.id === pendingAdvancePayload.docId);
+  if(idx >= 0){
+    bankTransactions[idx].advancePending = { ...pendingAdvancePayload };
+    bankTransactions[idx].openAmount = pendingAdvancePayload.totalAmount;
+    bankTransactions[idx].openVatAmount = pendingAdvancePayload.vatAmount;
+    addHist('',`Bağlanmayan məbləğin avans kimi oturdulması təxirə salındı (${formatMoney(pendingAdvancePayload.totalAmount)}).`,'İstifadəçi · 31.03.2026 · 10:05');
+    renderAdvanceTab(bankTransactions[idx]);
+    renderBankList();
+    showNotif('n-form','warn','Avans oturtma təsdiqlənmədi. Qalıq Avans tabında gözləyir.');
+  }
+  pendingAdvancePayload = null;
+}
+
+function updateCurrencyArea(){
+  const bank = getCurrentBankAccount();
+  const amount = parseMoney(document.getElementById('f-mebleg')?.value || 0);
+  const baseAmount = bank.currency === 'AZN' ? amount : amount * bank.rate;
+  document.querySelectorAll('.currency').forEach(el => el.value = bank.currency);
+  setFieldValue('fx-currency', bank.currency);
+  setFieldValue('fx-rate', bank.rate.toFixed(4).replace('.',','));
+  setFieldValue('fx-base-amount', formatMoney(baseAmount));
+  setFieldValue('fx-diff', '0,00');
+  const fxHint = document.getElementById('fx-hint');
+  if(fxHint){
+    fxHint.textContent = bank.currency === 'AZN'
+      ? 'Hesab AZN olduğundan valyuta fərqi hesablanmır.'
+      : `${bank.currency} sənədi üçün məzənnə bank hesabı valyutasından götürülür.`;
+  }
+}
+
+function populateOperationTypes(docType, selected){
+  const select = document.getElementById('f-optype');
+  const options = operationTypeMap[docType] || [];
+  select.innerHTML = options.map(op => `<option value="${op}">${op}</option>`).join('');
+  select.value = options.includes(selected) ? selected : (options[0] || '');
+}
+
+function populateCounterpartySelect(docType, selectedId){
+  const select = document.getElementById('f-ktg');
+  const options = counterpartyCatalog.filter(cp => docType === 'Daxilolma' ? cp.isCustomer : cp.isVendor);
+  select.innerHTML = `<option value="">Seçin</option>${options.map(cp => `<option value="${cp.id}">${cp.name}</option>`).join('')}`;
+  if(options.some(cp => String(cp.id) === String(selectedId))){
+    select.value = String(selectedId);
+  } else {
+    select.value = options[0] ? String(options[0].id) : '';
+  }
+  const hint = document.getElementById('f-ktg-hint');
+  if(hint){
+    hint.textContent = docType === 'Daxilolma'
+      ? 'Kontragentlər soraqçasından yalnız müştəri rolu olan kontragentlər göstərilir.'
+      : 'Kontragentlər soraqçasından yalnız tədarükçü rolu olan kontragentlər göstərilir.';
+  }
+}
+
+function populateRelatedAccounts(docType, counterpartyId, selectedAccount){
+  const select = document.getElementById('f-relacc');
+  const hint = document.getElementById('f-relacc-hint');
+  const accounts = getRelatedAccountOptions(docType, counterpartyId);
+  if(!accounts.length){
+    select.innerHTML = '<option value="">Hesab tapılmadı</option>';
+    select.value = '';
+    if(hint) hint.textContent = 'Seçilmiş kontragent üzrə uyğun hesab təyin edilməyib.';
+    return;
+  }
+  select.innerHTML = accounts.map(acc => `<option value="${acc}">${acc}</option>`).join('');
+  select.value = accounts.includes(selectedAccount) ? selectedAccount : accounts[0];
+  if(hint){
+    hint.textContent = docType === 'Daxilolma'
+      ? 'Daxilolma üçün müştərinin Debitor və ya Alınmış avans hesabı göstərilir.'
+      : 'Ödəniş üçün tədarükçünün Kreditor və ya Verilmiş avans hesabı göstərilir.';
+  }
+}
+
+function syncDocTypeDependentFields(options = {}){
+  const preserveOperation = options.preserveOperation || false;
+  const preserveAccount = options.preserveAccount || false;
+  const docType = document.getElementById('f-tip')?.value || 'Ödəniş';
+  const selectedOperation = preserveOperation ? document.getElementById('f-optype')?.value : '';
+  const selectedCounterpartyId = document.getElementById('f-ktg')?.value || '';
+  const selectedAccount = preserveAccount ? document.getElementById('f-relacc')?.value : '';
+  populateOperationTypes(docType, selectedOperation);
+  populateCounterpartySelect(docType, selectedCounterpartyId);
+  populateRelatedAccounts(docType, document.getElementById('f-ktg')?.value || '', selectedAccount);
+  renderReferenceDocs(docType);
+}
+
+function collectFormData(){
+  const existing = bankTransactions.find(row => row.id === currentDocId) || {};
+  return {
+    id: currentDocId ?? (bankTransactions.reduce((max,row) => Math.max(max, row.id), 0) + 1),
+    documentNo: document.getElementById('f-docno').value,
+    docType: document.getElementById('f-tip').value,
+    operationType: document.getElementById('f-optype').value,
+    documentDate: document.getElementById('f-tarix').value,
+    valueDate: document.getElementById('f-icra-tarixi').value,
+    bankAccount: document.getElementById('f-bank').value,
+    counterpartyId: Number(document.getElementById('f-ktg').value || 0),
+    relatedAccount: document.getElementById('f-relacc').value,
+    amount: parseMoney(document.getElementById('f-mebleg').value),
+    vatAmount: parseMoney(document.getElementById('f-vat').value),
+    openAmount: existing.openAmount ?? parseMoney(document.getElementById('f-mebleg').value),
+    openVatAmount: existing.openVatAmount ?? parseMoney(document.getElementById('f-vat').value),
+    advanceRecords: existing.advanceRecords || [],
+    advancePending: existing.advancePending || null,
+    status: curStatus,
+    purpose: document.getElementById('f-meqsed_inline').value,
+    summaryNote: document.getElementById('f-meqsed').value,
+    note: document.getElementById('f-note').value
+  };
+}
+
+function validateForm(){
+  const doc = collectFormData();
+  if(!doc.docType) return 'Sənəd tipi seçilməlidir.';
+  if(!doc.documentDate) return 'Tarix sahəsi məcburidir.';
+  if(!doc.operationType) return 'Əməliyyat tipi seçilməlidir.';
+  if(!doc.counterpartyId) return 'Kontragent seçilməlidir.';
+  if(!doc.relatedAccount) return 'Əlaqəli hesab seçilməlidir.';
+  if(doc.amount <= 0) return 'Məbləğ sıfırdan böyük olmalıdır.';
+  return '';
+}
+
+function loadForm(doc){
+  currentDocId = doc.id;
+  setFieldValue('f-docno', doc.documentNo);
+  setFieldValue('f-tip', doc.docType);
+  setFieldValue('f-tarix', doc.documentDate);
+  setFieldValue('f-icra-tarixi', doc.valueDate || doc.documentDate);
+  setFieldValue('f-bank', doc.bankAccount);
+  setFieldValue('f-mebleg', formatMoney(doc.amount));
+  setFieldValue('f-vat', formatMoney(doc.vatAmount || 0));
+  setFieldValue('f-meqsed_inline', doc.purpose || '');
+  setFieldValue('f-meqsed', doc.summaryNote || doc.note || '');
+  setFieldValue('f-note', doc.note || '');
+  syncDocTypeDependentFields({ preserveOperation:false, preserveAccount:false });
+  populateOperationTypes(doc.docType, doc.operationType);
+  populateCounterpartySelect(doc.docType, doc.counterpartyId);
+  populateRelatedAccounts(doc.docType, doc.counterpartyId, doc.relatedAccount);
+  updateCurrencyArea();
+  setStatus(doc.status || 'draft');
+  renderAdvanceTab(doc);
+}
+
+function newBankDocument(){
+  currentDocId = null;
+  setFieldValue('f-docno', generateDocNo());
+  setFieldValue('f-tip', 'Ödəniş');
+  setFieldValue('f-tarix', '2026-03-31');
+  setFieldValue('f-icra-tarixi', '2026-03-31');
+  setFieldValue('f-bank', 'ABB_AZN_4521');
+  setFieldValue('f-mebleg', '0,00');
+  setFieldValue('f-vat', '0,00');
+  setFieldValue('f-meqsed_inline', '');
+  setFieldValue('f-meqsed', '');
+  setFieldValue('f-note', '');
+  syncDocTypeDependentFields();
+  updateCurrencyArea();
+  setStatus('draft');
+  renderAdvanceTab({ id:null, advanceRecords:[], advancePending:null, docType:'Ödəniş', counterpartyId:document.getElementById('f-ktg')?.value || '' });
+  goScreen('form');
+  showNotif('n-form','success','Yeni bank sənədi yaradılması üçün forma hazırdır.');
+}
+
+function openDocById(id){
+  const doc = bankTransactions.find(row => row.id === id);
+  if(!doc) return;
+  loadForm(doc);
+  goScreen('form');
+}
+
+/* ── FORM STATUS ── */
+function setStatus(s) {
+  curStatus = s;
+  ['draft','confirmed','closed','cancelled'].forEach(x => document.getElementById('fs-'+x)?.classList.remove('da'));
+  document.getElementById('fs-' + s)?.classList.add('da');
+  applyStatus(s);
+}
+
+function applyStatus(s) {
+  const ro = s !== 'draft';
+  ['f-tip','f-tarix','f-bank','f-optype','f-icra-tarixi','f-ktg','f-relacc','f-mebleg','f-vat','f-meqsed_inline','f-meqsed','f-note'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.disabled = ro;
+  });
+  document.querySelectorAll('#tab-ref input[type="checkbox"],#tab-ref input[type="text"]').forEach(el => el.disabled = ro);
+  v('fb-saxla',    s === 'draft');
+  v('fb-imtina',   s === 'draft');
+  v('fb-sep',      s === 'draft');
+  v('fb-tesdiqle', s === 'draft');
+  v('fb-qaralama', s === 'confirmed');
+  v('fb-eks',      s === 'confirmed');
+  ['ss-draft','ss-confirmed','ss-closed'].forEach(id => {
+    const el = document.getElementById(id);
+    el.className = 'status-step';
+    el.querySelectorAll('.badge').forEach(b => b.remove());
+  });
+  ['sc-1','sc-2'].forEach(id => document.getElementById(id).classList.remove('done'));
+  const addBadge = (stepId, cls, txt) => {
+    const b = document.createElement('span');
+    b.className = 'badge ' + cls; b.style.marginLeft = '7px'; b.textContent = txt;
+    document.getElementById(stepId).appendChild(b);
+  };
+  if (s === 'draft') {
+    document.getElementById('ss-draft').classList.add('s-active');
+    addBadge('ss-draft','draft','Qaralama');
+  } else if (s === 'confirmed') {
+    document.getElementById('ss-draft').classList.add('s-done');
+    document.getElementById('sc-1').classList.add('done');
+    document.getElementById('ss-confirmed').classList.add('s-confirmed');
+    addBadge('ss-confirmed','confirmed','Təsdiqlənmiş');
+  } else if (s === 'closed') {
+    document.getElementById('ss-draft').classList.add('s-done');
+    document.getElementById('ss-confirmed').classList.add('s-done');
+    document.getElementById('sc-1').classList.add('done');
+    document.getElementById('sc-2').classList.add('done');
+    document.getElementById('ss-closed').classList.add('s-closed');
+    addBadge('ss-closed','closed','Bağlandı');
+  } else if (s === 'cancelled') {
+    document.getElementById('ss-draft').classList.add('s-cancelled');
+    addBadge('ss-draft','cancelled','Ləğv edilmiş');
+  }
+  const docNo = document.getElementById('f-docno').value || 'BANK-2026-00000';
+  document.getElementById('bc-doc').textContent = docNo;
+  document.getElementById('tn-doc').textContent = docNo;
+}
+
+/* ── TABS ── */
+function switchTab(name, el) {
+  document.querySelectorAll('.tabs .tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('tab-' + name).classList.add('active');
+}
+
+/* ── MODALS ── */
+function openModal(id)  { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+/* ── FORM ACTIONS ── */
+function doSave(){
+  const error = validateForm();
+  if(error){ showNotif('n-form','error',error); return; }
+  const summary = getAllocationSummary();
+  const doc = collectFormData();
+  const confirmedAdvanceTotal = (doc.advanceRecords || []).reduce((sum, item) => sum + Number(item.totalAmount || 0), 0);
+  doc.openAmount = Math.max(0, summary.remainingTotal - confirmedAdvanceTotal);
+  doc.openVatAmount = Math.max(0, summary.remainingVat - (doc.advanceRecords || []).reduce((sum, item) => sum + Number(item.vatAmount || 0), 0));
+  const existingIndex = bankTransactions.findIndex(row => row.id === doc.id);
+  if(existingIndex >= 0){
+    bankTransactions[existingIndex] = { ...bankTransactions[existingIndex], ...doc };
+  } else {
+    bankTransactions.unshift(doc);
+    currentDocId = doc.id;
+  }
+  loadForm(doc);
+  renderBankList();
+  showNotif('n-form','success','Sənəd yadda saxlanıldı — ' + doc.documentNo);
+}
+function doConfirm(){
+  closeModal('m-confirm');
+  const error = validateForm();
+  if(error){ showNotif('n-form','error',error); return; }
+  doSave();
+  setStatus('confirmed');
+  const doc = collectFormData();
+  const idx = bankTransactions.findIndex(row => row.id === doc.id);
+  if(idx >= 0){
+    const payload = buildPendingAdvancePayload(bankTransactions[idx]);
+    bankTransactions[idx] = { ...bankTransactions[idx], status:'confirmed', openAmount: Math.max(bankTransactions[idx].openAmount, 0), advancePending: payload };
+  }
+  addHist('green','Status dəyişdi: Qaralama → Təsdiqlənmiş. Mühasibat qeydi yazıldı.','Əli Məmmədov · 31.03.2026 · 10:02');
+  renderBankList();
+  if(idx >= 0){
+    loadForm(bankTransactions[idx]);
+    if(bankTransactions[idx].advancePending){
+      openPendingAdvancePrompt();
+      showNotif('n-form','warn','Sənəd təsdiqləndi. Bağlanmayan məbləğin avans kimi oturdulması üçün əlavə təsdiq tələb olunur.');
+      return;
+    }
+  }
+  showNotif('n-form','success','Sənəd təsdiqləndi. Baş kitab qeydləri yazıldı.');
+}
+function doDraft(){
+  closeModal('m-draft');
+  setStatus('draft');
+  if(currentDocId != null){
+    const idx = bankTransactions.findIndex(row => row.id === currentDocId);
+    if(idx >= 0) bankTransactions[idx].status = 'draft';
+  }
+  addHist('','Qaralamaya qaytarıldı. Mühasibat qeydi ləğv edildi.','Əli Məmmədov · 31.03.2026 · 10:15');
+  renderBankList();
+  showNotif('n-form','warn','Qaralamaya qaytarıldı.');
+}
+function doEks() {
+  const r = document.getElementById('eks-reason').value.trim();
+  if (!r) { document.getElementById('eks-reason').style.borderColor='#ef4444'; return; }
+  closeModal('m-eks');
+  setStatus('closed');
+  if(currentDocId != null){
+    const idx = bankTransactions.findIndex(row => row.id === currentDocId);
+    if(idx >= 0){
+      bankTransactions[idx].status = 'closed';
+      bankTransactions[idx].openAmount = 0;
+    }
+  }
+  addHist('red','Əks yazılış → BANK-2026-00201. Səbəb: '+r,'Nigar Əliyeva · 31.03.2026 · 11:30');
+  renderBankList();
+  showNotif('n-form','warn','Əks yazılış tamamlandı. Hər iki sənəd Bağlandı statusundadır.');
+  document.getElementById('eks-reason').value='';
+  document.getElementById('eks-reason').style.borderColor='';
+}
+function addHistNote() {
+  const t = prompt('Daxili qeyd:');
+  if(t){ addHist('',t,'Siz · indicə'); switchTab('hist',document.querySelectorAll('.tabs .tab')[4]); }
+}
+function addHist(dot, txt, time) {
+  const l = document.getElementById('histlog');
+  const d = document.createElement('div');
+  d.className='hist-item';
+  d.innerHTML=`<div class="hist-dot ${dot}"></div><div class="hist-content">${txt}<div class="hist-time">${time}</div></div>`;
+  l.appendChild(d);
+}
+
+/* ── FACT-BOX ── */
+const fbData = {
+  matched: { rows:[['Tarix','22.03.2026'],['Bank','−3 000,00 AZN'],['Sistem','−3 000,00 AZN'],['Fərq','0,00'],['Status','Uyğun']], btns:[['primary','Sənədi aç',"openDocById(139)"],['','Bağla','closeFB()']] },
+  mismatch:{ rows:[['Tarix','12.03.2026'],['Bank','−85,00 AZN'],['Sistem','−65,00 AZN'],['Fərq','−20,00 AZN'],['Status','Uyğunsuz']], btns:[['primary','Yeni əməliyyat',"newBankDocument()"],['','Əllə bağla','closeFB()'],['danger','Rədd et','closeFB()']] },
+  missing:  { rows:[['Tarix','18.03.2026'],['Açıqlama','Naməlum köçürmə'],['Bank','−100,00 AZN'],['Sistem','—'],['Status','Tapılmadı']], btns:[['primary','Yeni əməliyyat yarat',"newBankDocument()"],['danger','Rədd et','closeFB()']] }
+};
+function openFB(type) {
+  const d = fbData[type];
+  document.getElementById('fb-content').innerHTML = d.rows.map(r=>`<div class="fb-row"><span class="fl">${r[0]}</span><span class="fv">${r[1]}</span></div>`).join('');
+  document.getElementById('fb-btns').innerHTML = d.btns.map(b=>`<button class="${b[0]}" onclick="${b[2]}">${b[1]}</button>`).join('');
+  document.getElementById('fact-box').classList.add('open');
+}
+function closeFB() { document.getElementById('fact-box').classList.remove('open'); }
+
+/* ── NOTIFS ── */
+function showNotif(id, type, msg) { const n=document.getElementById(id); n.className='notif '+type; n.textContent=msg; }
+function hideNotif(id) { const n=document.getElementById(id); if(n){n.className='notif';n.textContent='';} }
+
+/* ── EVENTS ── */
+document.getElementById('f-tip').addEventListener('change', () => {
+  syncDocTypeDependentFields();
+  updateCurrencyArea();
+});
+document.getElementById('f-ktg').addEventListener('change', () => {
+  populateRelatedAccounts(document.getElementById('f-tip').value, document.getElementById('f-ktg').value, '');
+  refreshAdvancePreview();
+});
+document.getElementById('f-bank').addEventListener('change', updateCurrencyArea);
+document.getElementById('f-mebleg').addEventListener('input', () => { updateCurrencyArea(); refreshAdvancePreview(); });
+document.getElementById('f-vat').addEventListener('input', refreshAdvancePreview);
+['list-search','list-status-filter','list-doc-filter','list-optype-filter'].forEach(id => {
+  document.getElementById(id).addEventListener('input', renderBankList);
+  document.getElementById(id).addEventListener('change', renderBankList);
+});
+document.getElementById('tab-ref').addEventListener('input', refreshAdvancePreview);
+document.getElementById('tab-ref').addEventListener('change', refreshAdvancePreview);
+
+// init
+populateListOperationFilter();
+renderBankList();
+loadForm(bankTransactions[0]);
+goScreen('list');
+</script>
+</body>
+</html>

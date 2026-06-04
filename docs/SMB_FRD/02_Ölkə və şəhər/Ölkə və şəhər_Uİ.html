@@ -1,0 +1,502 @@
+<!doctype html>
+<html lang="az">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Country + Cities Soraqçası</title>
+  <style>
+    :root {
+      --bg: #f4f7fb;
+      --panel: #ffffff;
+      --line: #d9e2ef;
+      --text: #1f2a37;
+      --muted: #667085;
+      --accent: #2563eb;
+      --danger: #dc2626;
+      --ok: #15803d;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: "Segoe UI", Arial, sans-serif; background: var(--bg); color: var(--text); }
+    .konteyner { max-width: 1160px; margin: 24px auto; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; background: var(--panel); }
+    .basliq { padding: 14px 18px; border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+    .basliq h1 { margin: 0; font-size: 20px; }
+    .basliq p { margin: 4px 0 0; color: var(--muted); font-size: 13px; }
+    .duyme-seti { display: flex; gap: 8px; flex-wrap: wrap; }
+    button { border: 1px solid var(--line); background: #fff; color: var(--text); padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 13px; }
+    .esas { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .tehlukeli { border-color: #fecaca; color: var(--danger); }
+    .govde { min-height: 560px; }
+    .sol { padding: 14px; }
+    .bolme-basliq { margin: 0 0 10px; color: var(--muted); font-size: 13px; text-transform: uppercase; letter-spacing: .4px; }
+    .agac { list-style: none; padding: 0; margin: 0; }
+    .olke-item { border: 1px solid var(--line); border-radius: 8px; margin-bottom: 8px; }
+    .olke-basliq { padding: 8px 10px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; }
+    .olke-basliq.secilmis, .seher-item.secilmis { background: #eaf1ff; }
+    .olke-sol { display: flex; align-items: center; gap: 8px; }
+    .ac-bagla {
+      width: 20px;
+      height: 20px;
+      border: 1px solid #c7d3e6;
+      border-radius: 5px;
+      background: #fff;
+      color: #3b4a5f;
+      font-size: 12px;
+      padding: 0;
+      line-height: 1;
+      cursor: pointer;
+    }
+    .olke-ad { font-weight: 600; }
+    .etiket { font-size: 11px; color: var(--muted); background: #f1f5f9; border-radius: 999px; padding: 2px 7px; }
+    .seherler { list-style: none; margin: 0; padding: 0 8px 8px 24px; }
+    .seher-item { padding: 6px 8px; border-radius: 6px; cursor: pointer; display: flex; justify-content: space-between; }
+    .kart { border: 1px solid var(--line); border-radius: 10px; padding: 12px; margin-bottom: 12px; }
+    .kart h3 { margin: 0 0 10px; font-size: 16px; }
+    .setir { display: grid; grid-template-columns: 140px 1fr; gap: 10px; align-items: center; margin-bottom: 9px; }
+    label { font-size: 14px; color: #334155; }
+    input { width: 100%; border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; font-size: 14px; }
+    input[readonly] { background: #f8fafc; color: #475569; }
+    .mesaj { min-height: 22px; font-size: 13px; color: var(--ok); font-weight: 600; }
+    .mesaj.sehv { color: var(--danger); }
+    .qeyd { margin: 2px 0 0; color: var(--muted); font-size: 12px; }
+    .actions { position: relative; }
+    .actions-menu {
+      position: absolute;
+      right: 0;
+      top: calc(100% + 6px);
+      min-width: 160px;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: 0 6px 14px rgba(15, 23, 42, 0.12);
+      padding: 6px;
+      display: none;
+      z-index: 120;
+    }
+    .actions-menu.open { display: block; }
+    .actions-menu button { width: 100%; text-align: left; border: 0; border-radius: 6px; }
+    .actions-menu button:hover { background: #eef4fb; }
+    .tree-blank {
+      border: 1px dashed #cbd5e1;
+      border-radius: 8px;
+      padding: 10px;
+      margin-bottom: 10px;
+      font-size: 12px;
+      color: var(--muted);
+      cursor: pointer;
+      background: #f8fbff;
+    }
+    .modal-ustu {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.2);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+      padding: 16px;
+    }
+    .modal {
+      width: 100%;
+      max-width: 420px;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 14px;
+    }
+    .modal h3 { margin: 0 0 10px; font-size: 16px; }
+    .modal-duymeler { display: flex; justify-content: flex-end; gap: 8px; margin-top: 10px; }
+    @media (max-width: 920px) {
+      .setir { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <main class="konteyner">
+    <header class="basliq">
+      <div>
+        <h1>Country + Cities Soraqçası</h1>
+        <p>Sadə Tree-View: Ölkə (root) → Şəhər (child)</p>
+      </div>
+      <div class="duyme-seti">
+        <div class="actions">
+          <button id="actionsBtn" class="esas">Əməliyyatlar</button>
+          <div id="actionsMenu" class="actions-menu">
+            <button id="yeniBtn">Yeni</button>
+            <button id="saveBtn">Yadda Saxla</button>
+            <button id="silBtn">Sil</button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <section class="govde">
+      <aside class="sol">
+        <h2 class="bolme-basliq">Tree-View</h2>
+        <div id="treeBlank" class="tree-blank">Qırağa klik et: seçim təmizlənir (Yeni => Ölkə yaradacaq)</div>
+        <ul id="tree" class="agac"></ul>
+        <div id="mesaj" class="mesaj"></div>
+      </aside>
+    </section>
+  </main>
+
+  <div id="cityModalOverlay" class="modal-ustu">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="cityModalBasliq">
+      <h3 id="cityModalBasliq">Yeni element</h3>
+      <div class="setir" id="modalTypeSetir">
+        <label for="modalType">Növ</label>
+        <input id="modalType" type="text" readonly />
+      </div>
+      <div class="setir">
+        <label for="modalCountryId">country_id</label>
+        <input id="modalCountryId" type="text" readonly />
+      </div>
+      <div class="setir" id="modalCountryCodeSetir">
+        <label for="modalCountryCode">Ölkə kodu</label>
+        <input id="modalCountryCode" type="text" placeholder="Məsələn: AZ" />
+      </div>
+      <div class="setir">
+        <label for="modalName">Ad</label>
+        <input id="modalName" type="text" placeholder="Məsələn: Bakı / Azərbaycan" />
+      </div>
+      <div class="setir" id="modalPostalSetir">
+        <label for="modalPostalCode">Poçt indeksi</label>
+        <input id="modalPostalCode" type="text" placeholder="Məsələn: AZ1000" />
+      </div>
+      <div class="modal-duymeler">
+        <button id="modalQapatBtn">Qapat</button>
+        <button id="modalSaveBtn" class="esas">Yadda Saxla</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let countrySeq = 3;
+    let citySeq = 4;
+
+    const state = {
+      countries: [
+        { country_id: 1, country_code: 'AZ', country_name: 'Azərbaycan' },
+        { country_id: 2, country_code: 'TR', country_name: 'Türkiyə' }
+      ],
+      cities: [
+        { city_id: 1, country_id: 1, city_name: 'Bakı', postal_code: 'AZ1000' },
+        { city_id: 2, country_id: 1, city_name: 'Gəncə', postal_code: 'AZ2000' },
+        { city_id: 3, country_id: 2, city_name: 'Ankara', postal_code: '06000' }
+      ],
+      expandedCountries: { 1: true, 2: true },
+      selected: { type: null, id: null },
+      mode: null,
+      modalMode: null
+    };
+
+    const tree = document.getElementById('tree');
+    const treeBlank = document.getElementById('treeBlank');
+    const message = document.getElementById('mesaj');
+    const actionsBtn = document.getElementById('actionsBtn');
+    const actionsMenu = document.getElementById('actionsMenu');
+    const cityModalOverlay = document.getElementById('cityModalOverlay');
+    const modalType = document.getElementById('modalType');
+    const modalCountryId = document.getElementById('modalCountryId');
+    const modalCountryCode = document.getElementById('modalCountryCode');
+    const modalName = document.getElementById('modalName');
+    const modalPostalCode = document.getElementById('modalPostalCode');
+    const modalCountryCodeSetir = document.getElementById('modalCountryCodeSetir');
+    const modalPostalSetir = document.getElementById('modalPostalSetir');
+    const modalCityTitle = document.getElementById('cityModalBasliq');
+
+    function closeActionsMenu() {
+      actionsMenu.classList.remove('open');
+    }
+
+    actionsBtn.onclick = () => {
+      actionsMenu.classList.toggle('open');
+    };
+
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.actions')) {
+        closeActionsMenu();
+      }
+
+      const clickedTreeNode = e.target.closest('.olke-basliq') || e.target.closest('.seher-item');
+      const clickedInteractive = e.target.closest('.actions') || e.target.closest('.modal') || e.target.closest('#treeBlank');
+
+      if (!clickedTreeNode && !clickedInteractive && state.selected.type) {
+        state.selected = { type: null, id: null };
+        state.mode = null;
+        renderTree();
+        yazMesaj('Seçim təmizləndi. Yeni => Ölkə yaradacaq.');
+      }
+    });
+
+    function cityModalAc(mode, payload = {}) {
+      state.modalMode = mode;
+      modalCountryCodeSetir.style.display = mode === 'country-new' || mode === 'country-edit' ? 'grid' : 'none';
+      modalPostalSetir.style.display = mode === 'city-new' || mode === 'city-edit' ? 'grid' : 'none';
+
+      if (mode === 'country-new') {
+        modalCityTitle.textContent = 'Yeni ölkə';
+        modalType.value = 'Ölkə';
+        modalCountryId.value = '';
+        modalCountryCode.value = '';
+        modalName.value = '';
+        modalPostalCode.value = '';
+      }
+
+      if (mode === 'city-new') {
+        modalCityTitle.textContent = 'Yeni şəhər';
+        modalType.value = 'Şəhər';
+        modalCountryId.value = payload.country_id || '';
+        modalCountryCode.value = '';
+        modalName.value = '';
+        modalPostalCode.value = '';
+      }
+
+      if (mode === 'country-edit') {
+        modalCityTitle.textContent = 'Ölkə redaktə';
+        modalType.value = 'Ölkə';
+        modalCountryId.value = payload.country_id;
+        modalCountryCode.value = payload.country_code || '';
+        modalName.value = payload.country_name || '';
+        modalPostalCode.value = '';
+      }
+
+      if (mode === 'city-edit') {
+        modalCityTitle.textContent = 'Şəhər redaktə';
+        modalType.value = 'Şəhər';
+        modalCountryId.value = payload.country_id;
+        modalCountryCode.value = '';
+        modalName.value = payload.city_name || '';
+        modalPostalCode.value = payload.postal_code || '';
+      }
+
+      modalPostalCode.value = '';
+      cityModalOverlay.style.display = 'flex';
+      setTimeout(() => modalName.focus(), 0);
+    }
+
+    function cityModalQapat() {
+      cityModalOverlay.style.display = 'none';
+      state.modalMode = null;
+    }
+
+    function yazMesaj(text, error = false) {
+      message.textContent = text;
+      message.classList.toggle('sehv', error);
+    }
+
+    function temizleForm() {
+      state.selected = { type: null, id: null };
+      state.mode = null;
+      renderTree();
+    }
+
+    function renderTree() {
+      tree.innerHTML = '';
+      state.countries.forEach((country) => {
+        const isExpanded = state.expandedCountries[country.country_id] !== false;
+        const countryLi = document.createElement('li');
+        countryLi.className = 'olke-item';
+
+        const countryHead = document.createElement('div');
+        countryHead.className = 'olke-basliq';
+        if (state.selected.type === 'country' && state.selected.id === country.country_id) {
+          countryHead.classList.add('secilmis');
+        }
+        countryHead.innerHTML = `
+          <div class="olke-sol">
+            <button class="ac-bagla" type="button">${isExpanded ? '▾' : '▸'}</button>
+            <span class="olke-ad">${country.country_name}</span>
+          </div>
+          <span class="etiket">Ölkə</span>
+        `;
+        countryHead.onclick = () => secCountry(country.country_id);
+        countryHead.querySelector('.ac-bagla').onclick = (e) => {
+          e.stopPropagation();
+          state.expandedCountries[country.country_id] = !isExpanded;
+          renderTree();
+        };
+
+        const cityUl = document.createElement('ul');
+        cityUl.className = 'seherler';
+        cityUl.style.display = isExpanded ? 'block' : 'none';
+        state.cities.filter(c => c.country_id === country.country_id).forEach((city) => {
+          const cityLi = document.createElement('li');
+          cityLi.className = 'seher-item';
+          if (state.selected.type === 'city' && state.selected.id === city.city_id) {
+            cityLi.classList.add('secilmis');
+          }
+          cityLi.innerHTML = `<span>${city.city_name}</span><span class="etiket">Şəhər</span>`;
+          cityLi.onclick = (e) => {
+            e.stopPropagation();
+            secCity(city.city_id);
+          };
+          cityUl.appendChild(cityLi);
+        });
+
+        countryLi.appendChild(countryHead);
+        countryLi.appendChild(cityUl);
+        tree.appendChild(countryLi);
+      });
+    }
+
+    function secCountry(countryId) {
+      state.selected = { type: 'country', id: countryId };
+      state.mode = 'country-edit';
+      const c = state.countries.find(x => x.country_id === countryId);
+      yazMesaj(`Ölkə seçildi: ${c.country_name}`);
+      renderTree();
+    }
+
+    function secCity(cityId) {
+      state.selected = { type: 'city', id: cityId };
+      state.mode = 'city-edit';
+      const city = state.cities.find(x => x.city_id === cityId);
+      yazMesaj(`Şəhər seçildi: ${city.city_name}`);
+      renderTree();
+    }
+
+    document.getElementById('yeniBtn').onclick = () => {
+      closeActionsMenu();
+      if (state.selected.type === 'country') {
+        state.mode = 'city-new';
+        cityModalAc('city-new', { country_id: state.selected.id });
+        yazMesaj('Yeni şəhər üçün modal pəncərə açıldı.');
+      } else if (state.selected.type === 'city') {
+        const selectedCity = state.cities.find(c => c.city_id === state.selected.id);
+        state.mode = 'city-new';
+        cityModalAc('city-new', { country_id: selectedCity.country_id });
+        yazMesaj('Seçilmiş şəhərin country_id-si ilə yeni şəhər pəncərəsi açıldı.');
+      } else {
+        state.mode = 'country-new';
+        cityModalAc('country-new');
+        yazMesaj('Yeni ölkə üçün modal pəncərə açıldı.');
+      }
+      renderTree();
+    };
+
+    document.getElementById('saveBtn').onclick = () => {
+      closeActionsMenu();
+      if (!state.selected.type) {
+        cityModalAc('country-new');
+        return yazMesaj('Seçim yoxdur: ölkə yaratmaq üçün modal açıldı.');
+      }
+
+      if (state.selected.type === 'country') {
+        const country = state.countries.find(c => c.country_id === state.selected.id);
+        cityModalAc('country-edit', country);
+        return yazMesaj('Ölkə redaktəsi üçün modal açıldı.');
+      }
+
+      if (state.selected.type === 'city') {
+        const city = state.cities.find(c => c.city_id === state.selected.id);
+        cityModalAc('city-edit', city);
+        return yazMesaj('Şəhər redaktəsi üçün modal açıldı.');
+      }
+    };
+
+    document.getElementById('silBtn').onclick = () => {
+      closeActionsMenu();
+      if (!state.selected.type) return yazMesaj('Silmək üçün tree-dən element seçin.', true);
+
+      if (state.selected.type === 'country') {
+        const hasCities = state.cities.some(c => c.country_id === state.selected.id);
+        if (hasCities) return yazMesaj('Bu ölkənin şəhərləri var. Əvvəl şəhərləri silin.', true);
+        delete state.expandedCountries[state.selected.id];
+        state.countries = state.countries.filter(c => c.country_id !== state.selected.id);
+        temizleForm();
+        state.selected = { type: null, id: null };
+        state.mode = null;
+        renderTree();
+        return yazMesaj('Ölkə silindi.');
+      }
+
+      if (state.selected.type === 'city') {
+        state.cities = state.cities.filter(c => c.city_id !== state.selected.id);
+        temizleForm();
+        state.selected = { type: null, id: null };
+        state.mode = null;
+        renderTree();
+        return yazMesaj('Şəhər silindi.');
+      }
+    };
+
+    document.getElementById('modalQapatBtn').onclick = () => {
+      cityModalQapat();
+      yazMesaj('Yeni şəhər pəncərəsi qapatıldı.');
+    };
+
+    document.getElementById('modalSaveBtn').onclick = () => {
+      if (state.modalMode === 'country-new') {
+        if (!modalName.value.trim()) return yazMesaj('Ölkə adı məcburidir.', true);
+        const code = modalCountryCode.value.trim();
+        if (code && state.countries.some(c => c.country_code.toLowerCase() === code.toLowerCase())) {
+          return yazMesaj('Bu ölkə kodu artıq mövcuddur.', true);
+        }
+        const newCountry = {
+          country_id: countrySeq++,
+          country_code: code,
+          country_name: modalName.value.trim()
+        };
+        state.countries.push(newCountry);
+        state.expandedCountries[newCountry.country_id] = true;
+        cityModalQapat();
+        secCountry(newCountry.country_id);
+        return yazMesaj('Ölkə əlavə olundu.');
+      }
+
+      if (state.modalMode === 'city-new') {
+        if (!modalCountryId.value) return yazMesaj('Country seçilmədən şəhər yaradıla bilməz.', true);
+        if (!modalName.value.trim()) return yazMesaj('Şəhər adı məcburidir.', true);
+        const newCity = {
+          city_id: citySeq++,
+          country_id: Number(modalCountryId.value),
+          city_name: modalName.value.trim(),
+          postal_code: modalPostalCode.value.trim()
+        };
+        state.cities.push(newCity);
+        cityModalQapat();
+        secCity(newCity.city_id);
+        return yazMesaj('Şəhər əlavə olundu.');
+      }
+
+      if (state.modalMode === 'country-edit' && state.selected.type === 'country') {
+        if (!modalName.value.trim()) return yazMesaj('Ölkə adı məcburidir.', true);
+        const country = state.countries.find(c => c.country_id === state.selected.id);
+        country.country_name = modalName.value.trim();
+        country.country_code = modalCountryCode.value.trim();
+        cityModalQapat();
+        renderTree();
+        return yazMesaj('Ölkə məlumatı yeniləndi.');
+      }
+
+      if (state.modalMode === 'city-edit' && state.selected.type === 'city') {
+        if (!modalName.value.trim()) return yazMesaj('Şəhər adı məcburidir.', true);
+        const city = state.cities.find(c => c.city_id === state.selected.id);
+        city.city_name = modalName.value.trim();
+        city.postal_code = modalPostalCode.value.trim();
+        cityModalQapat();
+        renderTree();
+        return yazMesaj('Şəhər məlumatı yeniləndi.');
+      }
+
+      yazMesaj('Modal rejimi tapılmadı.', true);
+    };
+
+    cityModalOverlay.onclick = (e) => {
+      if (e.target === cityModalOverlay) {
+        cityModalQapat();
+      }
+    };
+
+    treeBlank.onclick = () => {
+      state.selected = { type: null, id: null };
+      state.mode = null;
+      renderTree();
+      yazMesaj('Seçim təmizləndi. Yeni => Ölkə yaradacaq.');
+    };
+
+    renderTree();
+    yazMesaj('Hazırdır. Root ölkə seçili deyilsə Yeni ilə ölkə, seçilidirsə şəhər yaradılır.');
+  </script>
+</body>
+</html>

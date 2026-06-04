@@ -1,0 +1,124 @@
+{
+  "object": "ORG_STRUCTURE_MASTER",
+  "ui_scope": "functional-schema-only",
+  "workflow_model": "status/təsdiq yoxdur",
+  "tabs": [
+    {
+      "name": "ENTITY",
+      "label": "Müəssisə (Entity)",
+      "parentRequired": false,
+      "header_fields": [
+        {"name": "abreviatura", "label": "Abreviatura", "type": "text", "required": true},
+        {"name": "ad", "label": "Müəssisə adı", "type": "text", "required": true, "validation": "boş ola bilməz"},
+        {"name": "legal_name", "label": "Tam hüquqi ad", "type": "text", "required": true},
+        {"name": "country_id", "label": "Ölkə", "type": "lookup", "required": true},
+        {"name": "city_id", "label": "Şəhər", "type": "lookup", "required": true},
+        {"name": "postal_code", "label": "Poçt indeksi", "type": "text", "required": true},
+        {"name": "legal_address", "label": "Hüquqi ünvan", "type": "text", "required": true},
+        {"name": "base_currency", "label": "Əsas valyuta", "type": "select", "required": true},
+        {"name": "currency_precision", "label": "Valyuta dəqiqliyi", "type": "number", "required": true},
+        {"name": "taxpayer_group", "label": "Vergi ödəyici qrupu", "type": "select", "required": true},
+        {"name": "vat_registered", "label": "ƏDV statusu", "type": "checkbox", "required": true},
+        {"name": "created_date", "label": "Yaradılma tarixi", "type": "date", "required": true},
+        {"name": "closed_date", "label": "Ləğv edilmə tarixi", "type": "date", "required": false}
+      ]
+    },
+    {
+      "name": "BRANCH",
+      "label": "Filial (Branch)",
+      "parentRequired": true,
+      "parentType": "ENTITY",
+      "header_fields": [
+        {"name": "entity_id", "label": "Entity", "type": "lookup", "required": true},
+        {"name": "ad", "label": "Filial adı", "type": "text", "required": true},
+        {"name": "branch_type", "label": "Branch tipi", "type": "select", "required": true},
+        {"name": "manager_name", "label": "Məsul şəxs", "type": "text", "required": false},
+        {"name": "address_id", "label": "Ünvan (Address)", "type": "lookup", "required": false},
+        {"name": "created_date", "label": "Yaradılma tarixi", "type": "date", "required": true},
+        {"name": "closed_date", "label": "Ləğv edilmə tarixi", "type": "date", "required": false}
+      ]
+    },
+    {
+      "name": "DEPARTMENT",
+      "label": "Departament (Department)",
+      "parentRequired": true,
+      "parentType": "BRANCH",
+      "viewMode": "tree",
+      "header_fields": [
+        {"name": "branch_id", "label": "Branch", "type": "lookup", "required": true},
+        {"name": "parent_department_id", "label": "Parent Departament", "type": "lookup", "required": false},
+        {"name": "ad", "label": "Departament adı", "type": "text", "required": true},
+        {"name": "department_type", "label": "Department tipi", "type": "select", "required": true},
+        {"name": "cost_owner", "label": "Məsul şəxs/owner", "type": "text", "required": false},
+        {"name": "sort_order", "label": "Sıralama", "type": "number", "required": false},
+        {"name": "created_date", "label": "Yaradılma tarixi", "type": "date", "required": true},
+        {"name": "closed_date", "label": "Ləğv edilmə tarixi", "type": "date", "required": false}
+      ]
+    },
+    {
+      "name": "WAREHOUSE",
+      "label": "Anbar (Warehouse)",
+      "parentRequired": true,
+      "parentType": "BRANCH",
+      "header_fields": [
+        {"name": "branch_id", "label": "Branch", "type": "lookup", "required": true},
+        {"name": "ad", "label": "Anbar adı", "type": "text", "required": true},
+        {"name": "warehouse_type", "label": "Warehouse tipi", "type": "select", "required": true},
+        {"name": "is_default", "label": "Default anbar", "type": "checkbox", "required": false},
+        {"name": "created_date", "label": "Yaradılma tarixi", "type": "date", "required": true},
+        {"name": "closed_date", "label": "Ləğv edilmə tarixi", "type": "date", "required": false}
+      ]
+    },
+    {
+      "name": "LOCATION",
+      "label": "Saxlanma sahəsi (Location)",
+      "parentRequired": true,
+      "parentType": "WAREHOUSE",
+      "header_fields": [
+        {"name": "warehouse_id", "label": "Warehouse", "type": "lookup", "required": true},
+        {"name": "ad", "label": "Sahə adı", "type": "text", "required": true},
+        {"name": "location_type", "label": "Location tipi", "type": "select", "required": true},
+        {"name": "capacity_note", "label": "Tutum qeydi", "type": "textarea", "required": false},
+        {"name": "created_date", "label": "Yaradılma tarixi", "type": "date", "required": true},
+        {"name": "closed_date", "label": "Ləğv edilmə tarixi", "type": "date", "required": false}
+      ]
+    },
+    {
+      "name": "BIN",
+      "label": "Rəf/Hüceyrə (Bin)",
+      "parentRequired": true,
+      "parentType": "LOCATION",
+      "header_fields": [
+        {"name": "location_id", "label": "Location", "type": "lookup", "required": true},
+        {"name": "ad", "label": "Bin adı", "type": "text", "required": true},
+        {"name": "bin_type", "label": "Bin tipi", "type": "select", "required": true},
+        {"name": "max_volume", "label": "Maksimum həcm", "type": "number", "required": false},
+        {"name": "max_weight", "label": "Maksimum çəki", "type": "number", "required": false},
+        {"name": "created_date", "label": "Yaradılma tarixi", "type": "date", "required": true},
+        {"name": "closed_date", "label": "Ləğv edilmə tarixi", "type": "date", "required": false}
+      ]
+    }
+  ],
+  "actions": [
+    {"name": "Yeni", "action": "init", "states": ["all"]},
+    {"name": "Yadda Saxla", "action": "save", "states": ["all"]},
+    {"name": "Ləğv et", "action": "close-record", "states": ["all"]},
+    {"name": "Sil", "action": "delete", "states": ["all"]},
+    {"name": "Çap/İxrac", "action": "export", "states": ["all"]},
+    {"name": "Qapat", "action": "close-screen", "states": ["all"]}
+  ],
+  "filters": [
+    {"name": "kod", "label": "Kod"},
+    {"name": "ad", "label": "Ad"},
+    {"name": "aktivlik", "label": "Aktivlik (tarixə görə)"},
+    {"name": "parent", "label": "Parent obyekt"}
+  ],
+  "events": [
+    {"trigger": "Tab dəyişdi", "reaction": "Uyğun field və lookup-lar yenilənir"},
+    {"trigger": "Parent seçildi", "reaction": "Parent validasiyası və aktivlik yoxlaması edilir"},
+    {"trigger": "Departament parent seçildi", "reaction": "Eyni branch və cycle yoxlanır"},
+    {"trigger": "Kod dəyişdi", "reaction": "Unikallıq yoxlaması işə düşür"},
+    {"trigger": "Yadda Saxla klik edildi", "reaction": "Qeyd cədvələ yazılır və audit log yenilənir"},
+    {"trigger": "Ləğv et klik edildi", "reaction": "Qeyd üçün ləğv edilmə tarixi yazılır"}
+  ]
+}

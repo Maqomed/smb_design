@@ -1,0 +1,112 @@
+FUNKSIONAL TƏLƏBLƏR SƏNƏDİ (FRD)
+
+1. Sənəd başlığı
+- Sənədin adı: Bank əməliyyat tipləri soraqçası
+- Layihə adı: SMB ERP
+- Sənəd nömrəsi: FRD-BANK-OPT-001
+- Mövzu: Bank sənədlərində istifadə olunan əməliyyat tiplərinin idarə olunması
+- Tarix: 31.03.2026
+- Versiya: v1.0
+
+2. Giriş və məqsəd
+Bank əməliyyat tipləri modulu bank sənədində istifadə olunan davranış qaydalarının master-data mənbəyidir.
+Əməliyyat tipi seçildikdə sənədin kontragent tələb edib-etməməsi, hansı rolun qəbul ediləcəyi, avans məntiqinin
+işləyib-işləməyəcəyi və susmaya görə hesabın olub-olmaması bu moduldan təyin olunur.
+
+İş ehtiyacları:
+- Bank modulunda kod səviyyəsində saxlanan əməliyyat məntiqi ayrıca idarə olunan soraqçaya çıxarılmalıdır.
+- Ödəniş və daxilolma davranışları ayrılmalı və yalnız uyğun tipli əməliyyatlar seçilə bilməlidir.
+- Kontragent rolu və avans rejimi seçimləri sənəd tipi ilə uyğun olmalıdır.
+- Susmaya görə hesab verildikdə yalnız aktiv və posting CoA hesabı seçilməlidir.
+
+3. İstifadəçi modeli (RBAC)
+Sabit rol siyahısı verilməyib.
+Aktyor bütün ssenarilərdə `İstifadəçi` kimi göstərilir.
+İcazələr RBAC ilə idarə olunur.
+
+4. Məlumat modeli
+4.1 Əsas cədvəl: `bank_operation_type`
+Sütun | Tip | PK/FK | Məcburi | Qeyd
+operation_type_id | int | PK | Bəli | Sistem ID-si; bütün PK/FK əlaqələri bu sahə ilə qurulur
+operation_type_code | varchar(30) | - | Bəli | Unikal biznes kodu; UI və texniki konfiqurasiya üçün istifadə olunur, FK kimi istifadə edilmir
+operation_type_name | varchar(100) | - | Bəli | Görünən ad
+transaction_type | varchar(20) | - | Bəli | `PAYMENT / RECEIPT`
+requires_counterparty | boolean | - | Bəli | Kontragent məcburidirmi
+counterparty_role | varchar(20) | - | Xeyr | `VENDOR / CUSTOMER / OPTIONAL / NONE`
+default_account_id | int | FK | Xeyr | Default əlaqəli hesab
+advance_mode | varchar(20) | - | Bəli | `NONE / ADVANCE_PAID / ADVANCE_RECEIVED`
+sort_order | int | - | Bəli | Sıralama
+created_date | date | - | Bəli | Başlama tarixi
+closed_date | date | - | Xeyr | Bağlanma tarixi
+
+4.2 Xarici açar əlaqələri
+Sütun | İstinad cədvəl | İstinad sütun | Modul
+operation_type_id | bank_transaction | operation_type_id | Bank sənədləri
+default_account_id | coa_account | account_id | Hesablar planı
+counterparty_role | counterparty_card | rol sahələri | Kontragentlər
+
+4.3 Modul daxili axtarış qaydaları
+a) Susmaya görə hesab axtarışı:
+	`coa_account WHERE is_posting = true AND closed_date IS NULL`
+b) Bank modulunda axtarış:
+	`bank_operation_type WHERE transaction_type = seçilmiş_transaction_type AND closed_date IS NULL`
+c) Kontragent qaydası:
+	`counterparty_role = VENDOR` olduqda yalnız tədarükçü rolundakı kontragentlər,
+	`counterparty_role = CUSTOMER` olduqda yalnız müştəri rolundakı kontragentlər seçilir.
+
+5. Əlaqələr
+- `bank_transaction.operation_type_id` -> `bank_operation_type.operation_type_id`
+- `bank_operation_type.default_account_id` -> `coa_account.account_id`
+- `bank_operation_type.counterparty_role` -> `counterparty_card` rol atributları ilə uyğunluq qaydasında işləyir
+
+6. Biznes qaydaları
+BR-01: `operation_type_code` unikal olmalıdır.
+BR-01A: `operation_type_id` sistem tərəfindən yaradılır və dəyişdirilmir.
+BR-02: `transaction_type=PAYMENT` olduqda yalnız ödəniş tipli əməliyyatlar aktiv ola bilər.
+BR-03: `transaction_type=RECEIPT` olduqda yalnız daxilolma tipli əməliyyatlar aktiv ola bilər.
+BR-04: `requires_counterparty=true` olduqda `counterparty_role` boş ola bilməz.
+BR-05: `advance_mode=ADVANCE_PAID` yalnız `PAYMENT` üçün, `advance_mode=ADVANCE_RECEIVED` yalnız `RECEIPT` üçün mümkündür.
+BR-06: `closed_date < created_date` ola bilməz.
+BR-07: Bank sənədlərində istifadə olunmuş əməliyyat tipi fiziki silinə bilməz.
+BR-08: Aktiv olmayan əməliyyat tipi yeni bank sənədində görünməməlidir.
+BR-09: `default_account_id` seçilərsə hesab aktiv və posting olmalıdır.
+
+7. İstifadə ssenariləri
+7.1 Yeni əməliyyat tipi yaradılması
+1) İstifadəçi `Yeni` klik edir.
+2) Kod, ad, sənəd tipi, kontragent qaydası və sıralama daxil edir.
+3) Lazım gələrsə susmaya görə hesab seçir.
+4) `Yadda Saxla` klik edir.
+5) Sistem qeydi yaradır.
+
+7.2 Tədarükçü ödənişi tipi
+1) `transaction_type = PAYMENT`, `counterparty_role = VENDOR`, `requires_counterparty = true` daxil edilir.
+2) `advance_mode = NONE` və ya `ADVANCE_PAID` seçilir.
+3) Bank modulu bu tipi yalnız ödəniş sənədlərində göstərir.
+
+7.3 Müştəri daxilolması tipi
+1) `transaction_type = RECEIPT`, `counterparty_role = CUSTOMER` seçilir.
+2) Lazım gələrsə susmaya görə hesab təyin edilir.
+3) Bank modulu bu tipi yalnız daxilolma sənədlərində göstərir.
+
+8. Xəta mesajları
+E-1201: Əməliyyat tipi kodu artıq mövcuddur.
+E-1202: Bu sənəd tipi üçün icazə verilməyən əməliyyat tipi seçilib.
+E-1203: Avans rejimi sənəd tipinə uyğun deyil.
+E-1204: Kontragent tələbi olduğu halda rol boş qala bilməz.
+E-1205: Susmaya görə hesab aktiv və posting deyil.
+
+9. Audit və izlənmə
+- `bank_operation_type` üzrə CREATE/UPDATE/CLOSE əməliyyatları `audit_log` cədvəlində saxlanır.
+- `transaction_type`, `counterparty_role`, `advance_mode` dəyişiklikləri ayrıca audit hadisəsi kimi qeyd olunur.
+
+10. İnteqrasiya qeydləri
+INT-01 (Bank sənədləri): `bank_transaction.operation_type_id → bank_operation_type.operation_type_id`
+INT-02 (Hesablar planı): `bank_operation_type.default_account_id → coa_account.account_id`
+  Filtr: `is_posting = true AND closed_date IS NULL`
+INT-03 (Kontragentlər): `counterparty_role` bank sənədlərində kontragent filtrini idarə edir
+
+11. Ekran təsviri
+- Siyahı sütunları: Kod, Ad, Sənəd tipi, Kontragent tələbi, Susmaya görə hesab, Status.
+- Form sahələri: əsas atributlar, rol məntiqi, avans məntiqi, tarixlər.
+- Dizayn maket xarakterlidir; istehsal mühiti üçün son interfeys deyil.

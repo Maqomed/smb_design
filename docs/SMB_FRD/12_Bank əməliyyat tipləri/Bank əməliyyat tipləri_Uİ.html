@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bank əməliyyat tipləri</title>
+  <style>
+    :root {
+      --bg: #f4f7fb;
+      --card: #fff;
+      --line: #d9e2ec;
+      --text: #243144;
+      --muted: #66758a;
+      --primary: #2563eb;
+      --ok: #0f766e;
+      --warn: #92400e;
+      --danger: #b91c1c;
+      --soft: #eef4ff;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: "Segoe UI", Arial, sans-serif; background: var(--bg); color: var(--text); }
+    .page { max-width: 1320px; margin: 0 auto; padding: 20px; }
+    h1 { margin: 0; font-size: 24px; }
+    .subtitle { margin: 6px 0 16px; color: var(--muted); font-size: 13px; }
+    .warning { margin-bottom: 16px; background: #fff7ed; border: 1px solid #fdba74; color: var(--warn); border-radius: 12px; padding: 12px 14px; font-size: 13px; }
+    .summary { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px; }
+    .metric, .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04); }
+    .metric { padding: 14px 16px; }
+    .metric span { display: block; color: var(--muted); font-size: 12px; margin-bottom: 8px; }
+    .metric strong { font-size: 22px; }
+    .layout { display: grid; grid-template-columns: 1.1fr .9fr; gap: 16px; }
+    .card-head { padding: 14px 16px; border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; align-items: center; }
+    .card-head h2 { margin: 0; font-size: 16px; }
+    .filters, .form-grid { display: grid; gap: 12px; }
+    .filters { grid-template-columns: 1fr .8fr .8fr; padding: 14px 16px; border-bottom: 1px solid var(--line); background: #fbfcfe; }
+    .body-pad { padding: 16px; }
+    .field label { display: block; margin-bottom: 6px; font-size: 12px; color: var(--muted); font-weight: 600; }
+    .field input, .field select { width: 100%; border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; font-size: 14px; background: #fff; }
+    .form-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
+    .span-2 { grid-column: span 2; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th, td { padding: 11px 12px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+    th { font-size: 11px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); background: #fbfcfe; }
+    tbody tr { cursor: pointer; }
+    tbody tr.selected { background: var(--soft); }
+    tbody tr:hover { background: #fafcff; }
+    .pill { display: inline-flex; padding: 4px 8px; border-radius: 999px; font-size: 12px; font-weight: 600; background: #eff6ff; color: #1d4ed8; }
+    .pill.ok { background: #ecfdf5; color: var(--ok); }
+    .pill.off { background: #fef2f2; color: var(--danger); }
+    .actions { display: flex; gap: 8px; flex-wrap: wrap; padding-top: 8px; }
+    button { height: 38px; border-radius: 10px; border: 1px solid var(--line); background: #fff; padding: 0 14px; cursor: pointer; }
+    .primary { background: var(--primary); border-color: var(--primary); color: #fff; }
+    .danger { background: #fff5f5; border-color: #fecaca; color: var(--danger); }
+    .status { min-height: 20px; color: var(--muted); font-size: 13px; padding-top: 6px; }
+    .status.ok { color: var(--ok); }
+    .status.err { color: var(--danger); }
+    @media (max-width: 1100px) { .summary, .layout, .filters, .form-grid { grid-template-columns: 1fr; } .span-2 { grid-column: span 1; } }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <h1>Bank əməliyyat tipləri</h1>
+    <div class="subtitle">Bank sənədləri üçün sənəd tipi filtrini və kontragent qaydalarını ayrıca soraqça səviyyəsinə çıxarır.</div>
+    <div class="warning">Bu ekran maket xarakterlidir. Məqsəd Bank sənədlərində sabit yazılmış əməliyyat tiplərini ayrıca əsas məlumat mənbəyi kimi modelləşdirməkdir.</div>
+
+    <div class="summary" id="summary"></div>
+
+    <div class="layout">
+      <section class="card">
+        <div class="card-head">
+          <h2>Əməliyyat tipi siyahısı</h2>
+          <span class="pill">Bank əməliyyat tipləri</span>
+        </div>
+        <div class="filters">
+          <div class="field">
+            <label for="search">Axtarış</label>
+            <input id="search" placeholder="Kod və ya ad üzrə axtarış" />
+          </div>
+          <div class="field">
+            <label for="doc-filter">Sənəd tipi</label>
+            <select id="doc-filter">
+              <option value="ALL">Hamısı</option>
+              <option value="PAYMENT">Ödəniş</option>
+              <option value="RECEIPT">Daxilolma</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="status-filter">Status</label>
+            <select id="status-filter">
+              <option value="ALL">Hamısı</option>
+              <option value="ACTIVE">Aktiv</option>
+              <option value="CLOSED">Bağlı</option>
+            </select>
+          </div>
+        </div>
+        <div style="max-height: 620px; overflow: auto;">
+          <table>
+            <thead>
+              <tr>
+                <th>Kod</th>
+                <th>Ad</th>
+                <th>Sənəd tipi</th>
+                <th>Kontragent</th>
+                <th>Avans</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="table-body"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card-head">
+          <h2>Əməliyyat tipi kartı</h2>
+          <span class="pill ok">Bank ilə əlaqəli</span>
+        </div>
+        <div class="body-pad">
+          <div class="form-grid">
+            <div class="field">
+              <label for="operation_type_code">Kod</label>
+              <input id="operation_type_code" placeholder="SUPPLIER_PAYMENT" />
+            </div>
+            <div class="field">
+              <label for="operation_type_name">Ad</label>
+              <input id="operation_type_name" placeholder="Təchizatçı ödənişi" />
+            </div>
+            <div class="field">
+              <label for="transaction_type">Sənəd tipi</label>
+              <select id="transaction_type">
+                <option value="PAYMENT">Ödəniş</option>
+                <option value="RECEIPT">Daxilolma</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="requires_counterparty">Kontragent tələbi</label>
+              <select id="requires_counterparty">
+                <option value="true">Məcburi</option>
+                <option value="false">Məcburi deyil</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="counterparty_role">Kontragent rolu</label>
+              <select id="counterparty_role">
+                <option value="VENDOR">Təchizatçı</option>
+                <option value="CUSTOMER">Müştəri</option>
+                <option value="OPTIONAL">Opsional</option>
+                <option value="NONE">Yoxdur</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="default_account_id">Susmaya görə əlaqəli hesab</label>
+              <select id="default_account_id"></select>
+            </div>
+            <div class="field">
+              <label for="advance_mode">Avans rejimi</label>
+              <select id="advance_mode">
+                <option value="NONE">Yoxdur</option>
+                <option value="ADVANCE_PAID">Verilmiş avans</option>
+                <option value="ADVANCE_RECEIVED">Alınmış avans</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="sort_order">Sıralama</label>
+              <input id="sort_order" type="number" min="1" step="1" />
+            </div>
+            <div class="field">
+              <label for="created_date">Yaradılma tarixi</label>
+              <input id="created_date" placeholder="31.03.2026" />
+            </div>
+            <div class="field">
+              <label for="closed_date">Bağlanma tarixi</label>
+              <input id="closed_date" placeholder="" />
+            </div>
+          </div>
+          <div class="actions">
+            <button id="btn-new">Yeni</button>
+            <button id="btn-save" class="primary">Yadda Saxla</button>
+            <button id="btn-close">Bağla</button>
+            <button id="btn-delete" class="danger">Sil</button>
+          </div>
+          <div id="status" class="status">Hazırdır.</div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    const state = {
+      selectedId: null,
+      glAccounts: [
+        { id: 201, label: '5310 — Təchizatçı borcları' },
+        { id: 202, label: '1710 — Verilmiş avanslar' },
+        { id: 203, label: '2110 — Müştəri debitor borcları' },
+        { id: 204, label: '4110 — Alınmış avanslar' },
+        { id: 205, label: '7210 — Əmək haqqı öhdəlikləri' },
+        { id: 206, label: '7310 — Digər əməliyyat gəlirləri' }
+      ],
+      rows: [
+        { operation_type_code: 'SUPPLIER_PAYMENT', operation_type_name: 'Təchizatçı ödənişi', transaction_type: 'PAYMENT', requires_counterparty: true, counterparty_role: 'VENDOR', default_account_id: 201, advance_mode: 'NONE', sort_order: 10, created_date: '31.03.2026', closed_date: '' },
+        { operation_type_code: 'PAYROLL_PAYMENT', operation_type_name: 'Əmək haqqı ödənişi', transaction_type: 'PAYMENT', requires_counterparty: false, counterparty_role: 'NONE', default_account_id: 205, advance_mode: 'NONE', sort_order: 20, created_date: '31.03.2026', closed_date: '' },
+        { operation_type_code: 'ADVANCE_PAYMENT', operation_type_name: 'Avans', transaction_type: 'PAYMENT', requires_counterparty: true, counterparty_role: 'VENDOR', default_account_id: 202, advance_mode: 'ADVANCE_PAID', sort_order: 30, created_date: '31.03.2026', closed_date: '' },
+        { operation_type_code: 'PETTY_CASH', operation_type_name: 'Təhtəlhesab', transaction_type: 'PAYMENT', requires_counterparty: false, counterparty_role: 'OPTIONAL', default_account_id: null, advance_mode: 'NONE', sort_order: 40, created_date: '31.03.2026', closed_date: '' },
+        { operation_type_code: 'CUSTOMER_RECEIPT', operation_type_name: 'Müştərilərdən daxilolma', transaction_type: 'RECEIPT', requires_counterparty: true, counterparty_role: 'CUSTOMER', default_account_id: 203, advance_mode: 'NONE', sort_order: 10, created_date: '31.03.2026', closed_date: '' },
+        { operation_type_code: 'OTHER_OPERATING_INCOME', operation_type_name: 'Digər əməliyyat gəlirləri', transaction_type: 'RECEIPT', requires_counterparty: false, counterparty_role: 'OPTIONAL', default_account_id: 206, advance_mode: 'NONE', sort_order: 20, created_date: '31.03.2026', closed_date: '' }
+      ]
+    };
+
+    const refs = {
+      summary: document.getElementById('summary'),
+      tableBody: document.getElementById('table-body'),
+      search: document.getElementById('search'),
+      docFilter: document.getElementById('doc-filter'),
+      statusFilter: document.getElementById('status-filter'),
+      code: document.getElementById('operation_type_code'),
+      name: document.getElementById('operation_type_name'),
+      transactionType: document.getElementById('transaction_type'),
+      requiresCounterparty: document.getElementById('requires_counterparty'),
+      counterpartyRole: document.getElementById('counterparty_role'),
+      defaultAccountId: document.getElementById('default_account_id'),
+      advanceMode: document.getElementById('advance_mode'),
+      sortOrder: document.getElementById('sort_order'),
+      createdDate: document.getElementById('created_date'),
+      closedDate: document.getElementById('closed_date'),
+      status: document.getElementById('status')
+    };
+
+    function setStatus(text, type = '') {
+      refs.status.textContent = text;
+      refs.status.className = `status ${type}`.trim();
+    }
+
+    function active(row) {
+      return !String(row.closed_date || '').trim();
+    }
+
+    function accountLabel(id) {
+      return state.glAccounts.find(item => item.id === Number(id))?.label || '-';
+    }
+
+    function populateAccounts() {
+      refs.defaultAccountId.innerHTML = '<option value="">— Seçilməsin —</option>' + state.glAccounts.map(item => `<option value="${item.id}">${item.label}</option>`).join('');
+    }
+
+    function metrics() {
+      const rows = state.rows;
+      const payment = rows.filter(row => row.transaction_type === 'PAYMENT').length;
+      const receipt = rows.filter(row => row.transaction_type === 'RECEIPT').length;
+      const withCounterparty = rows.filter(row => row.requires_counterparty).length;
+      const activeCount = rows.filter(active).length;
+      refs.summary.innerHTML = [
+        { label: 'Cəmi tip', value: rows.length },
+        { label: 'Ödəniş tipi', value: payment },
+        { label: 'Daxilolma tipi', value: receipt },
+        { label: 'Aktiv tip', value: activeCount }
+      ].map(item => `<div class="metric"><span>${item.label}</span><strong>${item.value}</strong></div>`).join('');
+    }
+
+    function filteredRows() {
+      const q = refs.search.value.trim().toLowerCase();
+      const doc = refs.docFilter.value;
+      const status = refs.statusFilter.value;
+      return state.rows.filter(row => {
+        if (q && !(`${row.operation_type_code} ${row.operation_type_name}`.toLowerCase().includes(q))) return false;
+        if (doc !== 'ALL' && row.transaction_type !== doc) return false;
+        if (status === 'ACTIVE' && !active(row)) return false;
+        if (status === 'CLOSED' && active(row)) return false;
+        return true;
+      }).sort((a, b) => a.transaction_type.localeCompare(b.transaction_type) || a.sort_order - b.sort_order);
+    }
+
+    function counterpartyRoleLabel(value) {
+      return { VENDOR: 'Təchizatçı', CUSTOMER: 'Müştəri', OPTIONAL: 'Opsional', NONE: 'Yoxdur' }[value] || value;
+    }
+
+    function advanceModeLabel(value) {
+      return { NONE: 'Yoxdur', ADVANCE_PAID: 'Verilmiş avans', ADVANCE_RECEIVED: 'Alınmış avans' }[value] || value;
+    }
+
+    function renderTable() {
+      refs.tableBody.innerHTML = filteredRows().map(row => `
+        <tr data-id="${row.operation_type_code}" class="${state.selectedId === row.operation_type_code ? 'selected' : ''}">
+          <td><strong>${row.operation_type_code}</strong></td>
+          <td>${row.operation_type_name}</td>
+          <td>${row.transaction_type === 'PAYMENT' ? 'Ödəniş' : 'Daxilolma'}</td>
+          <td>${row.requires_counterparty ? '<span class="pill ok">Məcburi</span>' : '<span class="pill">Opsional</span>'}<br><span style="color:var(--muted)">${counterpartyRoleLabel(row.counterparty_role)}</span></td>
+          <td>${advanceModeLabel(row.advance_mode)}</td>
+          <td>${active(row) ? '<span class="pill ok">Aktiv</span>' : '<span class="pill off">Bağlı</span>'}</td>
+        </tr>
+      `).join('');
+      refs.tableBody.querySelectorAll('tr').forEach(tr => tr.addEventListener('click', () => openRecord(tr.dataset.id)));
+    }
+
+    function fillForm(row) {
+      refs.code.value = row?.operation_type_code || '';
+      refs.name.value = row?.operation_type_name || '';
+      refs.transactionType.value = row?.transaction_type || 'PAYMENT';
+      refs.requiresCounterparty.value = String(row?.requires_counterparty ?? true);
+      refs.counterpartyRole.value = row?.counterparty_role || 'VENDOR';
+      refs.defaultAccountId.value = row?.default_account_id ? String(row.default_account_id) : '';
+      refs.advanceMode.value = row?.advance_mode || 'NONE';
+      refs.sortOrder.value = row?.sort_order || 10;
+      refs.createdDate.value = row?.created_date || '31.03.2026';
+      refs.closedDate.value = row?.closed_date || '';
+    }
+
+    function openRecord(id) {
+      const row = state.rows.find(item => item.operation_type_code === id);
+      if (!row) return;
+      state.selectedId = id;
+      fillForm(row);
+      renderTable();
+      setStatus(`Əməliyyat tipi açıldı: ${id}`);
+    }
+
+    function resetForm() {
+      state.selectedId = null;
+      fillForm(null);
+      renderTable();
+      setStatus('Yeni əməliyyat tipi forması hazırdır.');
+    }
+
+    function validateDate(value) {
+      if (!String(value || '').trim()) return true;
+      return /^(\d{2})\.(\d{2})\.(\d{4})$/.test(value);
+    }
+
+    function compareDates(a, b) {
+      const [ad, am, ay] = a.split('.').map(Number);
+      const [bd, bm, by] = b.split('.').map(Number);
+      return new Date(ay, am - 1, ad) - new Date(by, bm - 1, bd);
+    }
+
+    function collectForm() {
+      return {
+        operation_type_code: refs.code.value.trim().toUpperCase(),
+        operation_type_name: refs.name.value.trim(),
+        transaction_type: refs.transactionType.value,
+        requires_counterparty: refs.requiresCounterparty.value === 'true',
+        counterparty_role: refs.counterpartyRole.value,
+        default_account_id: refs.defaultAccountId.value ? Number(refs.defaultAccountId.value) : null,
+        advance_mode: refs.advanceMode.value,
+        sort_order: Number(refs.sortOrder.value || 0),
+        created_date: refs.createdDate.value.trim(),
+        closed_date: refs.closedDate.value.trim()
+      };
+    }
+
+    function validateForm(payload) {
+      if (!payload.operation_type_code || !payload.operation_type_name) return 'Kod və ad məcburidir.';
+      if (!payload.sort_order) return 'Sıralama məcburidir.';
+      if (!validateDate(payload.created_date) || (payload.closed_date && !validateDate(payload.closed_date))) return 'Tarix formatı DD.MM.YYYY olmalıdır.';
+      if (payload.closed_date && compareDates(payload.closed_date, payload.created_date) < 0) return 'Bağlanma tarixi yaradılma tarixindən kiçik ola bilməz.';
+      const existing = state.rows.find(row => row.operation_type_code === payload.operation_type_code && row.operation_type_code !== state.selectedId);
+      if (existing) return 'E-1201: Əməliyyat tipi kodu artıq mövcuddur.';
+      const paymentCodes = ['SUPPLIER_PAYMENT', 'PAYROLL_PAYMENT', 'ADVANCE_PAYMENT', 'PETTY_CASH'];
+      const receiptCodes = ['CUSTOMER_RECEIPT', 'OTHER_OPERATING_INCOME'];
+      if (payload.transaction_type === 'PAYMENT' && !paymentCodes.includes(payload.operation_type_code)) return 'E-1202: Ödəniş üçün icazə verilməyən kod.';
+      if (payload.transaction_type === 'RECEIPT' && !receiptCodes.includes(payload.operation_type_code)) return 'E-1202: Daxilolma üçün icazə verilməyən kod.';
+      if (payload.requires_counterparty && ['NONE', 'OPTIONAL'].includes(payload.counterparty_role)) return 'E-1204: Kontragent məcburidirsə rol boş qala bilməz.';
+      if (payload.advance_mode === 'ADVANCE_PAID' && payload.transaction_type !== 'PAYMENT') return 'E-1203: Verilmiş avans yalnız ödəniş üçün mümkündür.';
+      if (payload.advance_mode === 'ADVANCE_RECEIVED' && payload.transaction_type !== 'RECEIPT') return 'E-1203: Alınmış avans yalnız daxilolma üçün mümkündür.';
+      return '';
+    }
+
+    function saveForm() {
+      const payload = collectForm();
+      const error = validateForm(payload);
+      if (error) {
+        setStatus(error, 'err');
+        return;
+      }
+      if (state.selectedId) {
+        const idx = state.rows.findIndex(row => row.operation_type_code === state.selectedId);
+        state.rows[idx] = payload;
+        state.selectedId = payload.operation_type_code;
+        setStatus('Əməliyyat tipi yeniləndi.', 'ok');
+      } else {
+        state.rows.push(payload);
+        state.selectedId = payload.operation_type_code;
+        setStatus('Yeni əməliyyat tipi yaradıldı.', 'ok');
+      }
+      metrics();
+      renderTable();
+    }
+
+    function closeRecord() {
+      if (!state.selectedId) {
+        setStatus('Bağlamaq üçün əvvəlcə qeyd seçin.', 'err');
+        return;
+      }
+      const row = state.rows.find(item => item.operation_type_code === state.selectedId);
+      row.closed_date = row.closed_date || '31.03.2026';
+      refs.closedDate.value = row.closed_date;
+      metrics();
+      renderTable();
+      setStatus('Əməliyyat tipi passivləşdirildi.', 'ok');
+    }
+
+    function deleteRecord() {
+      if (!state.selectedId) {
+        setStatus('Silmək üçün qeyd seçin.', 'err');
+        return;
+      }
+      state.rows = state.rows.filter(row => row.operation_type_code !== state.selectedId);
+      resetForm();
+      metrics();
+      setStatus('Qeyd mockup siyahısından silindi.', 'ok');
+    }
+
+    refs.search.addEventListener('input', renderTable);
+    refs.docFilter.addEventListener('change', renderTable);
+    refs.statusFilter.addEventListener('change', renderTable);
+    document.getElementById('btn-new').addEventListener('click', resetForm);
+    document.getElementById('btn-save').addEventListener('click', saveForm);
+    document.getElementById('btn-close').addEventListener('click', closeRecord);
+    document.getElementById('btn-delete').addEventListener('click', deleteRecord);
+
+    populateAccounts();
+    metrics();
+    renderTable();
+    resetForm();
+  </script>
+</body>
+</html>

@@ -1,0 +1,115 @@
+FUNKSIONAL TƏLƏBLƏR SƏNƏDİ (FRD)
+
+1. Sənəd başlığı
+- Sənədin adı: Məzənnə soraqçası
+- Layihə adı: SMB ERP
+- Sənəd nömrəsi: FRD-FX-001
+- Mövzu: Valyutalararası məzənnələrin ayrıca master-data kimi idarə olunması
+- Tarix: 31.03.2026
+- Versiya: v1.0
+
+2. Giriş və məqsəd
+Məzənnə modulu valyuta kartından ayrı saxlanılan, tarixli və mənbəyə görə idarə olunan məzənnə dəyərlərinin əsas mənbəyidir.
+Bank, alış və satış sənədlərində görünən `exchange_rate` sahəsi sərbəst yazılan rəqəm deyil; bu modulun tətbiq etdiyi qaydaya əsasən
+seçilən aktiv məzənnənin sənəddə ayrıca snapshot kimi saxlanılmış dəyəridir.
+
+- Bank-spesifik məzənnə ümumi məzənnədən üstün tutulmalıdır.
+- Alış, satış və bank sənədləri tarixə uyğun aktiv məzənnəni avtomatik götürməlidir.
+- Bağlanmış məzənnə yeni sənədlərdə avtomatik seçilməməlidir.
+
+3. İstifadəçi modeli (RBAC)
+Sabit rol siyahısı verilmir.
+Aktyor bütün ssenarilərdə `İstifadəçi` kimi göstərilir.
+İcazələr RBAC qatından idarə olunur.
+
+4. Məlumat modeli
+4.1 Əsas cədvəl: `exchange_rate`
+Sütun | Tip | PK/FK | Məcburi | Qeyd
+rate_id | int | PK | Bəli | Sistem ID
+rate_date | date | - | Bəli | Məzənnənin qüvvəyə minmə tarixi
+from_currency_id | int | FK | Bəli | Mənbə valyuta
+to_currency_id | int | FK | Bəli | Hədəf valyuta
+rate_source | varchar(30) | - | Bəli | `CBAR / MANUAL / BANK_SPECIFIC`
+rate_type | varchar(20) | - | Bəli | `SELL / BUY / AVERAGE / ACCOUNTING`
+bank_account_id | int | FK | Xeyr | Yalnız bank-spesifik məzənnə olduqda
+rate_value | decimal(18,6) | - | Bəli | > 0
+note_text | varchar(250) | - | Xeyr | Qeyd
+created_date | date | - | Bəli | Başlama tarixi
+closed_date | date | - | Xeyr | Bağlanma tarixi
+
+4.2 Xarici əlaqələri
+Sütun | İstinad cədvəl | İstinad sütun | Modul
+from_currency_id | currency | currency_id | Valyuta soraqçası
+to_currency_id | currency | currency_id | Valyuta soraqçası
+bank_account_id | bank_account | bank_account_id | Bank hesabları soraqçası
+rate_id | bank_transaction / purchase_document / sales_document | source_exchange_rate_id | Bank sənədləri / Alış sənədləri / Satış sənədləri
+
+4.3 Modul daxili axtarış qaydaları
+a) Mənbə valyuta və hədəf valyuta axtarışı:
+	yalnız aktiv valyutalar göstərilir.
+b) `rate_source = BANK_SPECIFIC` olduqda bank hesabı axtarışı aktivləşir.
+c) Sənəd modullarında seçim qaydası:
+	əvvəl bank-spesifik məzənnə, o yoxdursa ümumi aktiv `CBAR` və ya `MANUAL` məzənnə.
+
+5. Əlaqələr
+- `exchange_rate.from_currency_id` -> `currency.currency_id`
+- `exchange_rate.to_currency_id` -> `currency.currency_id`
+- `exchange_rate.bank_account_id` -> `bank_account.bank_account_id`
+- `bank_transaction.source_exchange_rate_id` -> `exchange_rate.rate_id` (opsional)
+- `purchase_document.source_exchange_rate_id` və `sales_document.source_exchange_rate_id` -> `exchange_rate.rate_id` (opsional)
+- `bank_transaction.exchange_rate`, `purchase_document.exchange_rate`, `sales_document.exchange_rate` sahələri isə seçilmiş `rate_value` snapshot-unun ayrıca saxlanmış dəyəridir və FK deyil.
+
+6. Biznes qaydaları
+BR-01: `from_currency_id <> to_currency_id` olmalıdır.
+BR-02: `rate_value > 0` olmalıdır.
+BR-03: `rate_source=BANK_SPECIFIC` olduqda `bank_account_id` məcburidir.
+BR-04: `rate_source<>BANK_SPECIFIC` olduqda `bank_account_id` boş olmalıdır.
+BR-05: Eyni `rate_date + from_currency_id + to_currency_id + rate_source + rate_type + bank_account_id` kombinasiyası təkrarlana bilməz.
+BR-06: `closed_date < created_date` ola bilməz.
+BR-07: Bank modulu sənəd yaradarkən əvvəl bank-spesifik məzənnəni, o yoxdursa `CBAR` və ya `MANUAL` aktiv məzənnəni götürə bilər.
+BR-07A: Sənədə tətbiq edilən məzənnə dəyəri ayrıca snapshot kimi saxlanmalıdır; sonradan məzənnə kartı dəyişsə belə mövcud sənəd dəyəri avtomatik dəyişməməlidir.
+BR-08: Aktiv olmayan məzənnə yeni sənəddə seçilməməlidir.
+BR-09: Fiziki silmə yalnız heç bir əməliyyat sənədi istinad etmədikdə mümkündür.
+
+7. İstifadə ssenariləri
+7.1 CBAR məzənnəsi daxil edilməsi
+1) İstifadəçi `Yeni` klik edir.
+2) `rate_date`, `from_currency_id`, `to_currency_id`, `rate_source=CBAR`, `rate_type=ACCOUNTING`, `rate_value` daxil edir.
+3) `Yadda Saxla` klik edir.
+4) Sistem qeydi yaradır.
+
+7.2 Bank-spesifik məzənnə daxil edilməsi
+1) İstifadəçi `rate_source=BANK_SPECIFIC` seçir.
+2) Müvafiq `bank_account_id` göstərir.
+3) Məzənnəni saxlayır.
+4) Bank modulu həmin bank hesabı seçildikdə bu məzənnədən istifadə edir.
+
+7.3 Alış sənədində avtomatik seçim
+1) İstifadəçi Alış sənədlərində xarici valyuta sənədi yaradır.
+2) Sistem `document_date`, `currency_id` və müəssisənin baza valyutası əsasında uyğun məzənnəni tapır.
+3) Seçilmiş məzənnənin `rate_id` dəyəri opsional istinad kimi, `rate_value` isə sənədə snapshot kimi yazılır.
+
+7.4 Tarix üzrə məzənnə axtarışı
+1) İstifadəçi tarix, valyuta cütü və mənbə üzrə filtr verir.
+2) Sistem uyğun aktiv məzənnələri göstərir.
+
+8. Xəta mesajları
+E-1302: Məzənnə dəyəri sıfırdan böyük olmalıdır.
+E-1303: Bank-spesifik məzənnə üçün bank hesabı seçilməlidir.
+E-1304: Eyni tarix və kontekst üçün dublikat məzənnə mövcuddur.
+
+9. Audit və izlənmə
+- `exchange_rate` üzrə CREATE/UPDATE/CLOSE əməliyyatları `audit_log` cədvəlində saxlanır.
+- `rate_value`, `rate_source`, `rate_type`, `bank_account_id` dəyişiklikləri ayrıca audit olunur.
+
+10. İnteqrasiya qeydləri
+INT-01 (Valyuta soraqçası): `exchange_rate.from_currency_id / to_currency_id → currency.currency_id`
+INT-02 (Bank hesabları soraqçası): `exchange_rate.bank_account_id → bank_account.bank_account_id`
+INT-03 (Bank sənədləri): `bank_transaction.source_exchange_rate_id → exchange_rate.rate_id`, `bank_transaction.exchange_rate ← exchange_rate.rate_value` snapshot
+INT-04 (Alış sənədləri): `purchase_document.source_exchange_rate_id → exchange_rate.rate_id`, `purchase_document.exchange_rate ← exchange_rate.rate_value` snapshot
+INT-05 (Satış sənədləri): `sales_document.source_exchange_rate_id → exchange_rate.rate_id`, `sales_document.exchange_rate ← exchange_rate.rate_value` snapshot
+
+11. Ekran təsviri
+- Siyahı sütunları: Tarix, Valyuta cütü, Mənbə, Tip, Bank hesabı, Dəyər, Status.
+- Form sahələri: valyuta cütü, mənbə, bank hesabı, məzənnə dəyəri, tarixlər.
+- Dizayn maket xarakterlidir; istehsal mühiti üçün son interfeys deyil.

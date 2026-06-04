@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bank hesabları</title>
+  <style>
+    :root {
+      --bg: #f4f7fb;
+      --card: #ffffff;
+      --line: #d9e2ec;
+      --text: #243144;
+      --muted: #66758a;
+      --primary: #2563eb;
+      --ok: #0f766e;
+      --warn: #92400e;
+      --danger: #b91c1c;
+      --soft: #eef4ff;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+    .page {
+      max-width: 1360px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .title-wrap h1 {
+      margin: 0;
+      font-size: 24px;
+    }
+    .title-wrap p {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .warning {
+      margin-bottom: 16px;
+      background: #fff7ed;
+      border: 1px solid #fdba74;
+      color: var(--warn);
+      border-radius: 12px;
+      padding: 12px 14px;
+      font-size: 13px;
+    }
+    .layout {
+      display: grid;
+      grid-template-columns: 1.15fr .95fr;
+      gap: 16px;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04);
+    }
+    .card-head {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+    .card-head h2 {
+      margin: 0;
+      font-size: 16px;
+    }
+    .card-head-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .filters, .form-grid {
+      display: grid;
+      gap: 12px;
+    }
+    .filters {
+      grid-template-columns: 1.1fr .8fr .8fr .7fr;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--line);
+      background: #fbfcfe;
+    }
+    .field label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 600;
+    }
+    .field input, .field select, .field textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-size: 14px;
+      background: #fff;
+      color: var(--text);
+      outline: none;
+    }
+    .field textarea {
+      min-height: 82px;
+      resize: vertical;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    th, td {
+      padding: 11px 12px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+    }
+    th {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+      color: var(--muted);
+      background: #fbfcfe;
+      position: sticky;
+      top: 0;
+    }
+    tbody tr { cursor: pointer; }
+    tbody tr:hover { background: #fafcff; }
+    tbody tr.selected { background: var(--soft); }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      padding: 4px 8px;
+      font-size: 12px;
+      font-weight: 600;
+      background: #eff6ff;
+      color: #1d4ed8;
+    }
+    .pill.ok { background: #ecfdf5; color: var(--ok); }
+    .pill.off { background: #fef2f2; color: var(--danger); }
+    .body-pad { padding: 16px; }
+    .form-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .span-2 { grid-column: span 2; }
+    .detail-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    .detail-box {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 12px;
+      background: #fbfcfe;
+    }
+    .detail-box label {
+      display: block;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+      color: var(--muted);
+      margin-bottom: 6px;
+      font-weight: 700;
+    }
+    .detail-box strong {
+      display: block;
+      font-size: 14px;
+    }
+    .empty-state {
+      border: 1px dashed var(--line);
+      background: #fbfcfe;
+      border-radius: 12px;
+      min-height: 160px;
+    }
+    .rel-list {
+      margin: 0;
+      padding-left: 18px;
+      color: var(--text);
+      font-size: 13px;
+      line-height: 1.7;
+    }
+    .actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      padding-top: 6px;
+    }
+    button {
+      height: 38px;
+      border-radius: 10px;
+      border: 1px solid var(--line);
+      background: #fff;
+      padding: 0 14px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .primary {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+    }
+    .danger {
+      background: #fff5f5;
+      color: var(--danger);
+      border-color: #fecaca;
+    }
+    .status {
+      min-height: 20px;
+      font-size: 13px;
+      color: var(--muted);
+      padding-top: 6px;
+    }
+    .status.ok { color: var(--ok); }
+    .status.err { color: var(--danger); }
+    .modal-wrap {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, .35);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 40;
+    }
+    .modal {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      width: min(980px, 100%);
+      max-height: 90vh;
+      overflow: auto;
+      padding: 14px;
+      box-shadow: 0 20px 45px rgba(15, 23, 42, .12);
+    }
+    .modal-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+      flex-wrap: wrap;
+    }
+    .modal-head-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .btn-sm {
+      height: 30px;
+      padding: 0 10px;
+      font-size: 12px;
+      border-radius: 8px;
+    }
+    .modal-actions {
+      margin-top: 12px;
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    @media (max-width: 1100px) {
+      .layout, .filters, .form-grid, .detail-grid { grid-template-columns: 1fr; }
+      .span-2 { grid-column: span 1; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="topbar">
+      <div class="title-wrap">
+        <h1>Bank hesabları</h1>
+        <p>Bank sənədləri, məzənnə və təşkilati struktur ilə əlaqəli əsas məlumat soraqçası</p>
+      </div>
+    </div>
+
+    <div class="warning">Bu ekran maket xarakterlidir, istehsal üçün son interfeys deyil. Məqsəd bank hesabı kartının strukturu və digər modullarla əlaqələrin göstərilməsidir.</div>
+
+    <div class="layout">
+      <section class="card">
+        <div class="card-head">
+          <h2>Bank hesabı siyahısı</h2>
+          <div class="card-head-actions">
+            <button id="btn-new" class="primary">Yeni</button>
+            <button id="btn-delete" class="danger">Sil</button>
+            <span class="pill">Bank hesabları</span>
+          </div>
+        </div>
+        <div class="filters">
+          <div class="field">
+            <label for="f-search">Axtarış</label>
+            <input id="f-search" placeholder="Bank, hesab adı, IBAN və ya nömrə" />
+          </div>
+          <div class="field">
+            <label for="f-entity-filter">Müəssisə</label>
+            <select id="f-entity-filter"></select>
+          </div>
+          <div class="field">
+            <label for="f-currency-filter">Valyuta</label>
+            <select id="f-currency-filter"></select>
+          </div>
+          <div class="field">
+            <label for="f-status-filter">Status</label>
+            <select id="f-status-filter">
+              <option value="ALL">Hamısı</option>
+              <option value="ACTIVE">Aktiv</option>
+              <option value="CLOSED">Bağlı</option>
+            </select>
+          </div>
+        </div>
+        <div style="max-height: 620px; overflow: auto;">
+          <table>
+            <thead>
+              <tr>
+                <th>Hesab</th>
+                <th>Bank / Hesab adı</th>
+                <th>Müəssisə</th>
+                <th>Valyuta</th>
+                <th>Əlaqəli hesab</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="table-body"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card-head">
+          <h2>Bank hesabı kartı</h2>
+        </div>
+        <div class="body-pad">
+          <div id="detail-panel"></div>
+          <div id="status" class="status"></div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <div class="modal-wrap" id="modalWrap">
+    <div class="modal">
+      <div class="modal-head">
+        <strong id="modalTitle">Yeni bank hesabı</strong>
+        <div class="modal-head-right">
+          <span class="pill ok">Bank + Valyuta + CoA</span>
+          <button id="btnModalX" class="btn-sm">Bağla</button>
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="field">
+          <label for="account_no">Hesab nömrəsi</label>
+          <input id="account_no" placeholder="ABB-AZN-4521" />
+        </div>
+        <div class="field">
+          <label for="iban">IBAN</label>
+          <input id="iban" placeholder="AZ00NABZ0000000012345678901" />
+        </div>
+        <div class="field">
+          <label for="bank_name">Bank adı</label>
+          <input id="bank_name" placeholder="ABB" />
+        </div>
+        <div class="field">
+          <label for="account_name">Hesab adı</label>
+          <input id="account_name" placeholder="AZN cari hesabı" />
+        </div>
+        <div class="field">
+          <label for="swift_code">SWIFT</label>
+          <input id="swift_code" placeholder="NABZAZ2C" />
+        </div>
+        <div class="field">
+          <label for="entity_id">Müəssisə</label>
+          <select id="entity_id"></select>
+        </div>
+        <div class="field">
+          <label for="branch_id">Filial</label>
+          <select id="branch_id"></select>
+        </div>
+        <div class="field">
+          <label for="currency_id">Valyuta</label>
+          <select id="currency_id"></select>
+        </div>
+        <div class="field span-2">
+          <label for="related_account_id">Əlaqəli hesab</label>
+          <select id="related_account_id"></select>
+        </div>
+        <div class="field span-2">
+          <label for="note_text">Qeyd</label>
+          <textarea id="note_text" placeholder="İstəyə bağlı daxili qeyd"></textarea>
+        </div>
+        <div class="field">
+          <label for="created_date">Yaradılma tarixi</label>
+          <input id="created_date" placeholder="31.03.2026" />
+        </div>
+        <div class="field">
+          <label for="closed_date">Bağlanma tarixi</label>
+          <input id="closed_date" placeholder="" />
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button id="btnModalCancel">İmtina</button>
+        <button id="btnModalSave" class="primary">Yadda Saxla</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const state = {
+      idSeq: 4,
+      selectedId: null,
+      modalMode: 'new',
+      modalRecordId: null,
+      entities: [
+        { id: 1, name: 'Farabi Trading MMC' },
+        { id: 2, name: 'Farabi Services MMC' }
+      ],
+      branches: [
+        { id: 11, entity_id: 1, name: 'Bakı Baş Filial' },
+        { id: 12, entity_id: 1, name: 'Gəncə Filialı' },
+        { id: 21, entity_id: 2, name: 'Baş ofis' }
+      ],
+      currencies: [
+        { id: 1, code: 'AZN', name: 'Azərbaycan Manatı' },
+        { id: 2, code: 'USD', name: 'ABŞ Dolları' },
+        { id: 3, code: 'EUR', name: 'Avro' }
+      ],
+      relatedAccounts: [
+        { id: 224, code: '224', name: 'Tələblərə əsasən açılan digər bank hesabları' }
+      ],
+      rows: [
+        { bank_account_id: 1, account_no: 'ABB-AZN-4521', iban: 'AZ03NABZ0135010000000004521', bank_name: 'ABB', account_name: 'AZN cari hesabı', swift_code: 'NABZAZ2C', entity_id: 1, branch_id: 11, currency_id: 1, related_account_id: 224, allow_receipt: true, allow_payment: true, is_default: true, note_text: '224 hesabına bağlı əsas əməliyyat hesabı', created_date: '01.03.2026', closed_date: '' },
+        { bank_account_id: 2, account_no: 'KAP-USD-8834', iban: 'AZ55AIIB0000000000000008834', bank_name: 'Kapital Bank', account_name: 'USD hesabı', swift_code: 'AIIBAZ2X', entity_id: 1, branch_id: 11, currency_id: 2, related_account_id: 224, allow_receipt: true, allow_payment: true, is_default: true, note_text: '224 hesabına bağlı idxal ödəniş hesabı', created_date: '05.03.2026', closed_date: '' },
+        { bank_account_id: 3, account_no: 'PASA-EUR-2201', iban: 'AZ10PAHA0000000000000002201', bank_name: 'PAŞA Bank', account_name: 'EUR hesabı', swift_code: 'PAHAAZ22', entity_id: 2, branch_id: 21, currency_id: 3, related_account_id: 224, allow_receipt: true, allow_payment: false, is_default: false, note_text: '224 hesabına bağlı valyuta hesabı', created_date: '08.03.2026', closed_date: '' }
+      ]
+    };
+
+    const refs = {
+      tableBody: document.getElementById('table-body'),
+      detailPanel: document.getElementById('detail-panel'),
+      search: document.getElementById('f-search'),
+      entityFilter: document.getElementById('f-entity-filter'),
+      currencyFilter: document.getElementById('f-currency-filter'),
+      statusFilter: document.getElementById('f-status-filter'),
+      modalWrap: document.getElementById('modalWrap'),
+      modalTitle: document.getElementById('modalTitle'),
+      accountNo: document.getElementById('account_no'),
+      iban: document.getElementById('iban'),
+      bankName: document.getElementById('bank_name'),
+      accountName: document.getElementById('account_name'),
+      swiftCode: document.getElementById('swift_code'),
+      entityId: document.getElementById('entity_id'),
+      branchId: document.getElementById('branch_id'),
+      currencyId: document.getElementById('currency_id'),
+      relatedAccountId: document.getElementById('related_account_id'),
+      noteText: document.getElementById('note_text'),
+      createdDate: document.getElementById('created_date'),
+      closedDate: document.getElementById('closed_date'),
+      btnNew: document.getElementById('btn-new'),
+      btnDelete: document.getElementById('btn-delete'),
+      btnModalX: document.getElementById('btnModalX'),
+      btnModalCancel: document.getElementById('btnModalCancel'),
+      btnModalSave: document.getElementById('btnModalSave'),
+      status: document.getElementById('status')
+    };
+
+    function setStatus(text, type = '') {
+      refs.status.textContent = text;
+      refs.status.className = `status ${type}`.trim();
+    }
+
+    function byId(list, id) {
+      return list.find(item => item.id === Number(id)) || null;
+    }
+
+    function isActive(row) {
+      return !String(row.closed_date || '').trim();
+    }
+
+    function entityName(id) {
+      return byId(state.entities, id)?.name || '-';
+    }
+
+    function branchName(id) {
+      return byId(state.branches, id)?.name || '-';
+    }
+
+    function currencyObj(id) {
+      return byId(state.currencies, id) || { code: '-', name: '-' };
+    }
+
+    function relatedAccountLabel(id) {
+      const item = byId(state.relatedAccounts, id);
+      return item ? `${item.code} — ${item.name}` : '-';
+    }
+
+    function populateFilters() {
+      refs.entityFilter.innerHTML = '<option value="ALL">Bütün müəssisələr</option>' + state.entities.map(item => `<option value="${item.id}">${item.name}</option>`).join('');
+      refs.currencyFilter.innerHTML = '<option value="ALL">Bütün valyutalar</option>' + state.currencies.map(item => `<option value="${item.id}">${item.code}</option>`).join('');
+    }
+
+    function populateFormRefs() {
+      refs.entityId.innerHTML = state.entities.map(item => `<option value="${item.id}">${item.name}</option>`).join('');
+      refs.currencyId.innerHTML = state.currencies.map(item => `<option value="${item.id}">${item.code} — ${item.name}</option>`).join('');
+      refs.relatedAccountId.innerHTML = state.relatedAccounts.map(item => `<option value="${item.id}">${item.code} — ${item.name}</option>`).join('');
+      populateBranchOptions();
+    }
+
+    function populateBranchOptions(selected) {
+      const entityId = Number(refs.entityId.value || 0);
+      const options = state.branches.filter(item => item.entity_id === entityId);
+      refs.branchId.innerHTML = '<option value="">— Filial seçilməsin —</option>' + options.map(item => `<option value="${item.id}">${item.name}</option>`).join('');
+      if (selected && options.some(item => item.id === Number(selected))) {
+        refs.branchId.value = String(selected);
+      }
+    }
+
+    function filteredRows() {
+      const q = refs.search.value.trim().toLowerCase();
+      const entityId = refs.entityFilter.value;
+      const currencyId = refs.currencyFilter.value;
+      const status = refs.statusFilter.value;
+      return state.rows.filter(row => {
+        const text = [row.account_no, row.iban, row.bank_name, row.account_name].join(' ').toLowerCase();
+        if (q && !text.includes(q)) return false;
+        if (entityId !== 'ALL' && row.entity_id !== Number(entityId)) return false;
+        if (currencyId !== 'ALL' && row.currency_id !== Number(currencyId)) return false;
+        if (status === 'ACTIVE' && !isActive(row)) return false;
+        if (status === 'CLOSED' && isActive(row)) return false;
+        return true;
+      });
+    }
+
+    function renderDetail() {
+      const row = state.rows.find(item => item.bank_account_id === state.selectedId);
+      if (!row) {
+        refs.detailPanel.innerHTML = `
+          <div class="empty-state"></div>
+        `;
+        return;
+      }
+      const relationItems = [
+        `Bank sənədləri bu kartı <strong>${row.account_no}</strong> hesab nömrəsi ilə istifadə edir.`,
+        `Valyuta əlaqəsi: <strong>${currencyObj(row.currency_id).code}</strong>.`,
+        `Əlaqəli hesab əlaqəsi: <strong>${relatedAccountLabel(row.related_account_id)}</strong>.`,
+        `Təşkilati bağ: <strong>${entityName(row.entity_id)}</strong>${row.branch_id ? ` / ${branchName(row.branch_id)}` : ''}.`
+      ];
+      refs.detailPanel.innerHTML = `
+        <div class="detail-grid">
+          <div class="detail-box"><label>Hesab nömrəsi</label><strong>${row.account_no}</strong></div>
+          <div class="detail-box"><label>IBAN</label><strong>${row.iban || '-'}</strong></div>
+          <div class="detail-box"><label>Bank / Hesab adı</label><strong>${row.bank_name} — ${row.account_name}</strong></div>
+          <div class="detail-box"><label>SWIFT</label><strong>${row.swift_code || '-'}</strong></div>
+          <div class="detail-box"><label>Müəssisə / Filial</label><strong>${entityName(row.entity_id)}${row.branch_id ? ` / ${branchName(row.branch_id)}` : ''}</strong></div>
+          <div class="detail-box"><label>Valyuta / Əlaqəli hesab</label><strong>${currencyObj(row.currency_id).code} / ${relatedAccountLabel(row.related_account_id)}</strong></div>
+          <div class="detail-box"><label>Aktivlik</label><strong>${isActive(row) ? 'Aktiv' : `Bağlı (${row.closed_date})`}</strong></div>
+        </div>
+        <div class="detail-box" style="margin-bottom:12px;">
+          <label>Qeyd</label>
+          <strong>${row.note_text || 'Qeyd daxil edilməyib.'}</strong>
+        </div>
+        <div class="detail-box">
+          <label>Modullar arası əlaqələr</label>
+          <ul class="rel-list">${relationItems.map(item => `<li>${item}</li>`).join('')}</ul>
+        </div>
+      `;
+    }
+
+    function renderTable() {
+      const rows = filteredRows();
+      refs.tableBody.innerHTML = rows.map(row => {
+        const currency = currencyObj(row.currency_id).code;
+        return `
+          <tr data-id="${row.bank_account_id}" class="${row.bank_account_id === state.selectedId ? 'selected' : ''}">
+            <td><strong>${row.account_no}</strong><br><span style="color:var(--muted)">${row.iban || 'IBAN yoxdur'}</span></td>
+            <td>${row.bank_name}<br><span style="color:var(--muted)">${row.account_name}</span></td>
+            <td>${entityName(row.entity_id)}<br><span style="color:var(--muted)">${branchName(row.branch_id)}</span></td>
+            <td>${currency}</td>
+            <td>${relatedAccountLabel(row.related_account_id)}</td>
+            <td>${isActive(row) ? '<span class="pill ok">Aktiv</span>' : '<span class="pill off">Bağlı</span>'}${row.is_default ? '<br><span class="pill">Susmaya görə</span>' : ''}</td>
+          </tr>
+        `;
+      }).join('');
+
+      refs.tableBody.querySelectorAll('tr').forEach(tr => {
+        tr.addEventListener('click', () => openRecord(Number(tr.dataset.id)));
+        tr.addEventListener('dblclick', () => {
+          openRecord(Number(tr.dataset.id));
+          openModal(true);
+        });
+      });
+    }
+
+    function validateDate(text) {
+      if (!String(text || '').trim()) return true;
+      return /^(\d{2})\.(\d{2})\.(\d{4})$/.test(text);
+    }
+
+    function compareDates(a, b) {
+      const [ad, am, ay] = a.split('.').map(Number);
+      const [bd, bm, by] = b.split('.').map(Number);
+      return new Date(ay, am - 1, ad) - new Date(by, bm - 1, bd);
+    }
+
+    function collectForm() {
+      const currentRow = state.rows.find(row => row.bank_account_id === state.modalRecordId);
+      return {
+        bank_account_id: state.modalMode === 'edit' ? state.modalRecordId : null,
+        account_no: refs.accountNo.value.trim(),
+        iban: refs.iban.value.trim(),
+        bank_name: refs.bankName.value.trim(),
+        account_name: refs.accountName.value.trim(),
+        swift_code: refs.swiftCode.value.trim(),
+        entity_id: Number(refs.entityId.value || 0),
+        branch_id: refs.branchId.value ? Number(refs.branchId.value) : null,
+        currency_id: Number(refs.currencyId.value || 0),
+        related_account_id: Number(refs.relatedAccountId.value || 0),
+        note_text: refs.noteText.value.trim(),
+        created_date: refs.createdDate.value.trim(),
+        closed_date: refs.closedDate.value.trim(),
+        allow_receipt: currentRow?.allow_receipt ?? true,
+        allow_payment: currentRow?.allow_payment ?? true,
+        is_default: currentRow?.is_default ?? false
+      };
+    }
+
+    function validateForm(payload) {
+      if (!payload.account_no || !payload.bank_name || !payload.account_name) return 'E-1101 / Məcburi sahələr doldurulmalıdır.';
+      if (!payload.entity_id || !payload.currency_id || !payload.related_account_id) return 'Müəssisə, valyuta və əlaqəli hesab seçilməlidir.';
+      if (!payload.created_date || !validateDate(payload.created_date)) return 'Yaradılma tarixi DD.MM.YYYY formatında olmalıdır.';
+      if (payload.closed_date && !validateDate(payload.closed_date)) return 'Bağlanma tarixi DD.MM.YYYY formatında olmalıdır.';
+      if (payload.closed_date && compareDates(payload.closed_date, payload.created_date) < 0) return 'Bağlanma tarixi yaradılma tarixindən kiçik ola bilməz.';
+      const duplicateNo = state.rows.find(row => row.account_no.toLowerCase() === payload.account_no.toLowerCase() && row.bank_account_id !== payload.bank_account_id);
+      if (duplicateNo) return 'E-1101: Hesab nömrəsi artıq mövcuddur.';
+      if (payload.iban) {
+        const duplicateIban = state.rows.find(row => row.iban && row.iban.toLowerCase() === payload.iban.toLowerCase() && row.bank_account_id !== payload.bank_account_id);
+        if (duplicateIban) return 'IBAN artıq mövcuddur.';
+      }
+      const branch = state.branches.find(item => item.id === payload.branch_id);
+      if (branch && branch.entity_id !== payload.entity_id) return 'E-1102: Seçilmiş filial müəssisəyə aid deyil.';
+      const defaultConflict = state.rows.find(row => row.bank_account_id !== payload.bank_account_id && row.entity_id === payload.entity_id && row.currency_id === payload.currency_id && row.is_default && isActive(row) && !payload.closed_date && payload.is_default);
+      if (defaultConflict) return 'E-1103: Bu müəssisə və valyuta üçün artıq susmaya görə hesab var.';
+      return '';
+    }
+
+    function fillForm(row) {
+      refs.accountNo.value = row?.account_no || '';
+      refs.iban.value = row?.iban || '';
+      refs.bankName.value = row?.bank_name || '';
+      refs.accountName.value = row?.account_name || '';
+      refs.swiftCode.value = row?.swift_code || '';
+      refs.entityId.value = String(row?.entity_id || state.entities[0].id);
+      populateBranchOptions(row?.branch_id || '');
+      refs.currencyId.value = String(row?.currency_id || state.currencies[0].id);
+      refs.relatedAccountId.value = String(row?.related_account_id || state.relatedAccounts[0].id);
+      refs.noteText.value = row?.note_text || '';
+      refs.createdDate.value = row?.created_date || '31.03.2026';
+      refs.closedDate.value = row?.closed_date || '';
+    }
+
+    function clearForm() {
+      fillForm(null);
+    }
+
+    function openModal(edit = false) {
+      if (edit && !state.selectedId) {
+        setStatus('Redaktə üçün əvvəlcə bank hesabı seçin.', 'err');
+        return;
+      }
+      state.modalMode = edit ? 'edit' : 'new';
+      state.modalRecordId = edit ? state.selectedId : null;
+      refs.modalTitle.textContent = edit ? 'Bank hesabı redaktəsi' : 'Yeni bank hesabı';
+      if (edit) {
+        const row = state.rows.find(item => item.bank_account_id === state.selectedId);
+        fillForm(row);
+      } else {
+        clearForm();
+      }
+      refs.modalWrap.style.display = 'flex';
+    }
+
+    function closeModal() {
+      refs.modalWrap.style.display = 'none';
+      state.modalRecordId = null;
+    }
+
+    function openRecord(id) {
+      const row = state.rows.find(item => item.bank_account_id === id);
+      if (!row) return;
+      state.selectedId = id;
+      renderTable();
+      renderDetail();
+      setStatus(`Bank hesabı açıldı: ${row.account_no}`);
+    }
+
+    function resetForm() {
+      state.selectedId = null;
+      clearForm();
+      renderTable();
+      renderDetail();
+      setStatus('');
+    }
+
+    function saveForm() {
+      const payload = collectForm();
+      const error = validateForm(payload);
+      if (error) {
+        setStatus(error, 'err');
+        return;
+      }
+      if (payload.is_default && !payload.closed_date) {
+        state.rows.forEach(row => {
+          if (row.bank_account_id !== payload.bank_account_id && row.entity_id === payload.entity_id && row.currency_id === payload.currency_id) {
+            row.is_default = false;
+          }
+        });
+      }
+      if (payload.bank_account_id) {
+        const idx = state.rows.findIndex(row => row.bank_account_id === payload.bank_account_id);
+        state.rows[idx] = { ...state.rows[idx], ...payload };
+        state.selectedId = payload.bank_account_id;
+        setStatus('Bank hesabı yeniləndi.', 'ok');
+      } else {
+        payload.bank_account_id = ++state.idSeq;
+        state.rows.unshift(payload);
+        state.selectedId = payload.bank_account_id;
+        setStatus('Yeni bank hesabı yaradıldı.', 'ok');
+      }
+      renderTable();
+      renderDetail();
+      closeModal();
+    }
+
+    function closeRecord() {
+      if (!state.selectedId) {
+        setStatus('Bağlamaq üçün əvvəlcə bank hesabı seçin.', 'err');
+        return;
+      }
+      const row = state.rows.find(item => item.bank_account_id === state.selectedId);
+      row.closed_date = row.closed_date || '31.03.2026';
+      renderTable();
+      renderDetail();
+      setStatus('Bank hesabı passivləşdirildi.', 'ok');
+    }
+
+    function deleteRecord() {
+      if (!state.selectedId) {
+        setStatus('Silmək üçün qeyd seçin.', 'err');
+        return;
+      }
+      const row = state.rows.find(item => item.bank_account_id === state.selectedId);
+      if (row.is_default) {
+        setStatus('Susmaya görə hesab birbaşa silinmir; əvvəlcə statusu dəyişin.', 'err');
+        return;
+      }
+      state.rows = state.rows.filter(item => item.bank_account_id !== state.selectedId);
+      resetForm();
+      renderDetail();
+      setStatus('Qeyd mockup siyahısından silindi.', 'ok');
+    }
+
+    refs.entityId.addEventListener('change', () => populateBranchOptions());
+    refs.search.addEventListener('input', renderTable);
+    refs.entityFilter.addEventListener('change', renderTable);
+    refs.currencyFilter.addEventListener('change', renderTable);
+    refs.statusFilter.addEventListener('change', renderTable);
+    refs.btnNew.addEventListener('click', () => openModal(false));
+    refs.btnDelete.addEventListener('click', deleteRecord);
+    refs.btnModalX.addEventListener('click', closeModal);
+    refs.btnModalCancel.addEventListener('click', closeModal);
+    refs.btnModalSave.addEventListener('click', saveForm);
+    refs.modalWrap.addEventListener('click', (e) => {
+      if (e.target === refs.modalWrap) closeModal();
+    });
+
+    populateFilters();
+    populateFormRefs();
+    renderTable();
+    renderDetail();
+  </script>
+</body>
+</html>

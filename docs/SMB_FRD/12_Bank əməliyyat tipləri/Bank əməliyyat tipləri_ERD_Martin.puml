@@ -1,0 +1,54 @@
+@startuml
+hide circle
+skinparam linetype ortho
+skinparam monochrome true
+skinparam shadowing false
+skinparam class {
+  BackgroundColor White
+  BorderColor Black
+  ArrowColor Black
+}
+
+entity "Bank əməliyyat tipi" as bank_operation_type {
+  *operation_type_id : int
+  --
+  operation_type_code : varchar(30)
+  operation_type_name : varchar(100)
+  transaction_type : varchar(20)
+  requires_counterparty : boolean
+  counterparty_role : varchar(20)
+  default_account_id : int
+  advance_mode : varchar(20)
+  sort_order : int
+  created_date : date
+  closed_date : date
+}
+
+entity "Bank əməliyyatı (ref)" as bank_transaction {
+  *bank_txn_id : int
+  --
+  operation_type_id : int
+  transaction_type : varchar(20)
+}
+
+entity "Hesablar planı hesabı (ref)" as coa_account {
+  *account_id : int
+  --
+  account_code : varchar(20)
+  account_name : varchar(150)
+  is_posting : boolean
+  closed_date : date
+}
+
+entity "Kontragent (ref)" as counterparty_card {
+  *counterparty_id : int
+  --
+  is_customer : boolean
+  is_vendor : boolean
+}
+
+bank_operation_type ||..o{ bank_transaction : operation_type_id
+coa_account ||..o{ bank_operation_type : default_account_id
+counterparty_card }o..o{ bank_operation_type : role-based filter
+
+@enduml

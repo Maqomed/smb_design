@@ -1,0 +1,1272 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SMB ERP — Satış</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Display&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+
+/* ── Design System Tokens ─────────────────────────── */
+:root {
+  --clr-primary:         #1B3A5C;
+  --clr-primary-hover:   #24497A;
+  --clr-accent:          #2E6DA4;
+  --clr-accent-hover:    #245E90;
+  --clr-secondary:       #8BAFC8;
+  --clr-secondary-light: #9BBDCF;
+  --clr-input-label:     #2A4E70;
+  --clr-text-secondary:  #4A7296;
+  --clr-text-muted:      #7AAFC5;
+  --clr-border:          #C8DCE8;
+  --clr-border-light:    #E0EBF5;
+  --clr-bg-page:         #EEF3F8;
+  --clr-bg-hover:        #F0F6FF;
+  --clr-bg-subtle:       #F4F7FB;
+  --clr-accent-bg:       #DBEAFE;
+  --clr-accent-fg:       #1E3A7A;
+  /* Status colors */
+  --clr-success:         #22C55E;
+  --clr-success-bg:      #D1FAE5;
+  --clr-success-text:    #065F46;
+  --clr-warning:         #F59E0B;
+  --clr-warning-bg:      #FEF3C7;
+  --clr-warning-text:    #92400E;
+  --clr-error:           #EF4444;
+  --clr-error-bg:        #FEE2E2;
+  --clr-error-text:      #991B1B;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--clr-bg-page);
+  color: var(--clr-primary);
+  font-size: 14px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* ══════════════════════════════════════════════════
+   SHELL
+══════════════════════════════════════════════════ */
+.app { display: flex; flex-direction: column; height: 100vh; }
+.app-body { display: flex; flex: 1; overflow: hidden; position: relative; }
+
+/* ══════════════════════════════════════════════════
+   HEADER
+══════════════════════════════════════════════════ */
+.header {
+  height: 52px;
+  background: var(--clr-primary);
+  display: flex;
+  align-items: center;
+  padding: 0 0 0 0;
+  flex-shrink: 0;
+  z-index: 100;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.18);
+}
+
+/* Logo zone — exactly sidebar width */
+.header-logo-zone {
+  width: 240px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 0 16px;
+  height: 100%;
+  border-right: 1px solid rgba(255,255,255,0.08);
+  text-decoration: none;
+}
+.logo-mark {
+  width: 28px; height: 28px;
+  border: 1.5px solid rgba(255,255,255,0.45);
+  border-radius: 7px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  position: relative;
+}
+.logo-mark::after {
+  content: '';
+  width: 12px; height: 12px;
+  border: 1.5px solid rgba(255,255,255,0.9);
+  border-radius: 3px;
+  transform: rotate(15deg);
+}
+.logo-smb {
+  font-family: 'DM Serif Display', serif;
+  font-size: 18px;
+  color: #fff;
+  letter-spacing: -0.3px;
+}
+.logo-erp {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 9px;
+  font-weight: 700;
+  color: rgba(155,189,207,0.8);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+/* Breadcrumb */
+.header-breadcrumb {
+  flex: 1;
+  min-width: 0; /* allows flex child to shrink below content size */
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 13px;
+  color: rgba(155,189,207,0.65);
+  overflow: hidden;
+  white-space: nowrap;
+}
+.header-breadcrumb a,
+.bc-sep,
+.bc-current { flex-shrink: 1; }
+.bc-current {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.header-breadcrumb a {
+  color: rgba(155,189,207,0.65);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+.header-breadcrumb a:hover { color: rgba(255,255,255,0.9); }
+.bc-sep { opacity: 0.4; }
+.bc-current { color: rgba(255,255,255,0.92); font-weight: 500; }
+
+/* Header right */
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding-right: 16px;
+}
+.h-icon-btn {
+  width: 32px; height: 32px;
+  border-radius: 7px;
+  border: none;
+  background: transparent;
+  color: rgba(255,255,255,0.55);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  position: relative;
+}
+.h-icon-btn:hover { background: rgba(255,255,255,0.10); color: #fff; }
+.notif-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--clr-warning);
+  border: 1.5px solid var(--clr-primary);
+  position: absolute; top: 5px; right: 5px;
+}
+.h-divider { width: 1px; height: 20px; background: rgba(255,255,255,0.12); margin: 0 4px; }
+.header-user {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 3px 8px 3px 3px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.header-user:hover { background: rgba(255,255,255,0.10); }
+.avatar {
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--clr-accent), var(--clr-primary));
+  border: 1.5px solid rgba(255,255,255,0.30);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700; color: #fff;
+  flex-shrink: 0;
+}
+.user-name { font-size: 12px; font-weight: 600; color: #fff; }
+.user-role { font-size: 10px; color: rgba(155,189,207,0.75); }
+.btn-logout {
+  display: flex; align-items: center; gap: 6px;
+  padding: 0 12px; height: 32px;
+  border-radius: 7px;
+  border: 1px solid rgba(255,255,255,0.15);
+  background: transparent;
+  color: rgba(255,255,255,0.65);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px; font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.btn-logout:hover { background: rgba(239,68,68,0.15); border-color: rgba(239,68,68,0.35); color: #FCA5A5; }
+
+/* ══════════════════════════════════════════════════
+   SIDEBAR
+══════════════════════════════════════════════════ */
+.sidebar {
+  width: 240px;
+  background: #fff;
+  border-right: 1px solid var(--clr-border);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* Back to hub */
+.sidebar-back {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 13px 16px;
+  color: var(--clr-text-secondary);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: none;
+  border-bottom: 1px solid var(--clr-border-light);
+  transition: color 0.15s, background 0.15s;
+  flex-shrink: 0;
+}
+.sidebar-back:hover { color: var(--clr-primary); background: var(--clr-bg-subtle); }
+.sidebar-back svg { flex-shrink: 0; }
+
+/* Module header inside sidebar */
+.sidebar-module-hd {
+  padding: 16px 16px 8px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+.sidebar-module-icon {
+  width: 32px; height: 32px;
+  border-radius: 8px;
+  background: var(--clr-accent-bg);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--clr-accent);
+  flex-shrink: 0;
+}
+.sidebar-module-name {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--clr-primary);
+  letter-spacing: -0.1px;
+}
+
+/* Section label */
+.sidebar-section {
+  padding: 10px 16px 4px;
+}
+.sidebar-label {
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  color: var(--clr-text-muted);
+}
+
+/* Nav item */
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 0 12px;
+  height: 38px;
+  margin: 1px 8px;
+  border-radius: 7px;
+  cursor: pointer;
+  text-decoration: none;
+  color: var(--clr-text-secondary);
+  font-size: 13px;
+  font-weight: 500;
+  border: none;
+  background: transparent;
+  width: calc(100% - 16px);
+  text-align: left;
+  transition: background 0.13s, color 0.13s;
+  position: relative;
+}
+.nav-item:hover { background: var(--clr-bg-subtle); color: var(--clr-primary); }
+.nav-item.active {
+  background: var(--clr-accent-bg);
+  color: var(--clr-accent-fg);
+  font-weight: 600;
+}
+.nav-item.active::before {
+  content: '';
+  position: absolute;
+  left: -8px; top: 5px; bottom: 5px;
+  width: 3px;
+  border-radius: 0 2px 2px 0;
+  background: var(--clr-accent);
+}
+.nav-icon {
+  width: 16px; height: 16px;
+  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0.6;
+}
+.nav-item.active .nav-icon { opacity: 1; }
+.nav-item:hover .nav-icon { opacity: 0.85; }
+.nav-badge {
+  margin-left: auto;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; font-weight: 600;
+  padding: 1px 6px;
+  border-radius: 10px;
+  background: var(--clr-accent-bg);
+  color: var(--clr-accent-fg);
+}
+.nav-item.active .nav-badge { background: rgba(46,109,164,0.18); }
+
+.sidebar-divider {
+  height: 1px;
+  background: var(--clr-border-light);
+  margin: 6px 16px;
+}
+.sidebar-spacer { flex: 1; }
+
+/* ══════════════════════════════════════════════════
+   MAIN
+══════════════════════════════════════════════════ */
+.main {
+  flex: 1;
+  overflow-y: auto;
+  background: var(--clr-bg-page);
+  display: flex;
+  flex-direction: column;
+}
+
+/* Page header */
+.page-hd {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px 16px;
+  background: #fff;
+  border-bottom: 1px solid var(--clr-border-light);
+  flex-shrink: 0;
+}
+.page-title-wrap {}
+.page-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: 22px;
+  color: var(--clr-primary);
+  letter-spacing: -0.3px;
+  line-height: 1.15;
+}
+.page-meta {
+  font-size: 12px;
+  color: var(--clr-text-muted);
+  margin-top: 1px;
+  font-family: 'JetBrains Mono', monospace;
+}
+.page-actions { display: flex; gap: 8px; align-items: center; }
+
+/* Buttons (design system) */
+.btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 0 14px; height: 34px;
+  border-radius: 7px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px; font-weight: 500;
+  cursor: pointer;
+  border: none;
+  transition: all 0.14s;
+  white-space: nowrap;
+}
+.btn-primary { background: var(--clr-primary); color: #fff; }
+.btn-primary:hover { background: var(--clr-primary-hover); }
+.btn-ghost { background: transparent; color: var(--clr-primary); border: 1px solid var(--clr-border); }
+.btn-ghost:hover { background: var(--clr-bg-subtle); }
+.btn-icon { width: 34px; padding: 0; justify-content: center; }
+
+/* Toolbar */
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background: #fff;
+  border-bottom: 1px solid var(--clr-border-light);
+  flex-shrink: 0;
+}
+.search-wrap {
+  position: relative;
+  flex: 1;
+  max-width: 300px;
+}
+.search-icon {
+  position: absolute;
+  left: 10px; top: 50%;
+  transform: translateY(-50%);
+  color: var(--clr-text-muted);
+  pointer-events: none;
+  display: flex; align-items: center;
+}
+.search-input {
+  width: 100%;
+  height: 34px;
+  padding: 0 12px 0 34px;
+  border: 1px solid var(--clr-border);
+  border-radius: 7px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  color: var(--clr-primary);
+  background: var(--clr-bg-subtle);
+  outline: none;
+  transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+}
+.search-input::placeholder { color: var(--clr-text-muted); }
+.search-input:focus {
+  border-color: var(--clr-accent);
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(46,109,164,0.10);
+}
+.toolbar-sep { width: 1px; height: 20px; background: var(--clr-border-light); margin: 0 2px; }
+.filter-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 0 12px; height: 34px;
+  border-radius: 7px;
+  border: 1px solid var(--clr-border);
+  background: #fff;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px; font-weight: 500;
+  color: var(--clr-text-secondary);
+  cursor: pointer;
+  transition: background 0.14s, border-color 0.14s, color 0.14s;
+}
+.filter-btn:hover { background: var(--clr-bg-subtle); color: var(--clr-primary); border-color: var(--clr-secondary); }
+.filter-btn.active { background: var(--clr-accent-bg); border-color: var(--clr-accent); color: var(--clr-accent-fg); }
+.toolbar-spacer { flex: 1; }
+
+/* Record count */
+.record-count {
+  font-size: 12px;
+  color: var(--clr-text-muted);
+  font-family: 'JetBrains Mono', monospace;
+  white-space: nowrap;
+}
+
+/* Table area */
+.table-wrap {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 24px 24px;
+}
+.data-card {
+  background: #fff;
+  border: 1px solid var(--clr-border);
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(27,58,92,0.05);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+thead { position: sticky; top: 0; z-index: 1; }
+th {
+  background: var(--clr-bg-subtle);
+  padding: 10px 14px;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--clr-text-muted);
+  border-bottom: 1px solid var(--clr-border);
+  white-space: nowrap;
+  user-select: none;
+}
+th.sortable { cursor: pointer; }
+th.sortable:hover { color: var(--clr-primary); }
+th .sort-icon { margin-left: 4px; opacity: 0.4; display: inline-block; }
+th.sorted .sort-icon { opacity: 1; color: var(--clr-accent); }
+
+td {
+  padding: 11px 14px;
+  border-bottom: 1px solid var(--clr-border-light);
+  color: var(--clr-primary);
+  vertical-align: middle;
+}
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: var(--clr-bg-hover); }
+
+/* Cell variants */
+.cell-mono {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: var(--clr-input-label);
+  font-weight: 500;
+}
+.cell-muted { color: var(--clr-text-secondary); font-size: 12.5px; }
+.cell-amount {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--clr-primary);
+  text-align: right;
+}
+.cell-actions {
+  text-align: right;
+  width: 48px;
+}
+
+/* Badges (design system) */
+.badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 2px 8px;
+  border-radius: 99px;
+  font-size: 11px; font-weight: 600;
+  white-space: nowrap;
+}
+.badge-success { background: var(--clr-success-bg); color: var(--clr-success-text); }
+.badge-warning { background: var(--clr-warning-bg); color: var(--clr-warning-text); }
+.badge-error   { background: var(--clr-error-bg);   color: var(--clr-error-text); }
+.badge-info    { background: var(--clr-accent-bg);  color: var(--clr-accent-fg); }
+.badge-default { background: var(--clr-border-light); color: var(--clr-input-label); }
+.badge-dot {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.7;
+  flex-shrink: 0;
+}
+
+/* Row action button */
+.row-action {
+  width: 28px; height: 28px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--clr-text-muted);
+  display: inline-flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: background 0.13s, border-color 0.13s, color 0.13s;
+}
+.row-action:hover { background: var(--clr-bg-subtle); border-color: var(--clr-border); color: var(--clr-primary); }
+
+/* Pagination */
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 24px;
+  border-top: 1px solid var(--clr-border-light);
+  background: #fff;
+  flex-shrink: 0;
+}
+.pagination-info { font-size: 12px; color: var(--clr-text-muted); font-family: 'JetBrains Mono', monospace; }
+.pagination-btns { display: flex; gap: 4px; align-items: center; }
+.page-btn {
+  width: 30px; height: 30px;
+  border-radius: 6px;
+  border: 1px solid var(--clr-border);
+  background: #fff;
+  color: var(--clr-text-secondary);
+  font-size: 12px; font-weight: 500;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: background 0.13s, border-color 0.13s, color 0.13s;
+}
+.page-btn:hover { background: var(--clr-bg-subtle); color: var(--clr-primary); }
+.page-btn.active { background: var(--clr-primary); border-color: var(--clr-primary); color: #fff; }
+.page-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+.page-sep { font-size: 12px; color: var(--clr-border); padding: 0 2px; }
+
+/* ══════════════════════════════════════════════════
+   SIDEBAR COLLAPSE (desktop)
+══════════════════════════════════════════════════ */
+.sidebar {
+  position: relative;
+  transition: width 0.22s ease;
+}
+
+/* Edge button — sits on the dividing line between sidebar and main */
+.sidebar-edge-btn {
+  position: absolute;
+  left: 240px;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 18px; height: 40px;
+  border-radius: 9px;
+  background: #fff;
+  border: 1px solid var(--clr-border);
+  box-shadow: 0 2px 6px rgba(27,58,92,0.12);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  color: var(--clr-text-muted);
+  z-index: 50;
+  transition: left 0.22s ease, background 0.15s, color 0.15s,
+              border-color 0.15s, box-shadow 0.15s;
+  flex-shrink: 0;
+}
+.sidebar-edge-btn:hover {
+  background: var(--clr-primary);
+  border-color: var(--clr-primary);
+  color: #fff;
+  box-shadow: 0 2px 10px rgba(27,58,92,0.25);
+}
+
+/* Collapsed sidebar — icons only, overflow hidden so nothing bleeds */
+.sidebar.collapsed {
+  width: 56px;
+  overflow: hidden;
+}
+
+/* Hide text labels in collapsed state */
+.sidebar.collapsed .sidebar-section,
+.sidebar.collapsed .sidebar-module-name,
+.sidebar.collapsed .nav-label,
+.sidebar.collapsed .nav-back-label,
+.sidebar.collapsed .nav-badge,
+.sidebar.collapsed .sidebar-divider { display: none; }
+
+.sidebar.collapsed .sidebar-back {
+  justify-content: center;
+  padding: 13px 0;
+  gap: 0;
+}
+.sidebar.collapsed .sidebar-module-hd {
+  justify-content: center;
+  padding: 14px 0;
+  gap: 0;
+}
+.sidebar.collapsed .nav-item {
+  justify-content: center;
+  padding: 0;
+  width: 40px;
+  margin: 1px 8px;
+}
+.sidebar.collapsed .nav-item::before { display: none; }
+.sidebar.collapsed .nav-icon {
+  width: 18px;
+  opacity: 0.65;
+  justify-content: center;
+}
+.sidebar.collapsed .nav-item:hover .nav-icon,
+.sidebar.collapsed .nav-item.active .nav-icon { opacity: 1; }
+
+/* Header logo zone — stays 240px always so the toggle button is always visible */
+.header-logo-zone {
+  overflow: hidden;
+}
+/* No width change on collapse — button stays put */
+
+/* ══════════════════════════════════════════════════
+   BURGER BUTTON (design system pattern)
+══════════════════════════════════════════════════ */
+.burger-btn {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 36px; height: 36px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  margin: 0 4px 0 8px;
+  flex-shrink: 0;
+}
+.burger-btn:hover { background: rgba(255,255,255,0.10); }
+
+/* Design system burger — white version for dark header */
+.burger { display: flex; flex-direction: column; gap: 4px; padding: 4px; }
+.burger-line {
+  width: 18px; height: 2px;
+  background: rgba(255,255,255,0.85);
+  border-radius: 2px;
+  transition: all 0.2s;
+}
+.burger.open .burger-line:nth-child(1) { transform: rotate(45deg) translate(4px, 4px); }
+.burger.open .burger-line:nth-child(2) { opacity: 0; }
+.burger.open .burger-line:nth-child(3) { transform: rotate(-45deg) translate(4px, -4px); }
+
+/* ══════════════════════════════════════════════════
+   MOBILE BACKDROP
+══════════════════════════════════════════════════ */
+.sidebar-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(11, 25, 44, 0.55);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  z-index: 299;
+  opacity: 0;
+  transition: opacity 0.25s;
+}
+.sidebar-backdrop.visible {
+  display: block;
+  opacity: 1;
+}
+
+/* ══════════════════════════════════════════════════
+   RESPONSIVE
+══════════════════════════════════════════════════ */
+
+/* Tablet — compact but still side-by-side */
+@media (max-width: 1024px) {
+  .header-logo-zone { width: 200px; }
+  .sidebar { width: 200px; }
+  .sidebar.collapsed { width: 56px; }
+}
+
+/* Mobile sidebar header (close button row) */
+.sidebar-mobile-header {
+  display: none; /* shown only on mobile via media query */
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px 12px;
+  border-bottom: 1px solid var(--clr-border-light);
+  flex-shrink: 0;
+}
+.sidebar-mobile-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--clr-primary);
+}
+.sidebar-close-btn {
+  width: 32px; height: 32px;
+  border-radius: 8px;
+  border: 1px solid var(--clr-border);
+  background: var(--clr-bg-subtle);
+  color: var(--clr-text-secondary);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.sidebar-close-btn:hover { background: var(--clr-error-bg); color: var(--clr-error-text); border-color: transparent; }
+
+/* Mobile — burger + slide-in drawer */
+@media (max-width: 768px) {
+  body { overflow-y: auto; height: auto; }
+  .app { height: auto; min-height: 100vh; }
+  .app-body { overflow: visible; }
+
+  /* Show burger */
+  .burger-btn { display: flex; }
+
+  /* Show X inside sidebar */
+  .sidebar-mobile-header { display: flex; }
+
+  /* Sidebar becomes a fixed full-height overlay — covers header too */
+  .sidebar,
+  .sidebar.collapsed {
+    position: fixed;
+    top: 0;
+    left: -260px;
+    height: 100vh;
+    width: 260px !important;
+    z-index: 300;
+    box-shadow: 4px 0 24px rgba(0,0,0,0.18);
+    transition: left 0.25s ease;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+  .sidebar.open,
+  .sidebar.collapsed.open { left: 0; }
+
+  /* Override ALL collapsed styles — full labels always visible in drawer */
+  .sidebar.collapsed .sidebar-section { display: block; }
+  .sidebar.collapsed .sidebar-mobile-header { display: flex; }
+  .sidebar.collapsed .sidebar-module-name { display: block; }
+  .sidebar.collapsed .nav-label { display: inline; }
+  .sidebar.collapsed .nav-back-label { display: inline; }
+  .sidebar.collapsed .nav-badge { display: inline-flex; }
+  .sidebar.collapsed .sidebar-divider { display: block; margin: 6px 16px; }
+  .sidebar.collapsed .sidebar-back { justify-content: flex-start; padding: 13px 16px; gap: 8px; }
+  .sidebar.collapsed .sidebar-module-hd { justify-content: flex-start; padding: 16px 16px 8px; gap: 10px; }
+  .sidebar.collapsed .nav-item {
+    justify-content: flex-start;
+    padding: 0 12px;
+    width: calc(100% - 16px);
+    margin: 1px 8px;
+  }
+  .sidebar.collapsed .nav-item::before { display: block; }
+  .sidebar.collapsed .nav-icon { width: 16px; opacity: 0.6; justify-content: flex-start; }
+  .sidebar.collapsed .nav-item.active .nav-icon { opacity: 1; }
+
+  /* Hide desktop-only elements */
+  .sidebar-edge-btn { display: none; }
+  .h-hide-sm { display: none !important; }
+  .header-logo-zone { width: auto; padding: 0 12px; border-right: none; flex-shrink: 0; }
+
+  /* User: hide text, keep avatar only */
+  .user-name, .user-role { display: none; }
+
+  /* Logout: icon only */
+  .logout-label { display: none; }
+  .btn-logout { padding: 0 10px; }
+
+  /* Breadcrumb: show only current page name */
+  .header-breadcrumb { padding: 0 8px; font-size: 12px; }
+  .header-breadcrumb a,
+  .header-breadcrumb .bc-sep { display: none; }
+  .bc-current { color: rgba(255,255,255,0.85); font-weight: 500; max-width: 180px; }
+
+  /* Toolbar */
+  .toolbar { flex-wrap: wrap; gap: 6px; }
+  .search-wrap { max-width: 100%; flex: 1 1 100%; }
+  .toolbar-spacer { display: none; }
+  .record-count { order: -1; }
+
+  /* Table */
+  .table-wrap { padding: 12px; }
+  .data-card { overflow-x: auto; }
+  table { min-width: 640px; }
+
+  /* Main */
+  .main { width: 100%; min-height: calc(100vh - 52px); }
+
+  /* Pagination */
+  .pagination { flex-direction: column; gap: 10px; align-items: flex-start; padding: 12px; }
+}
+
+@media (max-width: 480px) {
+  .page-hd { flex-direction: column; gap: 12px; align-items: flex-start; }
+  .page-actions { width: 100%; justify-content: flex-end; }
+  .header-logo-zone { padding: 0 10px; }
+  .logo-smb { font-size: 16px; }
+  .logo-erp { display: none; }
+  .bc-current { max-width: 120px; }
+}
+
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ════════════════════════ HEADER ════════════════════════ -->
+  <header class="header">
+
+    <a class="header-logo-zone" href="02-dashboard.html">
+      <div class="logo-mark"></div>
+      <span class="logo-smb">SMB</span>
+      <span class="logo-erp">ERP</span>
+    </a>
+
+    <!-- Burger — mobile only, immediately after logo -->
+    <button class="burger-btn" id="burgerBtn" aria-label="Menyunu aç">
+      <div class="burger" id="burgerIcon">
+        <div class="burger-line"></div>
+        <div class="burger-line"></div>
+        <div class="burger-line"></div>
+      </div>
+    </button>
+
+    <nav class="header-breadcrumb">
+      <a href="02-dashboard.html">Ana səhifə</a>
+      <span class="bc-sep">›</span>
+      <span id="bcModule">Satış</span>
+      <span class="bc-sep">›</span>
+      <span class="bc-current" id="bcCurrent">Satış sifarişləri</span>
+    </nav>
+
+    <div class="header-right">
+      <!-- Notifications — always visible on all screen sizes -->
+      <button class="h-icon-btn" title="Bildirişlər">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <span class="notif-dot"></span>
+      </button>
+      <div class="h-divider h-hide-sm"></div>
+      <div class="header-user">
+        <div class="avatar">AR</div>
+        <div>
+          <div class="user-name">Admin Rəhimov</div>
+          <div class="user-role">Sistem administratoru</div>
+        </div>
+      </div>
+      <div class="h-divider"></div>
+      <button class="btn-logout" onclick="window.location.href='01-login.html'">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        <span class="logout-label">Çıxış</span>
+      </button>
+    </div>
+
+  </header>
+
+  <!-- Mobile backdrop -->
+  <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+  <div class="app-body">
+
+    <!-- ════════════════════════ SIDEBAR ════════════════════════ -->
+    <aside class="sidebar" id="sidebar">
+
+
+      <!-- Mobile close button — inside drawer header -->
+      <div class="sidebar-mobile-header">
+        <span class="sidebar-mobile-title">Menyu</span>
+        <button class="sidebar-close-btn" id="sidebarCloseBtn" aria-label="Bağla">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Back to hub -->
+      <a class="sidebar-back" href="02-dashboard.html">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        <span class="nav-back-label">Ana səhifə</span>
+      </a>
+
+      <!-- Module identity — rendered by JS -->
+      <div class="sidebar-module-hd">
+        <div class="sidebar-module-icon" id="sidebarModuleIcon"></div>
+        <span class="sidebar-module-name" id="sidebarModuleName"></span>
+      </div>
+
+      <!-- Nav items — rendered by JS -->
+      <div id="sidebarNav"></div>
+
+      <div class="sidebar-spacer"></div>
+
+    </aside>
+
+    <!-- Edge collapse button — sibling of sidebar, not inside it -->
+    <button class="sidebar-edge-btn" id="collapseBtn" title="Paneli bağla">
+      <svg id="collapseIcon" width="10" height="10" viewBox="0 0 24 24" fill="none"
+           stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+    </button>
+
+    <!-- ════════════════════════ MAIN ════════════════════════ -->
+    <main class="main">
+
+      <!-- Page header -->
+      <div class="page-hd">
+        <div class="page-title-wrap">
+          <div class="page-title" id="pageTitle"></div>
+          <div class="page-meta" id="pageMeta"></div>
+        </div>
+        <div class="page-actions">
+          <button class="btn btn-ghost">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            İxrac
+          </button>
+          <button class="btn btn-primary">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            <span id="newBtnLabel"></span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Toolbar -->
+      <div class="toolbar">
+        <div class="search-wrap">
+          <span class="search-icon">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          </span>
+          <input class="search-input" id="searchInput" type="text" placeholder="Axtar..."/>
+        </div>
+
+        <button class="filter-btn">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+          Filtr
+        </button>
+
+        <button class="filter-btn active">
+          Status: Hamısı
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+
+        <button class="filter-btn">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          Tarix aralığı
+        </button>
+
+        <div class="toolbar-spacer"></div>
+
+        <span class="record-count" id="recordCount"></span>
+
+        <div class="toolbar-sep"></div>
+
+        <button class="btn btn-ghost btn-icon" title="Sütunlar">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="6" height="6" rx="1"/><line x1="12" y1="6" x2="21" y2="6"/><line x1="12" y1="12" x2="21" y2="12"/><rect x="3" y="14" width="6" height="6" rx="1"/><line x1="12" y1="15" x2="21" y2="15"/><line x1="12" y1="21" x2="21" y2="21"/></svg>
+        </button>
+
+        <button class="btn btn-ghost btn-icon" title="Yenilə">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+        </button>
+      </div>
+
+      <!-- Table -->
+      <div class="table-wrap">
+        <div class="data-card">
+          <table>
+            <thead id="tableHead"></thead>
+            <tbody id="tableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Pagination -->
+      <div class="pagination">
+        <span class="pagination-info" id="paginationInfo"></span>
+        <div class="pagination-btns">
+          <button class="page-btn" disabled>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+          </button>
+          <button class="page-btn active">1</button>
+          <button class="page-btn">2</button>
+          <button class="page-btn">3</button>
+          <span class="page-sep">···</span>
+          <button class="page-btn">24</button>
+          <button class="page-btn">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+        </div>
+      </div>
+
+    </main>
+
+  </div>
+</div>
+
+<script>
+/* ── Shared SVG helpers ───────────────────────────── */
+const ICONS = {
+  fileText:   `<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/>`,
+  receipt:    `<path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1z"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="14" y2="14"/>`,
+  truck:      `<rect x="1" y="3" width="15" height="13" rx="1"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>`,
+  refresh:    `<polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>`,
+  users:      `<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>`,
+  tag:        `<path d="M20.59 13.41L13.42 20.58a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/>`,
+  percent:    `<line x1="19" y1="5" x2="5" y2="19"/><circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/>`,
+  barChart:   `<line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>`,
+  activity:   `<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>`,
+  dollar:     `<line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>`,
+  layoutList: `<rect x="3" y="5" width="6" height="6" rx="1"/><line x1="12" y1="6" x2="21" y2="6"/><line x1="12" y1="12" x2="21" y2="12"/><rect x="3" y="14" width="6" height="6" rx="1"/><line x1="12" y1="15" x2="21" y2="15"/><line x1="12" y1="21" x2="21" y2="21"/>`,
+  building:   `<path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/>`,
+  creditCard: `<rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/>`,
+  trending:   `<polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/>`,
+};
+
+function icon(key, size = 15) {
+  return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">${ICONS[key]}</svg>`;
+}
+const moreIcon = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><circle cx="5" cy="12" r="1" fill="currentColor"/><circle cx="12" cy="12" r="1" fill="currentColor"/><circle cx="19" cy="12" r="1" fill="currentColor"/></svg>`;
+const checkCell = `<td style="padding:11px 8px 11px 14px;"><input type="checkbox" style="cursor:pointer;accent-color:var(--clr-accent);"/></td>`;
+const actionCell = `<td class="cell-actions"><button class="row-action">${moreIcon}</button></td>`;
+
+/* ── Module definitions ───────────────────────────── */
+const MODULES = {
+
+  satis: {
+    name: 'Satış',
+    iconKey: 'activity',
+    firstSub: 'Satış sifarişləri',
+    newBtn: 'Yeni sifariş',
+    searchPlaceholder: 'Sifariş axtar...',
+    recordCount: '24 sifariş',
+    pageMeta: '24 qeyd · son yenilənmə 2 dəq. əvvəl',
+    paginationInfo: '1–8 / 24 qeyd göstərilir',
+    sidebar: [
+      { label: 'Sənədlər', items: [
+        { label: 'Satış sifarişləri', iconKey: 'fileText', badge: '24', active: true },
+        { label: 'Fakturalar',        iconKey: 'receipt',  badge: '8' },
+        { label: 'Qaimə-fakturalar',  iconKey: 'truck' },
+        { label: 'Qaytarmalar',       iconKey: 'refresh' },
+      ]},
+      { label: 'Kataloqlar', items: [
+        { label: 'Müştərilər',        iconKey: 'users' },
+        { label: 'Qiymət siyahıları', iconKey: 'tag' },
+        { label: 'Endirim siyahıları',iconKey: 'percent' },
+      ]},
+      { label: 'Analitika', items: [
+        { label: 'Satış hesabatı',    iconKey: 'barChart' },
+      ]},
+    ],
+    tableHead: `<tr>
+      <th style="width:32px;padding:10px 8px 10px 14px;"><input type="checkbox" style="cursor:pointer;accent-color:var(--clr-accent);"/></th>
+      <th class="sortable sorted">Sənəd № <span class="sort-icon">↑</span></th>
+      <th class="sortable">Tarix <span class="sort-icon">↕</span></th>
+      <th>Müştəri</th>
+      <th>Çatdırılma tarixi</th>
+      <th class="sortable" style="text-align:right;">Məbləğ <span class="sort-icon">↕</span></th>
+      <th>Ödəniş</th>
+      <th>Status</th>
+      <th style="width:48px;"></th>
+    </tr>`,
+    tableBody: `
+      <tr>${checkCell}<td class="cell-mono">SAT-2026-0851</td><td class="cell-muted">04.06.2026</td><td><div style="font-weight:500;">Azərbaycan Ərzaq MMC</div><div style="font-size:11px;color:var(--clr-text-muted);">Bakı</div></td><td class="cell-muted">10.06.2026</td><td class="cell-amount">6,480.00 <span style="font-size:10px;font-weight:400;color:var(--clr-text-muted);">AZN</span></td><td><span class="badge badge-success"><span class="badge-dot"></span>Ödənilib</span></td><td><span class="badge badge-info">Hazırlanır</span></td>${actionCell}</tr>
+      <tr>${checkCell}<td class="cell-mono">SAT-2026-0850</td><td class="cell-muted">04.06.2026</td><td><div style="font-weight:500;">Baku Stars LLC</div><div style="font-size:11px;color:var(--clr-text-muted);">Bakı</div></td><td class="cell-muted">07.06.2026</td><td class="cell-amount">1,240.00 <span style="font-size:10px;font-weight:400;color:var(--clr-text-muted);">AZN</span></td><td><span class="badge badge-success"><span class="badge-dot"></span>Ödənilib</span></td><td><span class="badge badge-success">Göndərilib</span></td>${actionCell}</tr>
+      <tr>${checkCell}<td class="cell-mono">SAT-2026-0849</td><td class="cell-muted">03.06.2026</td><td><div style="font-weight:500;">Naxçıvan Ticaret AS</div><div style="font-size:11px;color:var(--clr-text-muted);">Naxçıvan</div></td><td class="cell-muted">09.06.2026</td><td class="cell-amount">3,920.50 <span style="font-size:10px;font-weight:400;color:var(--clr-text-muted);">AZN</span></td><td><span class="badge badge-warning"><span class="badge-dot"></span>Gözlənilir</span></td><td><span class="badge badge-info">Hazırlanır</span></td>${actionCell}</tr>
+      <tr>${checkCell}<td class="cell-mono">SAT-2026-0848</td><td class="cell-muted">03.06.2026</td><td><div style="font-weight:500;">Gəncə Sənaye MMC</div><div style="font-size:11px;color:var(--clr-text-muted);">Gəncə</div></td><td class="cell-muted">06.06.2026</td><td class="cell-amount">18,600.00 <span style="font-size:10px;font-weight:400;color:var(--clr-text-muted);">AZN</span></td><td><span class="badge badge-success"><span class="badge-dot"></span>Ödənilib</span></td><td><span class="badge badge-success">Göndərilib</span></td>${actionCell}</tr>
+      <tr>${checkCell}<td class="cell-mono">SAT-2026-0847</td><td class="cell-muted">02.06.2026</td><td><div style="font-weight:500;">Global Trade İnc.</div><div style="font-size:11px;color:var(--clr-text-muted);">Bakı</div></td><td class="cell-muted">12.06.2026</td><td class="cell-amount">4,280.00 <span style="font-size:10px;font-weight:400;color:var(--clr-text-muted);">AZN</span></td><td><span class="badge badge-error"><span class="badge-dot"></span>Vaxtı keçib</span></td><td><span class="badge badge-default">Qaralama</span></td>${actionCell}</tr>
+      <tr>${checkCell}<td class="cell-mono">SAT-2026-0846</td><td class="cell-muted">02.06.2026</td><td><div style="font-weight:500;">Abşeron Qida SC</div><div style="font-size:11px;color:var(--clr-text-muted);">Abşeron</div></td><td class="cell-muted">05.06.2026</td><td class="cell-amount">7,100.00 <span style="font-size:10px;font-weight:400;color:var(--clr-text-muted);">AZN</span></td><td><span class="badge badge-success"><span class="badge-dot"></span>Ödənilib</span></td><td><span class="badge badge-success">Tamamlandı</span></td>${actionCell}</tr>
+      <tr>${checkCell}<td class="cell-mono">SAT-2026-0845</td><td class="cell-muted">01.06.2026</td><td><div style="font-weight:500;">Sumqayıt Kimya MMC</div><div style="font-size:11px;color:var(--clr-text-muted);">Sumqayıt</div></td><td class="cell-muted">08.06.2026</td><td class="cell-amount">2,550.00 <span style="font-size:10px;font-weight:400;color:var(--clr-text-muted);">AZN</span></td><td><span class="badge badge-warning"><span class="badge-dot"></span>Gözlənilir</span></td><td><span class="badge badge-info">Hazırlanır</span></td>${actionCell}</tr>
+      <tr>${checkCell}<td class="cell-mono">SAT-2026-0844</td><td class="cell-muted">01.06.2026</td><td><div style="font-weight:500;">Lənkəran Agro Koop.</div><div style="font-size:11px;color:var(--clr-text-muted);">Lənkəran</div></td><td class="cell-muted">11.06.2026</td><td class="cell-amount">9,870.00 <span style="font-size:10px;font-weight:400;color:var(--clr-text-muted);">AZN</span></td><td><span class="badge badge-success"><span class="badge-dot"></span>Ödənilib</span></td><td><span class="badge badge-success">Tamamlandı</span></td>${actionCell}</tr>
+    `,
+  },
+
+  maliyye: {
+    name: 'Maliyyə',
+    iconKey: 'dollar',
+    firstSub: 'Hesablar planı',
+    newBtn: 'Yeni hesab',
+    searchPlaceholder: 'Hesab axtar...',
+    recordCount: '47 hesab',
+    pageMeta: '47 qeyd · son yenilənmə 5 dəq. əvvəl',
+    paginationInfo: '1–10 / 47 qeyd göstərilir',
+    sidebar: [
+      { label: 'Sənədlər', items: [
+        { label: 'Jurnal qeydləri',     iconKey: 'fileText', badge: '6' },
+        { label: 'Ödəniş tapşırıqları', iconKey: 'creditCard' },
+      ]},
+      { label: 'Kataloqlar', items: [
+        { label: 'Hesablar planı',  iconKey: 'layoutList', active: true },
+        { label: 'Xərc mərkəzləri',iconKey: 'building' },
+        { label: 'Valyutalar',      iconKey: 'dollar' },
+      ]},
+      { label: 'Analitika', items: [
+        { label: 'Balans hesabatı', iconKey: 'barChart' },
+        { label: 'Mənfəət / Zərər', iconKey: 'trending' },
+      ]},
+    ],
+    tableHead: `<tr>
+      <th style="width:32px;padding:10px 8px 10px 14px;"><input type="checkbox" style="cursor:pointer;accent-color:var(--clr-accent);"/></th>
+      <th class="sortable sorted">Kod <span class="sort-icon">↑</span></th>
+      <th>Hesabın adı</th>
+      <th>Növ</th>
+      <th class="sortable" style="text-align:right;">Qalıq <span class="sort-icon">↕</span></th>
+      <th>Valyuta</th>
+      <th>Status</th>
+      <th style="width:48px;"></th>
+    </tr>`,
+    tableBody: `
+      <tr>${checkCell}<td class="cell-mono">1000</td><td style="font-weight:500;">Kassa</td><td><span class="badge badge-info">Aktiv</span></td><td class="cell-amount">12,450.00</td><td class="cell-muted">AZN</td><td><span class="badge badge-success">Aktiv</span></td>${actionCell}</tr>
+      <tr>${checkCell}<td class="cell-mono">1010</td><td style="font-weight:500;">Bank hesabları</td><td><span class="badge badge-info">Aktiv</span></td><td class="cell-amount">124,500.00</td><td class="cell-muted">AZN</td><td><span class="badge badge-success">Aktiv</span></td>${actionCell}</tr>
+      <tr>${checkCell}<td class="cell-mono">1100</td><td style="font-weight:500;">Debitor borclar</td><td><span class="badge badge-info">Aktiv</span></td><td class="cell-amount">48,260.00</td><td class="cell-muted">AZN</td><td><span class="badge badge-success">Aktiv</span></td>${actionCell}</tr>
+      <tr>${checkCell}<td class="cell-mono">1200</td><td style="font-weight:500;">Mal-material ehtiyatları</td><td><span class="badge badge-info">Aktiv</span></td><td class="cell-amount">83,140.00</td><td class="cell-muted">AZN</td><td><span class="badge badge-success">Aktiv</span></td>${actionCell}</tr>
+      <tr>${checkCell}<td class="cell-mono">1500</td><td style="font-weight:500;">Əsas vəsaitlər</td><td><span class="badge badge-info">Aktiv</span></td><td class="cell-amount">245,000.00</td><td class="cell-muted">AZN</td><td><span class="badge badge-success">Aktiv</span></td>${actionCell}</tr>
+      <tr>${checkCell}<td class="cell-mono">2000</td><td style="font-weight:500;">Kreditor borclar</td><td><span class="badge badge-warning">Passiv</span></td><td class="cell-amount">22,800.00</td><td class="cell-muted">AZN</td><td><span class="badge badge-success">Aktiv</span></td>${actionCell}</tr>
+      <tr>${checkCell}<td class="cell-mono">2100</td><td style="font-weight:500;">Bank kreditləri</td><td><span class="badge badge-warning">Passiv</span></td><td class="cell-amount">150,000.00</td><td class="cell-muted">AZN</td><td><span class="badge badge-success">Aktiv</span></td>${actionCell}</tr>
+      <tr>${checkCell}<td class="cell-mono">3000</td><td style="font-weight:500;">Nizamnamə kapitalı</td><td><span class="badge badge-success">Kapital</span></td><td class="cell-amount">200,000.00</td><td class="cell-muted">AZN</td><td><span class="badge badge-success">Aktiv</span></td>${actionCell}</tr>
+      <tr>${checkCell}<td class="cell-mono">4000</td><td style="font-weight:500;">Satış gəlirləri</td><td><span class="badge badge-success">Gəlir</span></td><td class="cell-amount">48,260.00</td><td class="cell-muted">AZN</td><td><span class="badge badge-success">Aktiv</span></td>${actionCell}</tr>
+      <tr>${checkCell}<td class="cell-mono">5000</td><td style="font-weight:500;">Satılan malların dəyəri</td><td><span class="badge badge-error">Xərc</span></td><td class="cell-amount">28,400.00</td><td class="cell-muted">AZN</td><td><span class="badge badge-success">Aktiv</span></td>${actionCell}</tr>
+    `,
+  },
+
+};
+
+/* ── Render sidebar ───────────────────────────────── */
+function renderSidebar(sections) {
+  return sections.map((sec, si) => {
+    const divider = si > 0 ? `<div class="sidebar-divider"></div>` : '';
+    const items = sec.items.map(item => {
+      const badge = item.badge ? `<span class="nav-badge">${item.badge}</span>` : '';
+      return `<button class="nav-item ${item.active ? 'active' : ''}"
+        title="${item.label}"
+        onclick="setActive(this,'${item.label}')">
+        <span class="nav-icon">${icon(item.iconKey)}</span>
+        <span class="nav-label">${item.label}</span>${badge}
+      </button>`;
+    }).join('');
+    return `${divider}<div class="sidebar-section"><span class="sidebar-label">${sec.label}</span></div>${items}`;
+  }).join('');
+}
+
+/* ── Boot ─────────────────────────────────────────── */
+const key = new URLSearchParams(window.location.search).get('m') || 'satis';
+const mod = MODULES[key] || MODULES.satis;
+
+document.title                                        = `SMB ERP — ${mod.name}`;
+document.getElementById('bcModule').textContent      = mod.name;
+document.getElementById('bcCurrent').textContent     = mod.firstSub;
+document.getElementById('sidebarModuleIcon').innerHTML = icon(mod.iconKey, 16);
+document.getElementById('sidebarModuleName').textContent = mod.name;
+document.getElementById('sidebarNav').innerHTML      = renderSidebar(mod.sidebar);
+document.getElementById('pageTitle').textContent     = mod.firstSub;
+document.getElementById('pageMeta').textContent      = mod.pageMeta;
+document.getElementById('newBtnLabel').textContent   = mod.newBtn;
+document.getElementById('searchInput').placeholder   = mod.searchPlaceholder;
+document.getElementById('recordCount').textContent   = mod.recordCount;
+document.getElementById('tableHead').innerHTML       = mod.tableHead;
+document.getElementById('tableBody').innerHTML       = mod.tableBody;
+document.getElementById('paginationInfo').textContent = mod.paginationInfo;
+
+/* ── Nav active toggle ────────────────────────────── */
+function setActive(btn, title) {
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('pageTitle').textContent = title;
+  document.getElementById('bcCurrent').textContent = title;
+  /* Close mobile drawer on nav click */
+  closeMobileDrawer();
+}
+
+/* ── Sidebar collapse (desktop) ───────────────────── */
+const sidebar      = document.getElementById('sidebar');
+const collapseBtn  = document.getElementById('collapseBtn');
+const collapseIcon = document.getElementById('collapseIcon');
+
+const ICON_COLLAPSE = `<polyline points="15 18 9 12 15 6"/>`;
+const ICON_EXPAND   = `<polyline points="9 18 15 12 9 6"/>`;
+
+function getSidebarWidth() {
+  if (window.innerWidth <= 1024) return 200;
+  return 240;
+}
+
+function updateEdgeBtn(collapsed) {
+  collapseIcon.innerHTML  = collapsed ? ICON_EXPAND : ICON_COLLAPSE;
+  collapseBtn.title       = collapsed ? 'Paneli aç' : 'Paneli bağla';
+  collapseBtn.style.left  = (collapsed ? 56 : getSidebarWidth()) + 'px';
+}
+
+function toggleSidebar() {
+  const isNowCollapsed = sidebar.classList.toggle('collapsed');
+  updateEdgeBtn(isNowCollapsed);
+}
+
+collapseBtn.addEventListener('click', toggleSidebar);
+
+/* Keep edge button position accurate on resize */
+window.addEventListener('resize', () => {
+  if (!sidebar.classList.contains('collapsed')) {
+    collapseBtn.style.left = getSidebarWidth() + 'px';
+  }
+});
+
+/* ── Mobile burger ────────────────────────────────── */
+const burgerBtn      = document.getElementById('burgerBtn');
+const burgerIcon     = document.getElementById('burgerIcon');
+const backdrop       = document.getElementById('sidebarBackdrop');
+
+function openMobileDrawer() {
+  sidebar.classList.add('open');
+  backdrop.classList.add('visible');
+}
+function closeMobileDrawer() {
+  sidebar.classList.remove('open');
+  backdrop.classList.remove('visible');
+}
+
+burgerBtn.addEventListener('click', () => {
+  sidebar.classList.contains('open') ? closeMobileDrawer() : openMobileDrawer();
+});
+backdrop.addEventListener('click', closeMobileDrawer);
+document.getElementById('sidebarCloseBtn').addEventListener('click', closeMobileDrawer);
+
+/* Close drawer on resize to desktop */
+window.addEventListener('resize', () => {
+  if (window.innerWidth > 768) closeMobileDrawer();
+});
+</script>
+
+</body>
+</html>
