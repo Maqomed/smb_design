@@ -210,13 +210,13 @@ body {
 ══════════════════════════════════════════════════ */
 .sidebar {
   width: 240px;
-  background: #fff;
-  border-right: 1px solid var(--clr-border);
+  background: #1B2C43;
+  border-right: none;
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
-  overflow-y: auto;
-  overflow-x: hidden;
+  overflow: hidden;
+  position: relative;
 }
 
 /* Back to hub */
@@ -225,16 +225,16 @@ body {
   align-items: center;
   gap: 8px;
   padding: 13px 16px;
-  color: var(--clr-text-secondary);
+  color: #7A9BB8;
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
   text-decoration: none;
-  border-bottom: 1px solid var(--clr-border-light);
+  border-bottom: 1px solid rgba(255,255,255,0.07);
   transition: color 0.15s, background 0.15s;
   flex-shrink: 0;
 }
-.sidebar-back:hover { color: var(--clr-primary); background: var(--clr-bg-subtle); }
+.sidebar-back:hover { color: #E2EEF8; background: rgba(255,255,255,0.06); }
 .sidebar-back svg { flex-shrink: 0; }
 
 /* Module header inside sidebar */
@@ -248,15 +248,15 @@ body {
 .sidebar-module-icon {
   width: 32px; height: 32px;
   border-radius: 8px;
-  background: var(--clr-accent-bg);
+  background: rgba(255,255,255,0.10);
   display: flex; align-items: center; justify-content: center;
-  color: var(--clr-accent);
+  color: #A8C4DC;
   flex-shrink: 0;
 }
 .sidebar-module-name {
   font-size: 13.5px;
   font-weight: 700;
-  color: var(--clr-primary);
+  color: #E8F2FA;
   letter-spacing: -0.1px;
 }
 
@@ -269,7 +269,7 @@ body {
   font-weight: 700;
   letter-spacing: 0.10em;
   text-transform: uppercase;
-  color: var(--clr-text-muted);
+  color: #4E6E8A;
 }
 
 /* Nav item */
@@ -283,9 +283,9 @@ body {
   border-radius: 7px;
   cursor: pointer;
   text-decoration: none;
-  color: var(--clr-text-secondary);
+  color: #EEF4FA;
   font-size: 13px;
-  font-weight: 500;
+  font-weight: 600;
   border: none;
   background: transparent;
   width: calc(100% - 16px);
@@ -293,10 +293,10 @@ body {
   transition: background 0.13s, color 0.13s;
   position: relative;
 }
-.nav-item:hover { background: var(--clr-bg-subtle); color: var(--clr-primary); }
+.nav-item:hover { background: rgba(255,255,255,0.06); color: #fff; }
 .nav-item.active {
-  background: var(--clr-accent-bg);
-  color: var(--clr-accent-fg);
+  background: rgba(255,255,255,0.10);
+  color: #E8F2FA;
   font-weight: 600;
 }
 .nav-item.active::before {
@@ -305,30 +305,30 @@ body {
   left: -8px; top: 5px; bottom: 5px;
   width: 3px;
   border-radius: 0 2px 2px 0;
-  background: var(--clr-accent);
+  background: #5B9BD5;
 }
 .nav-icon {
   width: 16px; height: 16px;
   flex-shrink: 0;
   display: flex; align-items: center; justify-content: center;
-  opacity: 0.6;
+  opacity: 0.75;
 }
 .nav-item.active .nav-icon { opacity: 1; }
-.nav-item:hover .nav-icon { opacity: 0.85; }
+.nav-item:hover .nav-icon { opacity: 0.9; }
 .nav-badge {
   margin-left: auto;
   font-family: 'JetBrains Mono', monospace;
   font-size: 9px; font-weight: 600;
   padding: 1px 6px;
   border-radius: 10px;
-  background: var(--clr-accent-bg);
-  color: var(--clr-accent-fg);
+  background: rgba(255,255,255,0.10);
+  color: #A8C4DC;
 }
-.nav-item.active .nav-badge { background: rgba(46,109,164,0.18); }
+.nav-item.active .nav-badge { background: rgba(91,155,213,0.25); color: #C8E0F4; }
 
 .sidebar-divider {
   height: 1px;
-  background: var(--clr-border-light);
+  background: rgba(255,255,255,0.07);
   margin: 6px 16px;
 }
 .sidebar-spacer { flex: 1; }
@@ -338,11 +338,21 @@ body {
 ══════════════════════════════════════════════════ */
 .main {
   flex: 1;
-  overflow-y: auto;
+  overflow: hidden;
+  position: relative;
   background: var(--clr-bg-page);
   display: flex;
   flex-direction: column;
 }
+.main-scroll {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: none;
+  display: flex;
+  flex-direction: column;
+}
+.main-scroll::-webkit-scrollbar { display: none; }
 
 /* Page header */
 .page-hd {
@@ -355,6 +365,26 @@ body {
   flex-shrink: 0;
 }
 .page-title-wrap {}
+.info-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 18px; height: 18px; border-radius: 50%;
+  background: var(--clr-border-light); color: var(--clr-text-secondary);
+  font-size: 11px; font-weight: 700;
+  cursor: pointer; border: none; flex-shrink: 0;
+  position: relative; transition: background 0.12s;
+}
+.info-btn:hover { background: #d1dce8; color: var(--clr-primary); }
+.page-info-wrap { position: relative; display: inline-flex; align-items: center; }
+.page-info-tip {
+  position: absolute; left: 26px; top: 50%; transform: translateY(-50%);
+  background: var(--clr-primary); color: #fff;
+  font-size: 12px; font-family: 'DM Sans', sans-serif; font-weight: 400;
+  line-height: 1.55; padding: 8px 12px; border-radius: 7px;
+  width: 220px; z-index: 200; pointer-events: none;
+  opacity: 0; transition: opacity 0.15s ease;
+  box-shadow: 0 4px 12px rgba(27,42,58,0.18);
+}
+.page-info-wrap:hover .page-info-tip { opacity: 1; }
 .page-title {
   font-family: 'DM Serif Display', serif;
   font-size: 22px;
@@ -446,6 +476,17 @@ body {
 .filter-btn:hover { background: var(--clr-bg-subtle); color: var(--clr-primary); border-color: var(--clr-secondary); }
 .filter-btn.active { background: var(--clr-accent-bg); border-color: var(--clr-accent); color: var(--clr-accent-fg); }
 .toolbar-spacer { flex: 1; }
+.toolbar-chip-wrap {
+  flex: 1; min-width: 0; max-width: 420px;
+  position: relative;
+}
+.toolbar-chip-wrap .chip-input-wrap {
+  min-height: 32px; padding: 3px 8px; border-radius: 7px;
+  font-size: 13px;
+}
+.toolbar-chip-wrap .chip { font-size: 11px; padding: 2px 8px; }
+.toolbar-chip-wrap .chip-input-field { font-size: 12.5px; min-width: 60px; }
+.toolbar-chip-wrap .chip-suggestions { z-index: 600; }
 
 /* Record count */
 .record-count {
@@ -485,42 +526,88 @@ body {
 .filter-dd-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
 .filter-dd-sep { height: 1px; background: var(--clr-border-light); margin: 3px 0; }
 
-/* Date range dropdown */
-.date-range-dropdown { padding: 14px; min-width: 220px; overflow: visible; }
-.date-range-title {
-  font-size: 10px; font-weight: 700; color: var(--clr-text-muted);
-  text-transform: uppercase; letter-spacing: 0.10em; margin-bottom: 12px;
+/* Date range calendar picker */
+.dr-dropdown { min-width: 300px; padding: 0; overflow: visible; }
+.dr-cal-hd {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 14px 8px;
+  border-bottom: 1px solid var(--clr-border-light);
 }
-.date-range-field { margin-bottom: 10px; }
-.date-range-field-lbl {
-  font-size: 11px; font-weight: 600; color: var(--clr-input-label);
-  margin-bottom: 4px; display: block;
+.dr-cal-nav {
+  width: 28px; height: 28px; border-radius: 6px;
+  border: 1px solid var(--clr-border); background: #fff;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; color: var(--clr-text-secondary); font-size: 16px;
+  transition: background 0.12s; line-height: 1;
 }
-.date-range-field input[type="date"] {
-  width: 100%; height: 32px; padding: 0 10px;
-  border: 1px solid var(--clr-border); border-radius: 6px;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 12px; color: var(--clr-primary);
-  background: var(--clr-bg-subtle); outline: none;
-  transition: border-color 0.15s, box-shadow 0.15s;
-  box-sizing: border-box;
+.dr-cal-nav:hover { background: var(--clr-bg-subtle); color: var(--clr-primary); }
+.dr-cal-month-lbl { font-size: 13px; font-weight: 600; color: var(--clr-primary); }
+.dr-cal-wdays {
+  display: grid; grid-template-columns: repeat(7,1fr);
+  padding: 8px 10px 2px;
 }
-.date-range-field input[type="date"]:focus {
-  border-color: var(--clr-accent); background: #fff;
-  box-shadow: 0 0 0 3px rgba(46,109,164,0.10);
+.dr-cal-wd {
+  text-align: center; font-size: 10px; font-weight: 700;
+  color: var(--clr-text-muted); padding: 3px 0;
 }
-.date-range-actions { display: flex; gap: 6px; justify-content: flex-end; margin-top: 12px; }
+.dr-cal-days {
+  display: grid; grid-template-columns: repeat(7,1fr);
+  padding: 0 10px 6px; gap: 1px;
+}
+.dr-cal-day {
+  height: 32px; display: flex; align-items: center; justify-content: center;
+  font-size: 12.5px; color: var(--clr-primary);
+  cursor: pointer; border-radius: 6px;
+  transition: background 0.1s; position: relative; user-select: none;
+}
+.dr-cal-day.empty, .dr-cal-day.other-month { pointer-events: none; }
+.dr-cal-day.other-month { opacity: 0; }
+.dr-cal-day:hover:not(.range-start):not(.range-end):not(.in-range) { background: var(--clr-bg-hover); }
+.dr-cal-day.today::after {
+  content: ''; position: absolute; bottom: 3px; left: 50%; transform: translateX(-50%);
+  width: 4px; height: 4px; border-radius: 50%; background: var(--clr-accent);
+}
+.dr-cal-day.range-start, .dr-cal-day.range-end {
+  background: var(--clr-primary) !important; color: #fff !important; z-index: 1;
+}
+.dr-cal-day.in-range {
+  background: var(--clr-accent-bg); color: var(--clr-accent-fg); border-radius: 0;
+}
+.dr-cal-day.range-start { border-radius: 6px 0 0 6px; }
+.dr-cal-day.range-end   { border-radius: 0 6px 6px 0; }
+.dr-cal-day.range-start.range-end { border-radius: 6px; }
+.dr-cal-hint {
+  font-size: 11px; color: var(--clr-text-muted); padding: 4px 14px 0;
+  min-height: 18px; font-style: italic;
+}
+.dr-cal-footer {
+  display: flex; gap: 6px; justify-content: flex-end;
+  padding: 8px 14px 12px;
+  border-top: 1px solid var(--clr-border-light);
+  margin-top: 4px;
+}
 
 /* Table area */
 .table-wrap {
   flex: 1;
-  overflow-y: auto;
   padding: 16px 24px 24px;
+  position: relative;
 }
+.table-card { position: relative; }
+
+.table-toolbar {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 14px;
+  background: #fff;
+  border: 1px solid var(--clr-border);
+  border-bottom: none;
+  border-radius: 10px 10px 0 0;
+}
+
 .data-card {
   background: #fff;
   border: 1px solid var(--clr-border);
-  border-radius: 10px;
+  border-radius: 0 0 10px 10px;
   overflow: hidden;
   box-shadow: 0 1px 3px rgba(27,58,92,0.05);
 }
@@ -656,22 +743,22 @@ tr:hover td { background: var(--clr-bg-hover); }
   transform: translate(-50%, -50%);
   width: 18px; height: 40px;
   border-radius: 9px;
-  background: #fff;
-  border: 1px solid var(--clr-border);
-  box-shadow: 0 2px 6px rgba(27,58,92,0.12);
+  background: #1B2C43;
+  border: 1px solid rgba(255,255,255,0.12);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.25);
   display: flex; align-items: center; justify-content: center;
   cursor: pointer;
-  color: var(--clr-text-muted);
+  color: #7A9BB8;
   z-index: 50;
   transition: left 0.22s ease, background 0.15s, color 0.15s,
               border-color 0.15s, box-shadow 0.15s;
   flex-shrink: 0;
 }
 .sidebar-edge-btn:hover {
-  background: var(--clr-primary);
-  border-color: var(--clr-primary);
-  color: #fff;
-  box-shadow: 0 2px 10px rgba(27,58,92,0.25);
+  background: #263D58;
+  border-color: rgba(255,255,255,0.2);
+  color: #E2EEF8;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.3);
 }
 
 /* Collapsed sidebar — icons only, overflow hidden so nothing bleeds */
@@ -780,29 +867,29 @@ tr:hover td { background: var(--clr-bg-hover); }
 
 /* Mobile sidebar header (close button row) */
 .sidebar-mobile-header {
-  display: none; /* shown only on mobile via media query */
+  display: none;
   align-items: center;
   justify-content: space-between;
   padding: 14px 16px 12px;
-  border-bottom: 1px solid var(--clr-border-light);
+  border-bottom: 1px solid rgba(255,255,255,0.07);
   flex-shrink: 0;
 }
 .sidebar-mobile-title {
   font-size: 13px;
   font-weight: 600;
-  color: var(--clr-primary);
+  color: #E8F2FA;
 }
 .sidebar-close-btn {
   width: 32px; height: 32px;
   border-radius: 8px;
-  border: 1px solid var(--clr-border);
-  background: var(--clr-bg-subtle);
-  color: var(--clr-text-secondary);
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.06);
+  color: #7A9BB8;
   display: flex; align-items: center; justify-content: center;
   cursor: pointer;
   transition: background 0.15s, color 0.15s;
 }
-.sidebar-close-btn:hover { background: var(--clr-error-bg); color: var(--clr-error-text); border-color: transparent; }
+.sidebar-close-btn:hover { background: rgba(239,68,68,0.15); color: #FCA5A5; border-color: transparent; }
 
 /* Mobile — burger + slide-in drawer */
 @media (max-width: 768px) {
@@ -872,7 +959,7 @@ tr:hover td { background: var(--clr-bg-hover); }
   .bc-current { color: rgba(255,255,255,0.85); font-weight: 500; max-width: 180px; }
 
   /* Toolbar */
-  .toolbar { flex-wrap: wrap; gap: 6px; }
+  .table-toolbar { flex-wrap: wrap; gap: 6px; }
   .search-wrap { max-width: 100%; flex: 1 1 100%; }
   .toolbar-spacer { display: none; }
   .record-count { order: -1; }
@@ -1067,7 +1154,7 @@ tr:hover td { background: var(--clr-bg-hover); }
   box-shadow: 0 8px 24px rgba(27,58,92,0.12);
   padding: 10px;
   z-index: 500;
-  width: 180px;
+  width: 210px;
 }
 .col-toggle-panel.open { display: block; animation: cgFadeIn 0.1s ease; }
 @keyframes cgFadeIn {
@@ -1143,10 +1230,357 @@ tr:hover td { background: var(--clr-bg-hover); }
   box-shadow: 0 0 0 2px rgba(46,109,164,0.10);
 }
 .cg-edit-select { cursor: pointer; appearance: none; -webkit-appearance: none; }
+.cg-edit-actions { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+.cg-edit-save, .cg-edit-discard {
+  width: 22px; height: 22px; border-radius: 5px; border: none;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; flex-shrink: 0; transition: background 0.12s;
+}
+.cg-edit-save    { background: var(--clr-success-bg); color: var(--clr-success-text); }
+.cg-edit-save:hover    { background: #bbf7d0; }
+.cg-edit-discard { background: var(--clr-error-bg);   color: var(--clr-error-text); }
+.cg-edit-discard:hover { background: #fecaca; }
 
+.cg-del-btn {
+  width: 22px; height: 22px; border-radius: 5px; border: none;
+  background: var(--clr-error-bg); color: var(--clr-error-text);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; flex-shrink: 0; transition: background 0.12s;
+}
+.cg-del-btn:hover { background: #fecaca; }
+.cg-del-btn svg { pointer-events: none; }
+
+/* ── Danger / delete confirmation modal ─────────────── */
+.modal-danger { max-width: 420px; }
+.modal-danger-top {
+  display: flex; flex-direction: column; align-items: center;
+  padding: 28px 28px 20px; gap: 14px; text-align: center;
+  position: relative;
+}
+.modal-danger-close {
+  position: absolute; top: 14px; right: 14px;
+  width: 26px; height: 26px; border-radius: 6px; border: none;
+  background: transparent; color: var(--clr-text-secondary);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: background 0.12s;
+}
+.modal-danger-close:hover { background: var(--clr-bg-subtle); }
+.modal-danger-icon-wrap {
+  width: 52px; height: 52px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.modal-danger-icon-wrap.danger { background: #fee2e2; color: #dc2626; }
+.modal-danger-title {
+  font-size: 16px; font-weight: 700; color: var(--clr-primary);
+}
+.modal-danger-desc {
+  font-size: 13.5px; color: var(--clr-text-secondary); line-height: 1.55;
+}
+.modal-danger-footer {
+  display: flex; justify-content: center; gap: 10px;
+  padding: 16px 24px; border-top: 1px solid var(--clr-border);
+}
+.btn-danger {
+  background: #dc2626; color: #fff;
+  height: 36px; padding: 0 18px; border-radius: 8px; border: none;
+  font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600;
+  cursor: pointer; transition: background 0.12s; display: flex; align-items: center; gap: 6px;
+}
+.btn-danger:hover { background: #b91c1c; }
+
+/* ── Chip input ──────────────────────────────────────── */
+.chip-input-wrap {
+  border: 1px solid var(--clr-border); border-radius: 6px;
+  padding: 6px 10px; background: #fff;
+  display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
+  min-height: 40px; cursor: text; transition: border-color 0.15s;
+}
+.chip-input-wrap:focus-within { border-color: var(--clr-accent); box-shadow: 0 0 0 3px rgba(46,109,164,0.1); }
+.chip {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: var(--clr-primary); color: #fff;
+  padding: 3px 10px; border-radius: 99px; font-size: 12px; font-weight: 500;
+  animation: chipIn 0.15s ease;
+}
+@keyframes chipIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.chip-x { opacity: 0.6; cursor: pointer; font-size: 11px; }
+.chip-x:hover { opacity: 1; }
+.chip-input-field {
+  border: none; outline: none; font-size: 13px;
+  font-family: 'DM Sans', sans-serif; color: var(--clr-primary);
+  flex: 1; min-width: 80px; background: transparent;
+}
+.chip-wrap-outer { position: relative; }
+.chip-suggestions {
+  position: absolute; top: calc(100% + 4px); left: 0; right: 0;
+  background: #fff; border: 1px solid var(--clr-border);
+  border-radius: 8px; box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+  z-index: 500; display: none;
+  max-height: 180px; overflow-y: auto;
+  scrollbar-width: thin; scrollbar-color: #b0bec9 transparent;
+}
+.chip-suggestions::-webkit-scrollbar { width: 5px; }
+.chip-suggestions::-webkit-scrollbar-track { background: transparent; }
+.chip-suggestions::-webkit-scrollbar-thumb { background: #b0bec9; border-radius: 99px; }
+.chip-suggestions::-webkit-scrollbar-thumb:hover { background: var(--clr-primary); }
+.chip-suggestions.open { display: block; }
+.chip-suggestion-item {
+  padding: 8px 12px; font-size: 13px; color: var(--clr-primary);
+  cursor: pointer; display: flex; align-items: center; gap: 8px;
+  transition: background 0.1s;
+}
+.chip-suggestion-item:hover, .chip-suggestion-item.focused { background: var(--clr-bg-subtle); }
+.chip-no-results { padding: 10px 12px; font-size: 13px; color: var(--clr-text-muted); }
+
+/* ── Input / form ────────────────────────────────────── */
+.input {
+  height: 36px; padding: 0 12px;
+  border: 1px solid var(--clr-border); border-radius: 6px;
+  font-family: 'DM Sans', sans-serif; font-size: 14px;
+  color: var(--clr-primary); background: #fff;
+  outline: none; width: 100%;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.input:focus { border-color: var(--clr-primary); box-shadow: 0 0 0 3px rgba(30,42,58,0.1); }
+textarea.input { height: auto; padding: 10px 12px; resize: vertical; }
+select.input { appearance: none; -webkit-appearance: none; background-image: url("data:image/svg+xml,%3Csvg width='11' height='11' viewBox='0 0 24 24' fill='none' stroke='%23728096' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' xmlns='http://www.w3.org/2000/svg'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; padding-right: 30px; cursor: pointer; }
+.form-group.has-error .input { border-color: var(--clr-error) !important; }
+.form-group.has-error .input:focus { box-shadow: 0 0 0 3px rgba(239,68,68,0.12) !important; }
+.field-error-msg { font-size: 11px; color: var(--clr-error-text); margin-top: 2px; display: none; }
+.field-error-msg.visible { display: block; }
+.select-trigger {
+  height: 36px; padding: 0 12px;
+  border: 1px solid var(--clr-border); border-radius: 6px;
+  font-size: 13px; font-family: 'DM Sans', sans-serif;
+  color: var(--clr-primary); background: #fff;
+  display: inline-flex; align-items: center; justify-content: space-between;
+  gap: 8px; cursor: pointer; width: 100%;
+  transition: border-color 0.15s;
+}
+.select-trigger:hover { border-color: var(--clr-accent); }
+.select-chevron { color: var(--clr-text-muted); flex-shrink: 0; }
+.form-group { display: flex; flex-direction: column; gap: 5px; margin-bottom: 16px; }
+.form-group:last-child { margin-bottom: 0; }
+.form-label { font-size: 12px; font-weight: 600; color: var(--clr-input-label); }
+.form-label.required::after { content: ' *'; color: #EF4444; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.form-hint { font-size: 11px; color: var(--clr-text-muted); margin-top: 2px; }
+.form-card { border: 1px solid var(--clr-border); border-radius: 10px; overflow: hidden; margin-bottom: 12px; }
+.form-card:last-child { margin-bottom: 0; }
+.form-card-header {
+  padding: 11px 16px; background: var(--clr-bg-subtle);
+  border-bottom: 1px solid var(--clr-border);
+  font-size: 11px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.07em; color: var(--clr-text-secondary);
+  display: flex; align-items: center; gap: 8px;
+}
+.form-card-body { padding: 16px; }
+
+/* ── Overlay scrollbar ───────────────────────────────── */
+.ov-scroll-wrap { position: relative; overflow: hidden; }
+.ov-scroll {
+  height: 100%; width: 100%;
+  overflow-y: auto; overflow-x: hidden;
+  scrollbar-width: none;
+}
+.ov-scroll::-webkit-scrollbar { display: none; }
+.ov-scroll-x {
+  height: 100%; width: 100%;
+  overflow-x: auto; overflow-y: hidden;
+  scrollbar-width: none;
+}
+.ov-scroll-x::-webkit-scrollbar { display: none; }
+.ov-track {
+  position: absolute;
+  border-radius: 99px;
+  background: rgba(255,255,255,0.08);
+  transition: opacity 0.2s;
+}
+.ov-track.ov-track-y { top: 6px; right: 4px; width: 4px; bottom: 6px; }
+.ov-track.ov-track-x { left: 6px; bottom: 4px; height: 4px; right: 6px; }
+.ov-thumb {
+  position: absolute;
+  border-radius: 99px;
+  background: rgba(180,200,220,0.45);
+  cursor: pointer;
+  transition: background 0.15s, width 0.15s, right 0.15s, height 0.15s, bottom 0.15s;
+}
+.ov-track.ov-track-y .ov-thumb { width: 100%; min-height: 24px; left: 0; top: 0; }
+.ov-track.ov-track-x .ov-thumb { height: 100%; min-width: 24px; top: 0; left: 0; }
+.ov-track.ov-track-y:hover .ov-thumb,
+.ov-track.ov-track-y .ov-thumb.dragging {
+  width: 8px; right: -2px; left: auto;
+  background: rgba(180,200,220,0.85);
+}
+.ov-track.ov-track-x:hover .ov-thumb,
+.ov-track.ov-track-x .ov-thumb.dragging {
+  height: 6px; bottom: -1px; top: auto;
+  background: var(--clr-accent);
+}
+/* Light variant (main + table scroll) */
+.ov-track.light { background: var(--clr-border-light); }
+.ov-track.light .ov-thumb { background: #b0bec9; }
+.ov-track.light:hover .ov-thumb,
+.ov-track.light .ov-thumb.dragging { background: var(--clr-primary); }
+
+/* ── Corner toast ────────────────────────────────────── */
+.corner-toast {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 12px 14px 16px;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.10), 0 1px 4px rgba(0,0,0,0.06);
+  border: 1px solid var(--clr-border-light);
+  font-size: 13px;
+  position: relative;
+  width: 300px;
+}
+.ct-icon-wrap {
+  width: 26px; height: 26px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.ct-info    { background: #DBEAFE; color: #2563EB; }
+.ct-success { background: #D1FAE5; color: #059669; }
+.ct-error   { background: #FEE2E2; color: #DC2626; }
+.ct-title   { font-weight: 600; font-size: 13px; color: var(--clr-primary); margin-bottom: 2px; }
+.ct-msg     { font-size: 12px; color: var(--clr-text-secondary); line-height: 1.4; }
+.ct-close {
+  margin-left: auto; flex-shrink: 0; background: none; border: none;
+  cursor: pointer; color: var(--clr-text-muted); padding: 2px;
+  opacity: 0.4; display: flex; align-items: center; align-self: flex-start;
+}
+.ct-close:hover { opacity: 0.9; }
+.ct-progress { background: var(--clr-border-light); position: absolute; bottom: 0; left: 0; right: 0; height: 3px; border-radius: 0 0 10px 10px; overflow: hidden; }
+.ct-progress-bar { height: 100%; border-radius: inherit; transition: width linear; }
+.ct-bar-success { background: #34D399; }
+.ct-bar-info    { background: #60A5FA; }
+.ct-bar-error   { background: #F87171; }
+.toast-stack {
+  position: fixed; top: 24px; right: 24px; z-index: 11000;
+  display: flex; flex-direction: column; gap: 8px; pointer-events: none;
+}
+.toast-stack .corner-toast { pointer-events: all; opacity: 0; transform: translateX(16px); transition: opacity 0.25s ease, transform 0.25s ease; }
+.toast-stack .corner-toast.toast-in { opacity: 1; transform: translateX(0); }
+.toast-stack .corner-toast.toast-out { opacity: 0; transform: translateX(16px); }
+
+/* ── Modal ───────────────────────────────────────────── */
+.modal-backdrop {
+  position: fixed; inset: 0; z-index: 10000;
+  background: rgba(27,42,58,0.45);
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+.modal-backdrop.open { opacity: 1; pointer-events: all; }
+.modal-box {
+  background: #fff; border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(27,42,58,0.22);
+  width: 520px; max-width: calc(100vw - 32px);
+  transform: translateY(10px);
+  transition: transform 0.2s ease;
+  max-height: calc(100vh - 48px);
+  overflow: hidden;
+  position: relative;
+  display: flex; flex-direction: column;
+}
+.modal-scroll {
+  overflow-y: auto; overflow-x: hidden;
+  scrollbar-width: none;
+  flex: 1;
+}
+.modal-scroll::-webkit-scrollbar { display: none; }
+.modal-backdrop.open .modal-box { transform: translateY(0); }
+.modal-hd {
+  padding: 18px 24px 14px;
+  border-bottom: 1px solid var(--clr-border-light);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.modal-ttl { font-size: 15px; font-weight: 600; color: var(--clr-primary); }
+.modal-ttl-sub { font-size: 12px; color: var(--clr-text-muted); font-weight: 400; margin-top: 1px; }
+.modal-x {
+  width: 28px; height: 28px; border-radius: 6px;
+  border: 1px solid var(--clr-border-light);
+  background: var(--clr-bg-subtle);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; color: var(--clr-text-muted); flex-shrink: 0;
+  transition: background 0.15s;
+}
+.modal-x:hover { background: var(--clr-border-light); color: var(--clr-primary); }
+.modal-bd { padding: 20px 24px; }
+.modal-ft {
+  padding: 14px 24px;
+  border-top: 1px solid var(--clr-border-light);
+  display: flex; justify-content: flex-end; gap: 8px;
+}
+
+/* ── Grid pulse spinner ──────────────────────────────── */
+.sp-grid { display: inline-grid; grid-template-columns: repeat(3,1fr); gap: 4px; vertical-align: middle; }
+.sp-grid-dot {
+  width: 7px; height: 7px; border-radius: 2px; background: var(--clr-primary);
+  animation: sp-grid-pulse 1.5s ease-in-out infinite;
+}
+.sp-grid-dot:nth-child(1){animation-delay:0s}   .sp-grid-dot:nth-child(2){animation-delay:.1s}
+.sp-grid-dot:nth-child(3){animation-delay:.2s}  .sp-grid-dot:nth-child(4){animation-delay:.3s}
+.sp-grid-dot:nth-child(5){animation-delay:.4s}  .sp-grid-dot:nth-child(6){animation-delay:.5s}
+.sp-grid-dot:nth-child(7){animation-delay:.6s}  .sp-grid-dot:nth-child(8){animation-delay:.7s}
+.sp-grid-dot:nth-child(9){animation-delay:.8s}
+@keyframes sp-grid-pulse {
+  0%, 100% { opacity: 0.12; transform: scale(0.75); }
+  50%       { opacity: 1;    transform: scale(1);    }
+}
+
+/* ── Table load overlay ──────────────────────────────── */
+.table-load-overlay {
+  position: absolute; inset: 0;
+  background: #fff;
+  border: 1px solid var(--clr-border);
+  border-radius: 10px;
+  z-index: 50;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+.table-load-overlay.visible { opacity: 1; pointer-events: all; }
+.table-load-overlay-label {
+  font-size: 12px; color: var(--clr-text-muted); letter-spacing: 0.02em;
+}
+.data-card { transition: opacity 0.2s ease; }
+
+/* ── Page loader overlay ─────────────────────────────── */
+@keyframes sp-cw  { to { transform: rotate(360deg);  } }
+@keyframes sp-ccw { to { transform: rotate(-360deg); } }
+.sp-dual { display: inline-block; position: relative; border-radius: 50%; }
+.sp-dual::before, .sp-dual::after {
+  content: ''; position: absolute; border-radius: 50%;
+}
+.sp-dual::before {
+  inset: 0;
+  border: 2.5px solid transparent;
+  border-top-color: var(--clr-primary);
+  animation: sp-cw 0.9s linear infinite;
+}
+.sp-dual::after {
+  inset: 5px;
+  border: 2px solid transparent;
+  border-bottom-color: var(--clr-accent);
+  animation: sp-ccw 0.65s linear infinite;
+}
+.page-loader {
+  position: fixed; inset: 0; z-index: 9999;
+  background: rgba(238, 243, 248, 0.55);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  display: flex; align-items: center; justify-content: center;
+  opacity: 1;
+  transition: opacity 0.25s ease;
+}
+.page-loader.fade-out { opacity: 0; pointer-events: none; }
 </style>
 </head>
 <body>
+<div id="pageLoader" class="page-loader">
+  <div class="sp-dual" style="width:40px;height:40px"></div>
+</div>
 <div class="app">
 
   <!-- ════════════════════════ HEADER ════════════════════════ -->
@@ -1218,22 +1652,28 @@ tr:hover td { background: var(--clr-bg-hover); }
         </button>
       </div>
 
-      <!-- Back to hub -->
-      <a class="sidebar-back" href="02-dashboard.html">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-        <span class="nav-back-label">Ana səhifə</span>
-      </a>
+      <!-- Scrollable sidebar content -->
+      <div class="ov-scroll" id="sidebarScroll" style="flex:1;display:flex;flex-direction:column;overflow-x:hidden;">
 
-      <!-- Module identity — rendered by JS -->
-      <div class="sidebar-module-hd">
-        <div class="sidebar-module-icon" id="sidebarModuleIcon"></div>
-        <span class="sidebar-module-name" id="sidebarModuleName"></span>
+        <!-- Back to hub -->
+        <a class="sidebar-back" href="02-dashboard.html">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+          <span class="nav-back-label">Ana səhifə</span>
+        </a>
+
+        <!-- Module identity — rendered by JS -->
+        <div class="sidebar-module-hd">
+          <div class="sidebar-module-icon" id="sidebarModuleIcon"></div>
+          <span class="sidebar-module-name" id="sidebarModuleName"></span>
+        </div>
+
+        <!-- Nav items — rendered by JS -->
+        <div id="sidebarNav"></div>
+
+        <div class="sidebar-spacer"></div>
+
       </div>
-
-      <!-- Nav items — rendered by JS -->
-      <div id="sidebarNav"></div>
-
-      <div class="sidebar-spacer"></div>
+      <div class="ov-track ov-track-y" id="sidebarTrack"><div class="ov-thumb" id="sidebarThumb"></div></div>
 
     </aside>
 
@@ -1251,81 +1691,100 @@ tr:hover td { background: var(--clr-bg-hover); }
       <!-- Page header -->
       <div class="page-hd">
         <div class="page-title-wrap">
-          <div class="page-title" id="pageTitle"></div>
-          <div class="page-meta" id="pageMeta"></div>
+          <div style="display:flex;align-items:center;gap:7px">
+            <div class="page-title" id="pageTitle"></div>
+            <div class="page-info-wrap">
+              <button class="info-btn" id="pageInfoBtn">?</button>
+              <div class="page-info-tip" id="pageInfoTip"></div>
+            </div>
+          </div>
         </div>
         <div class="page-actions">
           <button class="btn btn-ghost">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
             İxrac
           </button>
-          <button class="btn btn-primary">
+          <button class="btn btn-primary" id="newBtn" onclick="if(key==='maliyye')openHesabModal()">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
             <span id="newBtnLabel"></span>
           </button>
         </div>
       </div>
 
-      <!-- Toolbar -->
-      <div class="toolbar">
-
-        <!-- Status filter -->
-        <div class="filter-wrap" id="statusFilterWrap">
-          <button class="filter-btn" id="statusFilterBtn" onclick="toggleStatusDropdown(event)">
-            <span id="statusFilterLabel">Status: Hamısı</span>
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-          </button>
-          <div class="filter-dropdown" id="statusDropdown"></div>
-        </div>
-
-        <!-- Date range filter -->
-        <div class="filter-wrap" id="dateFilterWrap">
-          <button class="filter-btn" id="dateFilterBtn" onclick="toggleDateDropdown(event)">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-            <span id="dateFilterLabel">Tarix aralığı</span>
-          </button>
-          <div class="filter-dropdown date-range-dropdown" id="dateDropdown">
-            <div class="date-range-title">Tarix aralığı</div>
-            <div class="date-range-field">
-              <label class="date-range-field-lbl">Başlanğıc tarixi</label>
-              <input type="date" id="dateFrom"/>
-            </div>
-            <div class="date-range-field">
-              <label class="date-range-field-lbl">Son tarix</label>
-              <input type="date" id="dateTo"/>
-            </div>
-            <div class="date-range-actions">
-              <button class="btn btn-ghost" style="height:30px;font-size:12px;padding:0 10px;" onclick="clearDateFilter()">Sıfırla</button>
-              <button class="btn btn-primary" style="height:30px;font-size:12px;padding:0 10px;" onclick="applyDateFilter()">Tətbiq et</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Columns toggle — wired by JS (ntInitTable for normal tables, cgInit for complex grid) -->
-        <button class="filter-btn" id="columnsBtn" data-toolbar-columns-placeholder="true">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="6" height="6" rx="1"/><line x1="12" y1="6" x2="21" y2="6"/><line x1="12" y1="12" x2="21" y2="12"/><rect x="3" y="14" width="6" height="6" rx="1"/><line x1="12" y1="15" x2="21" y2="15"/><line x1="12" y1="21" x2="21" y2="21"/></svg>
-          Sütunlar
-        </button>
-
-        <div class="toolbar-spacer"></div>
-
-        <span class="record-count" id="recordCount"></span>
-
-        <div class="toolbar-sep"></div>
-
-        <button class="btn btn-ghost btn-icon" title="Filtrləri sıfırla" onclick="clearAllFilters()">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
-        </button>
-
-      </div>
+      <!-- Scrollable main content -->
+      <div class="main-scroll" id="mainScroll">
 
       <!-- Table -->
       <div class="table-wrap">
-        <div class="data-card">
-          <table>
-            <thead id="tableHead"></thead>
-            <tbody id="tableBody"></tbody>
-          </table>
+        <div class="table-card">
+
+          <!-- Table toolbar (filters moved into card header) -->
+          <div class="table-toolbar">
+
+            <!-- Status filter -->
+            <div class="filter-wrap" id="statusFilterWrap">
+              <button class="filter-btn" id="statusFilterBtn" onclick="toggleStatusDropdown(event)">
+                <span id="statusFilterLabel">Status: Hamısı</span>
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+              </button>
+              <div class="filter-dropdown" id="statusDropdown"></div>
+            </div>
+
+            <!-- Date range filter -->
+            <div class="filter-wrap" id="dateFilterWrap">
+              <button class="filter-btn" id="dateFilterBtn" onclick="toggleDateDropdown(event)">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                <span id="dateFilterLabel">Tarix aralığı</span>
+                <span id="dateFilterClear" style="display:none;line-height:1;margin-left:2px;opacity:0.55;" onclick="event.stopPropagation();clearDateFilter()">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </span>
+              </button>
+              <div class="filter-dropdown dr-dropdown" id="dateDropdown"></div>
+            </div>
+
+            <!-- Columns toggle — wired by JS (ntInitTable for normal tables, cgInit for complex grid) -->
+            <button class="filter-btn" id="columnsBtn" data-toolbar-columns-placeholder="true" title="Sütunlar">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/>
+                <line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/>
+                <line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/>
+                <line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/>
+              </svg>
+            </button>
+
+            <!-- Chip search — shown on normal tables, hidden on complex grid -->
+            <div class="toolbar-chip-wrap chip-wrap-outer" id="toolbarChipOuter">
+              <div class="chip-input-wrap" id="toolbarChipWrap">
+                <input class="chip-input-field" id="toolbarChipInput" placeholder="Axtar: müştəri, sənəd, status…" autocomplete="off" />
+              </div>
+              <div class="chip-suggestions" id="toolbarChipSuggestions"></div>
+            </div>
+
+            <span class="record-count" id="recordCount"></span>
+
+            <div class="toolbar-sep"></div>
+
+            <button class="btn btn-ghost btn-icon" title="Filtrləri sıfırla" onclick="clearAllFilters()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+            </button>
+
+          </div>
+
+          <div class="data-card">
+            <table>
+              <thead id="tableHead"></thead>
+              <tbody id="tableBody"></tbody>
+            </table>
+          </div>
+          <div id="tableLoadOverlay" class="table-load-overlay">
+            <div class="sp-grid">
+              <div class="sp-grid-dot"></div><div class="sp-grid-dot"></div><div class="sp-grid-dot"></div>
+              <div class="sp-grid-dot"></div><div class="sp-grid-dot"></div><div class="sp-grid-dot"></div>
+              <div class="sp-grid-dot"></div><div class="sp-grid-dot"></div><div class="sp-grid-dot"></div>
+            </div>
+            <div class="table-load-overlay-label">Məlumatlar yüklənir…</div>
+          </div>
+
         </div>
       </div>
 
@@ -1346,6 +1805,9 @@ tr:hover td { background: var(--clr-bg-hover); }
           </button>
         </div>
       </div>
+
+      </div><!-- /main-scroll -->
+      <div class="ov-track ov-track-y light" id="mainTrack"><div class="ov-thumb" id="mainThumb"></div></div>
 
     </main>
 
@@ -1376,7 +1838,7 @@ function icon(key, size = 15) {
 }
 const moreIcon = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><circle cx="5" cy="12" r="1" fill="currentColor"/><circle cx="12" cy="12" r="1" fill="currentColor"/><circle cx="19" cy="12" r="1" fill="currentColor"/></svg>`;
 const checkCell = `<td style="padding:11px 8px 11px 14px;"><input type="checkbox" style="cursor:pointer;accent-color:var(--clr-accent);"/></td>`;
-const actionCell = `<td class="cell-actions"><button class="row-action">${moreIcon}</button></td>`;
+const actionCell = ``;
 
 /* ── Module definitions ───────────────────────────── */
 const MODULES = {
@@ -1388,12 +1850,11 @@ const MODULES = {
     newBtn: 'Yeni sifariş',
     searchPlaceholder: 'Sifariş axtar...',
     recordCount: '24 sifariş',
-    pageMeta: '24 qeyd · son yenilənmə 2 dəq. əvvəl',
     paginationInfo: '1–8 / 24 qeyd göstərilir',
     sidebar: [
       { label: 'Sənədlər', items: [
-        { label: 'Satış sifarişləri', iconKey: 'fileText', badge: '24', active: true },
-        { label: 'Fakturalar',        iconKey: 'receipt',  badge: '8' },
+        { label: 'Satış sifarişləri', iconKey: 'fileText', active: true },
+        { label: 'Fakturalar',        iconKey: 'receipt' },
         { label: 'Qaimə-fakturalar',  iconKey: 'truck' },
         { label: 'Qaytarmalar',       iconKey: 'refresh' },
       ]},
@@ -1415,7 +1876,6 @@ const MODULES = {
       <th class="sortable" style="text-align:right;">Məbləğ <span class="sort-icon">↕</span></th>
       <th>Ödəniş</th>
       <th>Status</th>
-      <th style="width:48px;"></th>
     </tr>`,
     tableBody: `
       <tr>${checkCell}<td class="cell-mono">SAT-2026-0851</td><td class="cell-muted">04.06.2026</td><td><div style="font-weight:500;">Azərbaycan Ərzaq MMC</div><div style="font-size:11px;color:var(--clr-text-muted);">Bakı</div></td><td class="cell-muted">10.06.2026</td><td class="cell-amount">6,480.00 <span style="font-size:10px;font-weight:400;color:var(--clr-text-muted);">AZN</span></td><td><span class="badge badge-success"><span class="badge-dot"></span>Ödənilib</span></td><td><span class="badge badge-info">Hazırlanır</span></td>${actionCell}</tr>
@@ -1436,11 +1896,10 @@ const MODULES = {
     newBtn: 'Yeni hesab',
     searchPlaceholder: 'Hesab axtar...',
     recordCount: '47 hesab',
-    pageMeta: '47 qeyd · son yenilənmə 5 dəq. əvvəl',
     paginationInfo: '1–10 / 47 qeyd göstərilir',
     sidebar: [
       { label: 'Sənədlər', items: [
-        { label: 'Jurnal qeydləri',     iconKey: 'fileText', badge: '6' },
+        { label: 'Jurnal qeydləri',     iconKey: 'fileText' },
         { label: 'Ödəniş tapşırıqları', iconKey: 'creditCard', complex: true },
       ]},
       { label: 'Kataloqlar', items: [
@@ -1461,7 +1920,6 @@ const MODULES = {
       <th class="sortable" style="text-align:right;">Qalıq <span class="sort-icon">↕</span></th>
       <th>Valyuta</th>
       <th>Status</th>
-      <th style="width:48px;"></th>
     </tr>`,
     tableBody: `
       <tr>${checkCell}<td class="cell-mono">1000</td><td style="font-weight:500;">Kassa</td><td><span class="badge badge-info">Aktiv</span></td><td class="cell-amount">12,450.00</td><td class="cell-muted">AZN</td><td><span class="badge badge-success">Aktiv</span></td>${actionCell}</tr>
@@ -1508,7 +1966,6 @@ document.getElementById('sidebarModuleIcon').innerHTML = icon(mod.iconKey, 16);
 document.getElementById('sidebarModuleName').textContent = mod.name;
 document.getElementById('sidebarNav').innerHTML      = renderSidebar(mod.sidebar);
 document.getElementById('pageTitle').textContent     = mod.firstSub;
-document.getElementById('pageMeta').textContent      = mod.pageMeta;
 document.getElementById('newBtnLabel').textContent   = mod.newBtn;
 document.getElementById('recordCount').textContent   = mod.recordCount;
 document.getElementById('tableHead').innerHTML       = mod.tableHead;
@@ -1516,20 +1973,160 @@ document.getElementById('tableBody').innerHTML       = mod.tableBody;
 document.getElementById('paginationInfo').textContent = mod.paginationInfo;
 ntInitTable();
 
+/* ── Table load overlay ───────────────────────────── */
+function showTableLoader() {
+  var overlay = document.getElementById('tableLoadOverlay');
+  var card    = document.querySelector('.data-card');
+  if (card)    card.style.opacity = '0';
+  if (overlay) overlay.classList.add('visible');
+}
+
+function hideTableLoader() {
+  var overlay = document.getElementById('tableLoadOverlay');
+  var card    = document.querySelector('.data-card');
+  if (overlay) overlay.classList.remove('visible');
+  if (card)    card.style.opacity = '1';
+}
+
 /* ── Nav active toggle ────────────────────────────── */
+function showLoader() {
+  const loader = document.getElementById('pageLoader');
+  clearTimeout(loader._hideTimer);
+  loader.style.display = 'flex';
+  loader.style.opacity = '1';
+  loader.style.pointerEvents = 'auto';
+  loader.classList.remove('fade-out');
+  loader._hideTimer = setTimeout(() => {
+    loader.classList.add('fade-out');
+    setTimeout(() => { loader.style.display = 'none'; }, 250);
+  }, 1000);
+}
+
+var pageInfoTexts = {
+  'Hesablar planı':       'Şirkətin bütün mühasibat hesablarının strukturlaşdırılmış siyahısı. Hər hesab növü, valyutası və cari qalığı ilə göstərilir.',
+  'Satış sifarişləri':    'Müştərilərdən daxil olan sifarişlərin siyahısı. Hazırlanma, göndərilmə və tamamlanma mərhələlərini izləyir.',
+  'Fakturalar':           'Müştərilərə kəsilmiş faktura sənədlərinin reyestri. Ödəniş statusu və vaxtı keçmiş məbləğlər burada izlənir.',
+  'Qaimə-fakturalar':     'Malların fiziki hərəkətini təsdiqləyən qaimə sənədləri. Çatdırılma tarixləri və miqdarlarla birlikdə saxlanılır.',
+  'Qaytarmalar':          'Müştəri tərəfindən geri qaytarılan malların qeydiyyatı. Geri ödəniş və anbar hərəkəti bu sənədlər əsasında aparılır.',
+  'Müştərilər':           'Şirkətin müştəri bazası. Əlaqə məlumatları, kredit limiti və ödəniş şərtləri burada saxlanılır.',
+  'Qiymət siyahıları':    'Müxtəlif müştəri qrupları və kanallar üzrə qiymət cədvəlləri.',
+  'Endirim siyahıları':   'Müştərilərə tətbiq olunan endirim şərtlərinin idarəsi.',
+  'Satış hesabatı':       'Satış göstəriciləri üzrə analitik hesabatlar — dövriyyə, müştəri, məhsul kəsiyində.',
+  'Jurnal qeydləri':      'Mühasibat kitabına edilən bütün əməliyyat qeydlərinin xronoloji siyahısı.',
+  'Ödəniş tapşırıqları':  'Bank vasitəsilə həyata keçirilən ödəniş tapşırıqlarının reyestri. Status, məbləğ və alıcı məlumatları izlənir.',
+  'Xərc mərkəzləri':      'Xərclərin bölünməsi üçün istifadə olunan şöbə və layihə əsaslı mərkəzlər.',
+  'Valyutalar':           'Sistemdə istifadə olunan valyutalar və məzənnə tarixçəsi.',
+};
+
+function setPageInfoText(title) {
+  var tip = document.getElementById('pageInfoTip');
+  if (!tip) return;
+  var text = pageInfoTexts[title] || '';
+  tip.textContent = text;
+  document.getElementById('pageInfoBtn').style.display = text ? '' : 'none';
+}
+
+
 function setActive(btn, title) {
   document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
   btn.classList.add('active');
   document.getElementById('pageTitle').textContent = title;
   document.getElementById('bcCurrent').textContent = title;
-  if (btn.dataset.complex === 'true') {
-    cgInit();
-  } else {
-    clearAllFilters();
-    cgShowNormal();
-  }
-  closeMobileDrawer();
+  setPageInfoText(title);
+  // Phase 1: page loader (blur + dual ring) for 1000ms
+  showLoader();
+  // Phase 2: after page loader fades, show table grid pulse for 700ms, then render
+  setTimeout(function() {
+    showTableLoader();
+    setTimeout(function() {
+      if (btn.dataset.complex === 'true') {
+        cgInit();
+      } else {
+        clearAllFilters(true);
+        cgShowNormal();
+      }
+      hideTableLoader();
+      closeMobileDrawer();
+    }, 1300);
+  }, 1000);
 }
+
+/* ── Overlay scrollbar init ───────────────────────── */
+function initOverlayY(scrollEl, trackEl, thumbEl) {
+  if (!scrollEl || !trackEl || !thumbEl) return;
+  function update() {
+    var ratio = scrollEl.clientHeight / scrollEl.scrollHeight;
+    if (ratio >= 1) { trackEl.style.opacity = '0'; return; }
+    trackEl.style.opacity = '';
+    var thumbH = Math.max(24, trackEl.clientHeight * ratio);
+    var maxScroll = scrollEl.scrollHeight - scrollEl.clientHeight;
+    var pct = maxScroll > 0 ? scrollEl.scrollTop / maxScroll : 0;
+    var maxTop = trackEl.clientHeight - thumbH;
+    thumbEl.style.height = thumbH + 'px';
+    thumbEl.style.top = (pct * maxTop) + 'px';
+  }
+  scrollEl.addEventListener('scroll', update);
+  new ResizeObserver(update).observe(scrollEl);
+  update();
+  var startY, startTop;
+  thumbEl.addEventListener('mousedown', function(e) {
+    thumbEl.classList.add('dragging');
+    startY = e.clientY;
+    startTop = parseFloat(thumbEl.style.top) || 0;
+    e.preventDefault();
+  });
+  document.addEventListener('mousemove', function(e) {
+    if (!thumbEl.classList.contains('dragging')) return;
+    var maxTop = trackEl.clientHeight - parseFloat(thumbEl.style.height);
+    var newTop = Math.min(maxTop, Math.max(0, startTop + (e.clientY - startY)));
+    scrollEl.scrollTop = maxTop > 0 ? (newTop / maxTop) * (scrollEl.scrollHeight - scrollEl.clientHeight) : 0;
+  });
+  document.addEventListener('mouseup', function() { thumbEl.classList.remove('dragging'); });
+}
+
+function initOverlayX(scrollEl, trackEl, thumbEl) {
+  if (!scrollEl || !trackEl || !thumbEl) return;
+  function update() {
+    var ratio = scrollEl.clientWidth / scrollEl.scrollWidth;
+    if (ratio >= 1) { trackEl.style.opacity = '0'; return; }
+    trackEl.style.opacity = '';
+    var thumbW = Math.max(24, trackEl.clientWidth * ratio);
+    var maxScroll = scrollEl.scrollWidth - scrollEl.clientWidth;
+    var pct = maxScroll > 0 ? scrollEl.scrollLeft / maxScroll : 0;
+    var maxLeft = trackEl.clientWidth - thumbW;
+    thumbEl.style.width = thumbW + 'px';
+    thumbEl.style.left = (pct * maxLeft) + 'px';
+  }
+  scrollEl.addEventListener('scroll', update);
+  new ResizeObserver(update).observe(scrollEl);
+  update();
+  var startX, startLeft;
+  thumbEl.addEventListener('mousedown', function(e) {
+    thumbEl.classList.add('dragging');
+    startX = e.clientX;
+    startLeft = parseFloat(thumbEl.style.left) || 0;
+    e.preventDefault();
+  });
+  document.addEventListener('mousemove', function(e) {
+    if (!thumbEl.classList.contains('dragging')) return;
+    var maxLeft = trackEl.clientWidth - parseFloat(thumbEl.style.width);
+    var newLeft = Math.min(maxLeft, Math.max(0, startLeft + (e.clientX - startX)));
+    scrollEl.scrollLeft = maxLeft > 0 ? (newLeft / maxLeft) * (scrollEl.scrollWidth - scrollEl.clientWidth) : 0;
+  });
+  document.addEventListener('mouseup', function() { thumbEl.classList.remove('dragging'); });
+}
+
+/* Show loaders on initial page load */
+document.addEventListener('DOMContentLoaded', function() {
+  setPageInfoText(mod.firstSub);
+  initOverlayY(document.getElementById('sidebarScroll'), document.getElementById('sidebarTrack'), document.getElementById('sidebarThumb'));
+  initOverlayY(document.getElementById('mainScroll'), document.getElementById('mainTrack'), document.getElementById('mainThumb'));
+  showLoader();
+  setTimeout(function() {
+    showTableLoader();
+    setTimeout(hideTableLoader, 700);
+  }, 1000);
+});
 
 /* ── Sidebar collapse (desktop) ───────────────────── */
 const sidebar      = document.getElementById('sidebar');
@@ -1685,52 +2282,268 @@ function applyStatusFilter(status) {
   applyToolbarFilters();
 }
 
+/* ── Date range calendar picker ──────────────────── */
+var drYear = new Date().getFullYear();
+var drMonth = new Date().getMonth();
+var drStart = null;
+var drEnd   = null;
+var drHover = null;
+var drSelecting = false;
+
+var DR_MONTHS = ['Yanvar','Fevral','Mart','Aprel','May','İyun','İyul','Avqust','Sentyabr','Oktyabr','Noyabr','Dekabr'];
+var DR_WDAYS  = ['Be','Ça','Çə','Ca','Cü','Şə','Ba'];
+
+function drFmt(d) {
+  return String(d.getDate()).padStart(2,'0')+'.'+String(d.getMonth()+1).padStart(2,'0')+'.'+d.getFullYear();
+}
+
+function drRender() {
+  var dd = document.getElementById('dateDropdown');
+  if (!dd) return;
+  var today = new Date(); today.setHours(0,0,0,0);
+  var first = new Date(drYear, drMonth, 1);
+  var last  = new Date(drYear, drMonth+1, 0);
+  var startDow = (first.getDay()+6)%7; // Mon=0
+
+  var hint = '';
+  if (drSelecting && drStart) hint = drFmt(drStart)+' → bitmə tarixini seçin';
+  else if (drStart && drEnd)   hint = drFmt(drStart)+' – '+drFmt(drEnd);
+
+  var rangeEnd = (drSelecting && drHover) ? drHover : drEnd;
+
+  var cells = '';
+  for (var i=0;i<startDow;i++) cells+='<div class="dr-cal-day empty"></div>';
+  for (var d=1;d<=last.getDate();d++) {
+    var dt = new Date(drYear,drMonth,d); dt.setHours(0,0,0,0);
+    var iso = drYear+'-'+String(drMonth+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+    var cls = 'dr-cal-day';
+    var isS = drStart && dt.getTime()===drStart.getTime();
+    var isE = rangeEnd && dt.getTime()===rangeEnd.getTime();
+    var inR = false;
+    if (drStart && rangeEnd) {
+      var lo=drStart<rangeEnd?drStart:rangeEnd, hi=drStart<rangeEnd?rangeEnd:drStart;
+      inR = dt>lo && dt<hi;
+    }
+    if (dt.getTime()===today.getTime()) cls+=' today';
+    if (isS) cls+=' range-start';
+    if (isE) cls+=' range-end';
+    if (inR) cls+=' in-range';
+    cells+='<div class="'+cls+'" data-iso="'+iso+'">'+d+'</div>';
+  }
+
+  dd.innerHTML =
+    '<div class="dr-cal-hd">'+
+      '<button class="dr-cal-nav" onclick="drPrev()">&#8249;</button>'+
+      '<span class="dr-cal-month-lbl">'+DR_MONTHS[drMonth]+' '+drYear+'</span>'+
+      '<button class="dr-cal-nav" onclick="drNext()">&#8250;</button>'+
+    '</div>'+
+    '<div class="dr-cal-wdays">'+DR_WDAYS.map(function(w){return'<div class="dr-cal-wd">'+w+'</div>';}).join('')+'</div>'+
+    '<div class="dr-cal-hint">'+hint+'</div>'+
+    '<div class="dr-cal-days" id="drDaysGrid">'+cells+'</div>'+
+    '<div class="dr-cal-footer">'+
+      '<button class="btn btn-ghost" style="height:28px;font-size:12px;padding:0 10px;" onclick="clearDateFilter()">Sıfırla</button>'+
+      '<button class="btn btn-primary" style="height:28px;font-size:12px;padding:0 10px;" onclick="drApply()">Tətbiq et</button>'+
+    '</div>';
+
+  document.querySelectorAll('#drDaysGrid .dr-cal-day:not(.empty)').forEach(function(el){
+    el.addEventListener('click', function(e){
+      e.stopPropagation();
+      drClick(new Date(el.dataset.iso+'T00:00:00'));
+    });
+    el.addEventListener('mouseenter', function(){
+      if (drSelecting){ drHover=new Date(el.dataset.iso+'T00:00:00'); drPatchClasses(); }
+    });
+  });
+}
+
+function drPatchClasses() {
+  var rangeEnd = (drSelecting && drHover) ? drHover : drEnd;
+  var grid = document.getElementById('drDaysGrid');
+  if (!grid) return;
+  grid.querySelectorAll('.dr-cal-day:not(.empty)').forEach(function(el) {
+    var dt = new Date(el.dataset.iso + 'T00:00:00'); dt.setHours(0,0,0,0);
+    var isS = drStart && dt.getTime() === drStart.getTime();
+    var isE = rangeEnd && dt.getTime() === rangeEnd.getTime();
+    var inR = false;
+    if (drStart && rangeEnd) {
+      var lo = drStart < rangeEnd ? drStart : rangeEnd;
+      var hi = drStart < rangeEnd ? rangeEnd : drStart;
+      inR = dt > lo && dt < hi;
+    }
+    el.classList.toggle('range-start', !!isS);
+    el.classList.toggle('range-end',   !!isE);
+    el.classList.toggle('in-range',    inR);
+  });
+  var hintEl = document.querySelector('.dr-cal-hint');
+  if (hintEl) {
+    hintEl.textContent = (drSelecting && drStart)
+      ? drFmt(drStart) + ' → bitmə tarixini seçin'
+      : (drStart && drEnd ? drFmt(drStart) + ' – ' + drFmt(drEnd) : '');
+  }
+}
+
+function drClick(date) {
+  if (!drSelecting) {
+    drStart=date; drEnd=null; drSelecting=true;
+  } else {
+    if (date<drStart){ drEnd=drStart; drStart=date; } else { drEnd=date; }
+    drSelecting=false; drHover=null;
+  }
+  drRender();
+}
+
+function drPrev() {
+  if(drMonth===0){drMonth=11;drYear--;}else drMonth--;
+  drRender();
+}
+function drNext() {
+  if(drMonth===11){drMonth=0;drYear++;}else drMonth++;
+  drRender();
+}
+function drApply() {
+  if (!drStart||!drEnd) return;
+  tbFilterDateFrom = drStart.toISOString().slice(0,10);
+  tbFilterDateTo   = drEnd.toISOString().slice(0,10);
+  var btn=document.getElementById('dateFilterBtn'), lbl=document.getElementById('dateFilterLabel');
+  var clr=document.getElementById('dateFilterClear');
+  if(btn) btn.classList.add('active');
+  if(lbl) lbl.textContent = drFmt(drStart)+' – '+drFmt(drEnd);
+  if(clr) clr.style.display = 'inline-flex';
+  document.getElementById('dateDropdown').classList.remove('open');
+  applyToolbarFilters();
+}
+
 /* ── Date range dropdown ──────────────────────────── */
 function toggleDateDropdown(e) {
   e.stopPropagation();
   document.getElementById('statusDropdown').classList.remove('open');
-  document.getElementById('dateDropdown').classList.toggle('open');
-}
-
-function applyDateFilter() {
-  tbFilterDateFrom = document.getElementById('dateFrom').value;
-  tbFilterDateTo   = document.getElementById('dateTo').value;
-  var btn = document.getElementById('dateFilterBtn');
-  var lbl = document.getElementById('dateFilterLabel');
-  var active = tbFilterDateFrom || tbFilterDateTo;
-  if (btn) btn.classList.toggle('active', !!active);
-  if (lbl) {
-    if (tbFilterDateFrom && tbFilterDateTo) {
-      lbl.textContent = fmtDate(tbFilterDateFrom) + ' – ' + fmtDate(tbFilterDateTo);
-    } else if (tbFilterDateFrom) {
-      lbl.textContent = fmtDate(tbFilterDateFrom) + ' →';
-    } else if (tbFilterDateTo) {
-      lbl.textContent = '← ' + fmtDate(tbFilterDateTo);
-    } else {
-      lbl.textContent = 'Tarix aralığı';
-    }
-  }
-  document.getElementById('dateDropdown').classList.remove('open');
-  applyToolbarFilters();
+  var dd = document.getElementById('dateDropdown');
+  var opening = !dd.classList.contains('open');
+  dd.classList.toggle('open');
+  if (opening) drRender();
 }
 
 function clearDateFilter() {
-  document.getElementById('dateFrom').value = '';
-  document.getElementById('dateTo').value   = '';
+  drStart = null; drEnd = null; drHover = null; drSelecting = false;
   tbFilterDateFrom = '';
   tbFilterDateTo   = '';
   var btn = document.getElementById('dateFilterBtn');
   var lbl = document.getElementById('dateFilterLabel');
+  var clr = document.getElementById('dateFilterClear');
   if (btn) btn.classList.remove('active');
   if (lbl) lbl.textContent = 'Tarix aralığı';
-  document.getElementById('dateDropdown').classList.remove('open');
+  if (clr) clr.style.display = 'none';
+  var dd = document.getElementById('dateDropdown');
+  if (dd) { dd.classList.remove('open'); drRender(); }
   applyToolbarFilters();
 }
 
-function clearAllFilters() {
+function clearAllFilters(silent) {
   if (cgTable) { cgFilterText = ''; var si = document.querySelector('.grid-strip-search input'); if (si) si.value = ''; }
   applyStatusFilter('');
   clearDateFilter();
+  ntChipClear();
+  if (!silent) showToast('Filtrlər sıfırlandı', 'Bütün aktiv filtrlər ləğv edildi.', 'success');
+}
+
+/* ── Toolbar chip search ──────────────────────────── */
+var ntChipActive = [];
+var ntChipReady  = false;
+
+function ntChipClear() {
+  ntChipActive = [];
+  var wrap = document.getElementById('toolbarChipWrap');
+  var inp  = document.getElementById('toolbarChipInput');
+  if (!wrap || !inp) return;
+  wrap.querySelectorAll('.chip').forEach(function(c) { c.parentNode.removeChild(c); });
+  inp.value = '';
+  applyToolbarFilters();
+}
+
+function ntChipInit() {
+  if (ntChipReady) return;
+  ntChipReady = true;
+  var input  = document.getElementById('toolbarChipInput');
+  var wrap   = document.getElementById('toolbarChipWrap');
+  var sugBox = document.getElementById('toolbarChipSuggestions');
+  if (!input || !wrap || !sugBox) return;
+  var focIdx = -1;
+
+  function available(q) {
+    return TAG_SUGGESTIONS.filter(function(s) {
+      return s.toLowerCase().includes(q.toLowerCase()) && !ntChipActive.includes(s);
+    });
+  }
+
+  function addChip(label) {
+    label = label.trim();
+    if (!label || ntChipActive.includes(label)) return;
+    ntChipActive.push(label);
+    var chip = document.createElement('span');
+    chip.className = 'chip';
+    chip.innerHTML = label + ' <span class="chip-x">✕</span>';
+    chip.querySelector('.chip-x').addEventListener('click', function() {
+      ntChipActive.splice(ntChipActive.indexOf(label), 1);
+      chip.style.transition = 'opacity 0.15s'; chip.style.opacity = '0';
+      setTimeout(function() { if (chip.parentNode) chip.parentNode.removeChild(chip); }, 150);
+      renderSug(input.value);
+      applyToolbarFilters();
+    });
+    wrap.insertBefore(chip, input);
+    input.value = ''; input.focus();
+    renderSug('');
+    applyToolbarFilters();
+  }
+
+  function renderSug(q) {
+    var matches = available(q);
+    focIdx = -1;
+    if (!matches.length) {
+      sugBox.innerHTML = q ? '<div class="chip-no-results">Uyğun tapılmadı — Enter ilə əlavə et</div>' : '';
+      sugBox.className = 'chip-suggestions' + (q ? ' open' : '');
+      return;
+    }
+    sugBox.innerHTML = matches.map(function(s) {
+      return '<div class="chip-suggestion-item" data-val="' + s + '">' + s + '</div>';
+    }).join('');
+    sugBox.className = 'chip-suggestions open';
+    sugBox.querySelectorAll('.chip-suggestion-item').forEach(function(item) {
+      item.addEventListener('mousedown', function(e) { e.preventDefault(); addChip(item.dataset.val); });
+    });
+  }
+
+  function hideSug() { sugBox.className = 'chip-suggestions'; focIdx = -1; }
+
+  var outer = document.getElementById('toolbarChipOuter');
+  document.addEventListener('mousedown', function(e) {
+    if (!document.contains(e.target)) return;
+    if (outer && !outer.contains(e.target)) hideSug();
+  });
+
+  input.addEventListener('input',  function() { renderSug(input.value); });
+  input.addEventListener('focus',  function() { renderSug(input.value); });
+  input.addEventListener('keydown', function(e) {
+    var items = sugBox.querySelectorAll('.chip-suggestion-item');
+    if (e.key === 'ArrowDown') {
+      focIdx = Math.min(focIdx + 1, items.length - 1);
+      items.forEach(function(el, i) { el.classList.toggle('focused', i === focIdx); });
+      e.preventDefault();
+    } else if (e.key === 'ArrowUp') {
+      focIdx = Math.max(focIdx - 1, -1);
+      items.forEach(function(el, i) { el.classList.toggle('focused', i === focIdx); });
+      e.preventDefault();
+    } else if (e.key === 'Enter') {
+      if (focIdx >= 0 && items[focIdx]) addChip(items[focIdx].dataset.val);
+      else if (input.value.trim()) addChip(input.value.trim());
+      e.preventDefault();
+    } else if (e.key === 'Backspace' && input.value === '' && ntChipActive.length) {
+      var last = ntChipActive.pop();
+      var chips = wrap.querySelectorAll('.chip');
+      var lastChip = chips[chips.length - 1];
+      if (lastChip) lastChip.parentNode.removeChild(lastChip);
+      applyToolbarFilters();
+    } else if (e.key === 'Escape') { hideSug(); }
+  });
 }
 
 function fmtDate(iso) {
@@ -1789,6 +2602,16 @@ function applyToolbarFilters() {
       });
     }
 
+    /* Chip search — row must match at least one active chip (OR logic) */
+    if (show && ntChipActive.length) {
+      var rowText = tr.textContent.toLowerCase();
+      var matched = false;
+      ntChipActive.forEach(function(chip) {
+        if (rowText.indexOf(chip.toLowerCase()) !== -1) matched = true;
+      });
+      if (!matched) show = false;
+    }
+
     tr.style.display = show ? '' : 'none';
     if (show) visibleCount++;
   });
@@ -1810,7 +2633,8 @@ document.addEventListener('click', function(e) {
   var sw = document.getElementById('statusFilterWrap');
   var dw = document.getElementById('dateFilterWrap');
   if (sd && sw && !sw.contains(e.target)) sd.classList.remove('open');
-  if (dd && dw && !dw.contains(e.target)) dd.classList.remove('open');
+  /* document.contains check ignores detached nodes (rebuilt by drRender) */
+  if (dd && dw && document.contains(e.target) && !dw.contains(e.target)) dd.classList.remove('open');
 });
 
 /* ══════════════════════════════════════════════════
@@ -1833,7 +2657,7 @@ function ntGetHeaders() {
   var ths = Array.from(table.querySelectorAll('thead th'));
   return ths.map(function(th, i) {
     return { th: th, idx: i, label: th.textContent.replace(/[↑↓↕]/g, '').trim() };
-  }).filter(function(h) { return h.idx !== 0 && h.idx !== ths.length - 1 && h.label; });
+  }).filter(function(h) { return h.idx !== 0 && h.label; });
 }
 
 function ntApplyVisibility() {
@@ -1841,7 +2665,7 @@ function ntApplyVisibility() {
   if (!table) return;
   var ths = Array.from(table.querySelectorAll('thead th'));
   ths.forEach(function(th, i) {
-    if (i === 0 || i === ths.length - 1) return;
+    if (i === 0) return;
     var label = th.textContent.replace(/[↑↓↕]/g, '').trim();
     var hide = !!_ntHiddenCols[label];
     th.style.display = hide ? 'none' : '';
@@ -1897,9 +2721,14 @@ function ntBuildPanel(btn) {
 }
 
 function ntInitTable() {
-  /* Reset column visibility for the new tab's table */
   _ntHiddenCols = {};
   ntApplyVisibility();
+  /* Show chip search, init it, hide for complex grid */
+  var chipOuter = document.getElementById('toolbarChipOuter');
+  if (chipOuter) chipOuter.style.display = '';
+  ntChipInit();
+  /* always close the panel on tab switch so first click always opens */
+  if (_ntColPanel) _ntColPanel.classList.remove('open');
 
   var columnsBtn = document.getElementById('columnsBtn');
   if (!columnsBtn) return;
@@ -1948,7 +2777,6 @@ var cgDragSrc = null;
 var cgEditRow = null;
 
 function cgShowNormal() {
-  if (!cgNormalHTML) return;
   cgEditRow = null;
   /* detach cgInit's columnsBtn listener */
   var cb = document.getElementById('columnsBtn');
@@ -1956,7 +2784,9 @@ function cgShowNormal() {
     cb.removeEventListener('click', _cgColsBtnHandler);
     _cgColsBtnHandler = null;
   }
-  document.querySelector('.data-card').innerHTML = cgNormalHTML;
+  if (cgNormalHTML) {
+    document.querySelector('.data-card').innerHTML = cgNormalHTML;
+  }
   cgTable = null;
   if (cgColPanel) { cgColPanel.classList.remove('open'); cgColPanel = null; }
   if (cgCtxEl) cgCtxEl.style.display = 'none';
@@ -1967,6 +2797,9 @@ function cgInit() {
   var dataCard = document.querySelector('.data-card');
   if (!cgNormalHTML) cgNormalHTML = dataCard.innerHTML;
   dataCard.innerHTML = '';
+  /* Hide chip search — complex grid has its own grid-strip search */
+  var chipOuter = document.getElementById('toolbarChipOuter');
+  if (chipOuter) chipOuter.style.display = 'none';
 
   /* ── Filter strip (search only — count and column toggle moved to toolbar) */
   var strip = document.createElement('div');
@@ -2027,6 +2860,12 @@ function cgInit() {
   /* ── Wire toolbar Sütunlar button to cgColPanel ─── */
   var columnsBtn = document.getElementById('columnsBtn');
   if (columnsBtn) {
+    /* detach normal-table handler so only the cg handler fires in this tab */
+    if (_ntColsBtnHandler) {
+      columnsBtn.removeEventListener('click', _ntColsBtnHandler);
+    }
+    /* close normal-table panel if it was left open */
+    if (_ntColPanel) _ntColPanel.classList.remove('open');
     _cgColsBtnHandler = function(e) {
       e.stopPropagation();
       var isOpen = cgColPanel.classList.contains('open');
@@ -2044,8 +2883,12 @@ function cgInit() {
   }
 
   /* ── Table scroll wrapper ─────────────────────────── */
+  var tableScrollWrap = document.createElement('div');
+  tableScrollWrap.style.cssText = 'position:relative;overflow:hidden;';
+
   var tableScroll = document.createElement('div');
-  tableScroll.style.overflowX = 'auto';
+  tableScroll.className = 'ov-scroll-x';
+  tableScroll.style.overflowY = 'hidden';
 
   cgTable = document.createElement('table');
   cgTable.className = 'data-grid';
@@ -2056,7 +2899,17 @@ function cgInit() {
   cgTable.appendChild(thead);
   cgTable.appendChild(document.createElement('tbody'));
   tableScroll.appendChild(cgTable);
-  dataCard.appendChild(tableScroll);
+
+  var tblTrack = document.createElement('div');
+  tblTrack.className = 'ov-track ov-track-x light';
+  var tblThumb = document.createElement('div');
+  tblThumb.className = 'ov-thumb';
+  tblTrack.appendChild(tblThumb);
+
+  tableScrollWrap.appendChild(tableScroll);
+  tableScrollWrap.appendChild(tblTrack);
+  dataCard.appendChild(tableScrollWrap);
+  initOverlayX(tableScroll, tblTrack, tblThumb);
 
   /* ── Context menu (singleton) ─────────────────────── */
   if (!cgCtxEl) {
@@ -2225,6 +3078,11 @@ function cgRender() {
     thead.appendChild(th);
   });
 
+  /* Delete column th */
+  var thDel = document.createElement('th');
+  thDel.style.cssText = 'width:36px;min-width:36px;padding:10px 6px;';
+  thead.appendChild(thDel);
+
   /* Select-all state */
   selectAll.checked = visible.length > 0 && visible.every(function(r) { return r.sel; });
   selectAll.indeterminate = !selectAll.checked && visible.some(function(r) { return r.sel; });
@@ -2240,7 +3098,7 @@ function cgRender() {
   if (!visible.length) {
     var emptyTr = document.createElement('tr');
     var emptyTd = document.createElement('td');
-    emptyTd.colSpan = cgCols.length + 1;
+    emptyTd.colSpan = cgCols.length + 2;
     emptyTd.style.cssText = 'text-align:center;padding:40px;color:var(--clr-text-muted);font-size:13px';
     emptyTd.textContent = 'Filtrə uyğun qeyd tapılmadı';
     emptyTr.appendChild(emptyTd);
@@ -2310,6 +3168,17 @@ function cgRender() {
       }
       tr.appendChild(td);
     });
+
+    /* Delete action cell */
+    var tdDel = document.createElement('td');
+    tdDel.style.cssText = 'width:36px;padding:0 6px;text-align:center';
+    var delBtn = document.createElement('button');
+    delBtn.className = 'cg-del-btn';
+    delBtn.title = 'Sil';
+    delBtn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>';
+    (function(r){ delBtn.addEventListener('click', function(e){ e.stopPropagation(); cgAskDelete(r); }); })(row);
+    tdDel.appendChild(delBtn);
+    tr.appendChild(tdDel);
 
     tr.addEventListener('dblclick', function(e) {
       if (!e.target.matches('.cg-edit-input,.cg-edit-select,input,select,label')) cgStartEdit(tr, row);
@@ -2385,9 +3254,31 @@ function cgStartEdit(tr, row) {
   cgEditRow = { tr: tr, row: row, orig: JSON.parse(JSON.stringify(row)) };
   tr.classList.add('editing');
 
+  /* Replace checkbox cell with save / discard buttons */
+  var td0 = tr.querySelector('td:first-child');
+  if (td0) {
+    while (td0.firstChild) td0.removeChild(td0.firstChild);
+    var wrap = document.createElement('div');
+    wrap.className = 'cg-edit-actions';
+
+    var saveBtn = document.createElement('button');
+    saveBtn.className = 'cg-edit-save'; saveBtn.title = 'Yadda saxla';
+    saveBtn.innerHTML = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+    saveBtn.addEventListener('click', function(e) { e.stopPropagation(); cgSaveEdit(true);  cgRender(); });
+
+    var discardBtn = document.createElement('button');
+    discardBtn.className = 'cg-edit-discard'; discardBtn.title = 'Ləğv et';
+    discardBtn.innerHTML = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
+    discardBtn.addEventListener('click', function(e) { e.stopPropagation(); cgSaveEdit(false); cgRender(); });
+
+    wrap.appendChild(saveBtn);
+    wrap.appendChild(discardBtn);
+    td0.appendChild(wrap);
+  }
+
   var colIdx = 0;
   tr.querySelectorAll('td').forEach(function(td, idx) {
-    if (idx === 0) return; /* skip checkbox */
+    if (idx === 0) return; /* skip — now holds edit action buttons */
     var col = cgCols[colIdx++];
     if (!col) return;
     while (td.firstChild) td.removeChild(td.firstChild);
@@ -2477,7 +3368,418 @@ function cgSaveEdit(save) {
     }
   });
 }
+/* ── Toast ───────────────────────────────────────────── */
+function showToast(title, msg, variant, duration) {
+  variant  = variant  || 'info';
+  duration = duration || 3000;
+  var icons = {
+    success: '<polyline points="20 6 9 17 4 12"/>',
+    info:    '<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>',
+    error:   '<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>'
+  };
+  var stack = document.getElementById('toastStack');
+  var el = document.createElement('div');
+  el.className = 'corner-toast';
+  el.innerHTML =
+    '<div class="ct-icon-wrap ct-' + variant + '">' +
+      '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">' + (icons[variant] || icons.info) + '</svg>' +
+    '</div>' +
+    '<div style="flex:1;min-width:0">' +
+      '<div class="ct-title">' + title + '</div>' +
+      '<div class="ct-msg">' + msg + '</div>' +
+    '</div>' +
+    '<button class="ct-close">' +
+      '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>' +
+    '</button>' +
+    '<div class="ct-progress"><div class="ct-progress-bar ct-bar-' + variant + '" style="width:100%"></div></div>';
+
+  stack.appendChild(el);
+
+  requestAnimationFrame(function() {
+    requestAnimationFrame(function() { el.classList.add('toast-in'); });
+  });
+
+  var bar = el.querySelector('.ct-progress-bar');
+  bar.style.transition = 'width ' + duration + 'ms linear';
+  requestAnimationFrame(function() {
+    requestAnimationFrame(function() { bar.style.width = '0%'; });
+  });
+
+  function dismiss() {
+    clearTimeout(timer);
+    el.classList.remove('toast-in');
+    el.classList.add('toast-out');
+    setTimeout(function() { if (el.parentNode) el.parentNode.removeChild(el); }, 280);
+  }
+
+  var timer = setTimeout(dismiss, duration);
+  el.querySelector('.ct-close').addEventListener('click', dismiss);
+}
+
+/* ── Chip input ──────────────────────────────────────── */
+var TAG_SUGGESTIONS = [
+  'Azərbaycan Ərzaq MMC', 'Baku Stars LLC', 'Naxçıvan Ticaret AS',
+  'Gəncə Sənaye MMC', 'Global Trade İnc.', 'Abşeron Qida SC',
+  'Sumqayıt Kimya MMC', 'Lənkəran Agro Koop.',
+  'Ödənilib', 'Gözlənilir', 'Vaxtı keçib',
+  'Hazırlanır', 'Göndərilib', 'Tamamlandı', 'Qaralama',
+  'Bakı', 'Gəncə', 'Naxçıvan', 'Sumqayıt', 'Lənkəran', 'Abşeron'
+];
+
+function initChipInput(inputId, wrapId, sugId) {
+  var input  = document.getElementById(inputId);
+  var wrap   = document.getElementById(wrapId);
+  var sugBox = document.getElementById(sugId);
+  if (!input || !wrap || !sugBox || input._chipReady) return;
+  input._chipReady = true;
+
+  var active = [];
+  var focIdx = -1;
+
+  function available(q) {
+    return TAG_SUGGESTIONS.filter(function(s) {
+      return s.toLowerCase().includes(q.toLowerCase()) && !active.includes(s);
+    });
+  }
+
+  function addChip(label) {
+    label = label.trim();
+    if (!label || active.includes(label)) return;
+    active.push(label);
+    var chip = document.createElement('span');
+    chip.className = 'chip';
+    chip.innerHTML = label + ' <span class="chip-x">✕</span>';
+    chip.querySelector('.chip-x').addEventListener('click', function() {
+      active.splice(active.indexOf(label), 1);
+      chip.style.transition = 'opacity 0.15s'; chip.style.opacity = '0';
+      setTimeout(function() { if (chip.parentNode) chip.parentNode.removeChild(chip); }, 150);
+      renderSug(input.value);
+    });
+    wrap.insertBefore(chip, input);
+    input.value = '';
+    hideSug();
+    input.focus();
+  }
+
+  function renderSug(q) {
+    var matches = available(q);
+    focIdx = -1;
+    if (!matches.length) {
+      sugBox.innerHTML = q ? '<div class="chip-no-results">Uyğun tapılmadı — Enter ilə əlavə et</div>' : '';
+      sugBox.className = 'chip-suggestions' + (q ? ' open' : '');
+      return;
+    }
+    sugBox.innerHTML = matches.map(function(s) {
+      return '<div class="chip-suggestion-item" data-val="' + s + '">' + s + '</div>';
+    }).join('');
+    sugBox.className = 'chip-suggestions open';
+    sugBox.querySelectorAll('.chip-suggestion-item').forEach(function(item) {
+      item.addEventListener('mousedown', function(e) { e.preventDefault(); addChip(item.dataset.val); });
+    });
+  }
+
+  function hideSug() { sugBox.className = 'chip-suggestions'; focIdx = -1; }
+
+  input.addEventListener('input',  function() { renderSug(input.value); });
+  input.addEventListener('focus',  function() { renderSug(input.value); });
+  input.addEventListener('blur',   function() { setTimeout(hideSug, 120); });
+  input.addEventListener('keydown', function(e) {
+    var items = sugBox.querySelectorAll('.chip-suggestion-item');
+    if (e.key === 'ArrowDown') {
+      focIdx = Math.min(focIdx + 1, items.length - 1);
+      items.forEach(function(el, i) { el.classList.toggle('focused', i === focIdx); });
+      e.preventDefault();
+    } else if (e.key === 'ArrowUp') {
+      focIdx = Math.max(focIdx - 1, -1);
+      items.forEach(function(el, i) { el.classList.toggle('focused', i === focIdx); });
+      e.preventDefault();
+    } else if (e.key === 'Enter') {
+      if (focIdx >= 0 && items[focIdx]) addChip(items[focIdx].dataset.val);
+      else if (input.value.trim()) addChip(input.value.trim());
+      e.preventDefault();
+    } else if (e.key === 'Backspace' && input.value === '' && active.length) {
+      var last = active.pop();
+      var chips = wrap.querySelectorAll('.chip');
+      var lastChip = chips[chips.length - 1];
+      if (lastChip) lastChip.parentNode.removeChild(lastChip);
+    } else if (e.key === 'Escape') { hideSug(); }
+  });
+}
+
+/* ── Open "Yeni hesab" modal ─────────────────────────── */
+
+var HESAB_FIELDS = [
+  { id: 'fieldKod',     fg: 'fg-kod',     err: 'err-kod'     },
+  { id: 'fieldAd',      fg: 'fg-ad',      err: 'err-ad'      },
+  { id: 'fieldNov',     fg: 'fg-nov',     err: 'err-nov'     },
+  { id: 'fieldValyuta', fg: 'fg-valyuta', err: 'err-valyuta' },
+];
+
+function hesabClearErrors() {
+  HESAB_FIELDS.forEach(function(f) {
+    var fg  = document.getElementById(f.fg);
+    var err = document.getElementById(f.err);
+    if (fg)  fg.classList.remove('has-error');
+    if (err) err.classList.remove('visible');
+  });
+}
+
+function hesabResetForm() {
+  hesabClearErrors();
+  ['fieldKod','fieldAd','fieldQeyd'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  var nov = document.getElementById('fieldNov');
+  if (nov) nov.value = '';
+  var val = document.getElementById('fieldValyuta');
+  if (val) val.value = 'AZN';
+  var sta = document.getElementById('fieldStatus');
+  if (sta) sta.value = 'aktiv';
+  var ana = document.getElementById('fieldAnaHesab');
+  if (ana) ana.value = '';
+}
+
+function submitHesabModal() {
+  hesabClearErrors();
+  var valid = true;
+  HESAB_FIELDS.forEach(function(f) {
+    var el  = document.getElementById(f.id);
+    var fg  = document.getElementById(f.fg);
+    var err = document.getElementById(f.err);
+    if (el && !el.value.trim()) {
+      valid = false;
+      if (fg)  fg.classList.add('has-error');
+      if (err) err.classList.add('visible');
+    }
+  });
+
+  if (!valid) {
+    /* Scroll to first error */
+    var firstErr = document.querySelector('#hesabModalScroll .has-error');
+    if (firstErr) firstErr.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return;
+  }
+
+  var kod = document.getElementById('fieldKod').value.trim();
+  var ad  = document.getElementById('fieldAd').value.trim();
+  closeHesabModal();
+  hesabResetForm();
+  showToast('Hesab yaradıldı', kod + ' — ' + ad + ' uğurla əlavə edildi.', 'success');
+}
+
+/* Clear errors live as user types */
+(function() {
+  document.addEventListener('DOMContentLoaded', function() {
+    HESAB_FIELDS.forEach(function(f) {
+      var el = document.getElementById(f.id);
+      if (!el) return;
+      el.addEventListener('input', function() {
+        if (el.value.trim()) {
+          var fg  = document.getElementById(f.fg);
+          var err = document.getElementById(f.err);
+          if (fg)  fg.classList.remove('has-error');
+          if (err) err.classList.remove('visible');
+        }
+      });
+      el.addEventListener('change', function() {
+        if (el.value.trim()) {
+          var fg  = document.getElementById(f.fg);
+          var err = document.getElementById(f.err);
+          if (fg)  fg.classList.remove('has-error');
+          if (err) err.classList.remove('visible');
+        }
+      });
+    });
+  });
+})();
+
+function openHesabModal() {
+  hesabClearErrors();
+  document.getElementById('hesabModal').classList.add('open');
+  requestAnimationFrame(function() {
+    initOverlayY(
+      document.getElementById('hesabModalScroll'),
+      document.getElementById('hesabModalTrack'),
+      document.getElementById('hesabModalThumb')
+    );
+  });
+}
+function closeHesabModal() {
+  document.getElementById('hesabModal').classList.remove('open');
+}
+
+/* ── Delete row confirmation modal ──────────────────── */
+var cgDeleteTarget = null;
+function cgAskDelete(row) {
+  cgDeleteTarget = row;
+  document.getElementById('delModalDoc').textContent = row.doc;
+  document.getElementById('delModalPayee').textContent = row.payee;
+  document.getElementById('delModalAmt').textContent = row.currency + ' ' + row.amtFmt;
+  document.getElementById('deleteModal').classList.add('open');
+}
+function cgConfirmDelete() {
+  var deleted = cgDeleteTarget;
+  if (deleted) {
+    var i = cgRows.indexOf(deleted);
+    if (i >= 0) cgRows.splice(i, 1);
+    cgDeleteTarget = null;
+  }
+  document.getElementById('deleteModal').classList.remove('open');
+  cgRender();
+  if (deleted) showToast('Qeyd silindi', deleted.doc + ' · ' + deleted.payee, 'error');
+}
+function closeDeleteModal() {
+  cgDeleteTarget = null;
+  document.getElementById('deleteModal').classList.remove('open');
+}
 </script>
+
+<!-- ══ Toast stack ═══════════════════════════════════ -->
+<div id="toastStack" class="toast-stack"></div>
+
+<!-- ══ Yeni hesab modal ══════════════════════════════ -->
+<div id="hesabModal" class="modal-backdrop" onclick="if(event.target===this)closeHesabModal()">
+  <div class="modal-box">
+
+    <div class="modal-hd">
+      <div>
+        <div class="modal-ttl">Yeni hesab əlavə et</div>
+        <div class="modal-ttl-sub">Hesablar planına yeni hesab</div>
+      </div>
+      <button class="modal-x" onclick="closeHesabModal()">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+
+    <div class="modal-scroll" id="hesabModalScroll">
+    <div class="modal-bd">
+
+      <!-- Section 1 — Hesab məlumatları -->
+      <div class="form-card">
+        <div class="form-card-header">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
+          Hesab məlumatları
+        </div>
+        <div class="form-card-body">
+          <div class="form-row">
+            <div class="form-group" id="fg-kod">
+              <label class="form-label required" for="fieldKod">Hesab kodu</label>
+              <input class="input" id="fieldKod" placeholder="məs. 1010" />
+              <div class="form-hint">Unikal rəqəmsal kod</div>
+              <div class="field-error-msg" id="err-kod">Bu xana məcburidir</div>
+            </div>
+            <div class="form-group" id="fg-ad">
+              <label class="form-label required" for="fieldAd">Hesabın adı</label>
+              <input class="input" id="fieldAd" placeholder="məs. Bank hesabları" />
+              <div class="field-error-msg" id="err-ad">Bu xana məcburidir</div>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group" id="fg-nov">
+              <label class="form-label required" for="fieldNov">Növ</label>
+              <select class="input" id="fieldNov">
+                <option value="">Seçin…</option>
+                <option value="aktiv">Aktiv</option>
+                <option value="passiv">Passiv</option>
+                <option value="kapital">Kapital</option>
+                <option value="gelir">Gəlir</option>
+                <option value="xerc">Xərc</option>
+              </select>
+              <div class="field-error-msg" id="err-nov">Hesab növü seçilməlidir</div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="fieldAnaHesab">Ana hesab</label>
+              <select class="input" id="fieldAnaHesab">
+                <option value="">Ana hesab yoxdur</option>
+                <option value="1000">1000 — Kassa</option>
+                <option value="1010">1010 — Bank hesabları</option>
+                <option value="1100">1100 — Debitor borclar</option>
+                <option value="2000">2000 — Kreditor borclar</option>
+                <option value="3000">3000 — Nizamnamə kapitalı</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 2 — Əlavə parametrlər -->
+      <div class="form-card">
+        <div class="form-card-header">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+          Əlavə parametrlər
+        </div>
+        <div class="form-card-body">
+          <div class="form-row">
+            <div class="form-group" id="fg-valyuta">
+              <label class="form-label required" for="fieldValyuta">Valyuta</label>
+              <select class="input" id="fieldValyuta">
+                <option value="">Seçin…</option>
+                <option value="AZN" selected>AZN — Azərbaycan Manatı</option>
+                <option value="USD">USD — ABŞ Dolları</option>
+                <option value="EUR">EUR — Avro</option>
+                <option value="GBP">GBP — Britaniya Funtu</option>
+              </select>
+              <div class="field-error-msg" id="err-valyuta">Valyuta seçilməlidir</div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="fieldStatus">Status</label>
+              <select class="input" id="fieldStatus">
+                <option value="aktiv" selected>Aktiv</option>
+                <option value="deaktiv">Deaktiv</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="fieldQeyd">Qeyd</label>
+            <textarea class="input" id="fieldQeyd" style="height:72px" placeholder="Hesab haqqında əlavə qeyd..."></textarea>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    </div><!-- /modal-scroll -->
+    <div class="ov-track ov-track-y light" id="hesabModalTrack"><div class="ov-thumb" id="hesabModalThumb"></div></div>
+
+    <div class="modal-ft">
+      <button class="btn btn-ghost" onclick="closeHesabModal()">Ləğv et</button>
+      <button class="btn btn-primary" onclick="submitHesabModal()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        Yadda saxla
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── Delete confirmation modal ───────────────────── -->
+<div id="deleteModal" class="modal-backdrop" onclick="if(event.target===this)closeDeleteModal()">
+  <div class="modal-box modal-danger">
+    <div class="modal-danger-top">
+      <button class="modal-danger-close" onclick="closeDeleteModal()">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+      <div class="modal-danger-icon-wrap danger">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+      </div>
+      <div class="modal-danger-text">
+        <div class="modal-danger-title">Silinsin?</div>
+        <div class="modal-danger-desc">
+          <strong id="delModalDoc"></strong> — <span id="delModalPayee"></span><br>
+          Məbləğ: <strong id="delModalAmt"></strong><br>
+          Bu əməliyyat geri qaytarıla bilməz.
+        </div>
+      </div>
+    </div>
+    <div class="modal-danger-footer">
+      <button class="btn btn-ghost" onclick="closeDeleteModal()">Ləğv et</button>
+      <button class="btn btn-danger" onclick="cgConfirmDelete()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+        Bəli, sil
+      </button>
+    </div>
+  </div>
+</div>
 
 </body>
 </html>
