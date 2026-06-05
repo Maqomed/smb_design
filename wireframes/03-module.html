@@ -455,6 +455,62 @@ body {
   white-space: nowrap;
 }
 
+/* ── Toolbar filter dropdowns ──────────────────────── */
+.filter-wrap { position: relative; }
+.filter-dropdown {
+  display: none;
+  position: absolute;
+  top: calc(100% + 6px); left: 0;
+  background: #fff;
+  border: 1px solid var(--clr-border);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(27,58,92,0.12);
+  z-index: 200;
+  min-width: 185px;
+  overflow: hidden;
+}
+.filter-dropdown.open { display: block; animation: tbFadeIn 0.12s ease; }
+@keyframes tbFadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.filter-dd-item {
+  display: flex; align-items: center; gap: 9px;
+  padding: 9px 14px;
+  font-size: 13px; color: var(--clr-primary);
+  cursor: pointer; transition: background 0.1s;
+}
+.filter-dd-item:hover { background: var(--clr-bg-page); }
+.filter-dd-item.active { background: var(--clr-accent-bg); color: var(--clr-accent-fg); font-weight: 500; }
+.filter-dd-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.filter-dd-sep { height: 1px; background: var(--clr-border-light); margin: 3px 0; }
+
+/* Date range dropdown */
+.date-range-dropdown { padding: 14px; min-width: 220px; overflow: visible; }
+.date-range-title {
+  font-size: 10px; font-weight: 700; color: var(--clr-text-muted);
+  text-transform: uppercase; letter-spacing: 0.10em; margin-bottom: 12px;
+}
+.date-range-field { margin-bottom: 10px; }
+.date-range-field-lbl {
+  font-size: 11px; font-weight: 600; color: var(--clr-input-label);
+  margin-bottom: 4px; display: block;
+}
+.date-range-field input[type="date"] {
+  width: 100%; height: 32px; padding: 0 10px;
+  border: 1px solid var(--clr-border); border-radius: 6px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px; color: var(--clr-primary);
+  background: var(--clr-bg-subtle); outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  box-sizing: border-box;
+}
+.date-range-field input[type="date"]:focus {
+  border-color: var(--clr-accent); background: #fff;
+  box-shadow: 0 0 0 3px rgba(46,109,164,0.10);
+}
+.date-range-actions { display: flex; gap: 6px; justify-content: flex-end; margin-top: 12px; }
+
 /* Table area */
 .table-wrap {
   flex: 1;
@@ -842,6 +898,252 @@ tr:hover td { background: var(--clr-bg-hover); }
   .bc-current { max-width: 120px; }
 }
 
+/* ══════════════════════════════════════════════════
+   COMPLEX DATA GRID
+══════════════════════════════════════════════════ */
+.data-grid {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  table-layout: fixed;
+}
+.data-grid thead { position: sticky; top: 0; z-index: 2; }
+.data-grid th {
+  background: var(--clr-bg-subtle);
+  padding: 10px 14px;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--clr-text-muted);
+  border-bottom: 1px solid var(--clr-border);
+  white-space: nowrap;
+  user-select: none;
+  position: relative;
+  overflow: hidden;
+}
+.data-grid th:hover { background: var(--clr-border-light); }
+.data-grid th.drag-over {
+  background: var(--clr-border) !important;
+  outline: 2px dashed var(--clr-text-muted);
+  outline-offset: -2px;
+}
+.data-grid th[draggable="true"] { cursor: grab; }
+.data-grid th[draggable="true"]:active { cursor: grabbing; }
+.data-grid th.being-resized { background: var(--clr-border-light) !important; }
+.data-grid td {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--clr-border-light);
+  color: var(--clr-primary);
+  vertical-align: middle;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.data-grid tr:last-child td { border-bottom: none; }
+.data-grid tr:hover td { background: var(--clr-bg-hover); }
+.data-grid tr.selected td { background: var(--clr-accent-bg); }
+.data-grid .sort-icon { display: inline-block; margin-left: 4px; color: var(--clr-text-muted); font-size: 10px; }
+.data-grid .sort-icon.asc { color: var(--clr-primary); }
+
+/* Resize handle */
+.resize-handle {
+  position: absolute;
+  top: 0; right: 0;
+  width: 5px; height: 100%;
+  cursor: col-resize;
+  z-index: 10;
+  background: transparent;
+}
+.resize-handle::after {
+  content: '';
+  position: absolute;
+  top: 20%; right: 2px;
+  width: 1px; height: 60%;
+  background: var(--clr-border);
+  border-radius: 1px;
+  transition: background 0.15s, width 0.1s;
+}
+.resize-handle:hover::after,
+.resize-handle.resizing::after {
+  background: var(--clr-accent);
+  width: 2px; right: 1.5px;
+}
+
+/* Filter strip inside data card */
+.grid-strip {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--clr-border-light);
+  background: #fff;
+  flex-wrap: wrap;
+}
+.grid-strip-search {
+  position: relative;
+  flex: 1;
+  min-width: 180px;
+  max-width: 280px;
+}
+.grid-strip-search input {
+  width: 100%;
+  height: 32px;
+  padding: 0 10px 0 30px;
+  border: 1px solid var(--clr-border);
+  border-radius: 6px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12.5px;
+  color: var(--clr-primary);
+  background: var(--clr-bg-subtle);
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.grid-strip-search input:focus {
+  border-color: var(--clr-accent);
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(46,109,164,0.10);
+}
+.grid-strip-search input::placeholder { color: var(--clr-text-muted); }
+.grid-strip-search-icon {
+  position: absolute; left: 9px; top: 50%;
+  transform: translateY(-50%);
+  color: var(--clr-text-muted);
+  pointer-events: none;
+  display: flex; align-items: center;
+}
+.status-chip {
+  display: inline-flex; align-items: center;
+  padding: 0 10px; height: 30px;
+  border-radius: 6px;
+  border: 1px solid var(--clr-border);
+  background: #fff;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px; font-weight: 500;
+  color: var(--clr-text-secondary);
+  cursor: pointer;
+  transition: background 0.14s, border-color 0.14s, color 0.14s;
+  white-space: nowrap;
+}
+.status-chip:hover { background: var(--clr-bg-subtle); color: var(--clr-primary); }
+.status-chip.active { background: var(--clr-accent-bg); border-color: var(--clr-accent); color: var(--clr-accent-fg); }
+.grid-strip-spacer { flex: 1; }
+.grid-count {
+  font-size: 12px;
+  color: var(--clr-text-muted);
+  font-family: 'JetBrains Mono', monospace;
+  white-space: nowrap;
+}
+.grid-status-select {
+  height: 32px;
+  padding: 0 28px 0 10px;
+  border: 1px solid var(--clr-border);
+  border-radius: 6px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12.5px;
+  color: var(--clr-primary);
+  background: #fff;
+  outline: none;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%237AAFC5' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 9px center;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.grid-status-select:hover { border-color: var(--clr-secondary); }
+.grid-status-select:focus { border-color: var(--clr-accent); box-shadow: 0 0 0 3px rgba(46,109,164,0.10); }
+
+/* Column toggle panel */
+.col-toggle-wrap { position: relative; flex-shrink: 0; }
+.col-toggle-panel {
+  display: none;
+  position: fixed;   /* JS sets top/right at open time */
+  background: #fff;
+  border: 1px solid var(--clr-border);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(27,58,92,0.12);
+  padding: 10px;
+  z-index: 500;
+  width: 180px;
+}
+.col-toggle-panel.open { display: block; animation: cgFadeIn 0.1s ease; }
+@keyframes cgFadeIn {
+  from { opacity: 0; transform: scale(0.96) translateY(-4px); }
+  to   { opacity: 1; transform: scale(1)    translateY(0); }
+}
+.col-toggle-header {
+  font-size: 10px; font-weight: 600;
+  color: var(--clr-text-muted);
+  text-transform: uppercase; letter-spacing: 0.08em;
+  padding: 0 4px 6px;
+  border-bottom: 1px solid var(--clr-border-light);
+  margin-bottom: 4px;
+}
+.col-toggle-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 5px 4px; border-radius: 4px;
+  cursor: pointer; font-size: 12.5px; color: var(--clr-primary);
+}
+.col-toggle-item:hover { background: var(--clr-bg-page); }
+.col-toggle-check {
+  width: 14px; height: 14px;
+  border: 1.5px solid var(--clr-border);
+  border-radius: 3px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 9px; flex-shrink: 0;
+}
+.col-toggle-check.on { background: var(--clr-primary); border-color: var(--clr-primary); color: #fff; }
+
+/* Context menu */
+.cgrid-ctx {
+  position: fixed;
+  display: none;
+  background: #fff;
+  border: 1px solid var(--clr-border);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(27,58,92,0.14);
+  width: 185px;
+  z-index: 1000;
+  overflow: hidden;
+  animation: cgFadeIn 0.1s ease;
+}
+.cgrid-ctx-item {
+  display: flex; align-items: center; gap: 9px;
+  padding: 8px 14px;
+  font-size: 13px; color: var(--clr-primary);
+  cursor: pointer;
+  transition: background 0.1s;
+}
+.cgrid-ctx-item:hover { background: var(--clr-bg-page); }
+.cgrid-ctx-item.danger { color: #EF4444; }
+.cgrid-ctx-item.danger:hover { background: #FEE2E2; }
+.cgrid-ctx-divider { height: 1px; background: var(--clr-border-light); margin: 3px 0; }
+.cgrid-ctx-icon { width: 16px; text-align: center; font-size: 12px; opacity: 0.7; flex-shrink: 0; }
+
+/* Inline row editing */
+.data-grid tr.editing td { background: var(--clr-accent-bg); padding: 3px 6px; }
+.data-grid tr.editing td:first-child { border-left: 3px solid var(--clr-accent); padding-left: 11px; }
+.cg-edit-input, .cg-edit-select {
+  width: 100%; height: 30px;
+  border: 1px solid var(--clr-border);
+  border-radius: 3px;
+  padding: 0 6px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12.5px;
+  color: var(--clr-primary);
+  background: #fff;
+  outline: none;
+  box-sizing: border-box;
+}
+.cg-edit-input:focus, .cg-edit-select:focus {
+  border-color: var(--clr-accent);
+  box-shadow: 0 0 0 2px rgba(46,109,164,0.10);
+}
+.cg-edit-select { cursor: pointer; appearance: none; -webkit-appearance: none; }
+
 </style>
 </head>
 <body>
@@ -966,26 +1268,43 @@ tr:hover td { background: var(--clr-bg-hover); }
 
       <!-- Toolbar -->
       <div class="toolbar">
-        <div class="search-wrap">
-          <span class="search-icon">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          </span>
-          <input class="search-input" id="searchInput" type="text" placeholder="Axtar..."/>
+
+        <!-- Status filter -->
+        <div class="filter-wrap" id="statusFilterWrap">
+          <button class="filter-btn" id="statusFilterBtn" onclick="toggleStatusDropdown(event)">
+            <span id="statusFilterLabel">Status: Hamısı</span>
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="filter-dropdown" id="statusDropdown"></div>
         </div>
 
-        <button class="filter-btn">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
-          Filtr
-        </button>
+        <!-- Date range filter -->
+        <div class="filter-wrap" id="dateFilterWrap">
+          <button class="filter-btn" id="dateFilterBtn" onclick="toggleDateDropdown(event)">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            <span id="dateFilterLabel">Tarix aralığı</span>
+          </button>
+          <div class="filter-dropdown date-range-dropdown" id="dateDropdown">
+            <div class="date-range-title">Tarix aralığı</div>
+            <div class="date-range-field">
+              <label class="date-range-field-lbl">Başlanğıc tarixi</label>
+              <input type="date" id="dateFrom"/>
+            </div>
+            <div class="date-range-field">
+              <label class="date-range-field-lbl">Son tarix</label>
+              <input type="date" id="dateTo"/>
+            </div>
+            <div class="date-range-actions">
+              <button class="btn btn-ghost" style="height:30px;font-size:12px;padding:0 10px;" onclick="clearDateFilter()">Sıfırla</button>
+              <button class="btn btn-primary" style="height:30px;font-size:12px;padding:0 10px;" onclick="applyDateFilter()">Tətbiq et</button>
+            </div>
+          </div>
+        </div>
 
-        <button class="filter-btn active">
-          Status: Hamısı
-          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-        </button>
-
-        <button class="filter-btn">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-          Tarix aralığı
+        <!-- Columns toggle — wired by JS (ntInitTable for normal tables, cgInit for complex grid) -->
+        <button class="filter-btn" id="columnsBtn" data-toolbar-columns-placeholder="true">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="6" height="6" rx="1"/><line x1="12" y1="6" x2="21" y2="6"/><line x1="12" y1="12" x2="21" y2="12"/><rect x="3" y="14" width="6" height="6" rx="1"/><line x1="12" y1="15" x2="21" y2="15"/><line x1="12" y1="21" x2="21" y2="21"/></svg>
+          Sütunlar
         </button>
 
         <div class="toolbar-spacer"></div>
@@ -994,13 +1313,10 @@ tr:hover td { background: var(--clr-bg-hover); }
 
         <div class="toolbar-sep"></div>
 
-        <button class="btn btn-ghost btn-icon" title="Sütunlar">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="6" height="6" rx="1"/><line x1="12" y1="6" x2="21" y2="6"/><line x1="12" y1="12" x2="21" y2="12"/><rect x="3" y="14" width="6" height="6" rx="1"/><line x1="12" y1="15" x2="21" y2="15"/><line x1="12" y1="21" x2="21" y2="21"/></svg>
-        </button>
-
-        <button class="btn btn-ghost btn-icon" title="Yenilə">
+        <button class="btn btn-ghost btn-icon" title="Filtrləri sıfırla" onclick="clearAllFilters()">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
         </button>
+
       </div>
 
       <!-- Table -->
@@ -1125,7 +1441,7 @@ const MODULES = {
     sidebar: [
       { label: 'Sənədlər', items: [
         { label: 'Jurnal qeydləri',     iconKey: 'fileText', badge: '6' },
-        { label: 'Ödəniş tapşırıqları', iconKey: 'creditCard' },
+        { label: 'Ödəniş tapşırıqları', iconKey: 'creditCard', complex: true },
       ]},
       { label: 'Kataloqlar', items: [
         { label: 'Hesablar planı',  iconKey: 'layoutList', active: true },
@@ -1170,6 +1486,7 @@ function renderSidebar(sections) {
     const items = sec.items.map(item => {
       const badge = item.badge ? `<span class="nav-badge">${item.badge}</span>` : '';
       return `<button class="nav-item ${item.active ? 'active' : ''}"
+        ${item.complex ? 'data-complex="true"' : ''}
         title="${item.label}"
         onclick="setActive(this,'${item.label}')">
         <span class="nav-icon">${icon(item.iconKey)}</span>
@@ -1193,11 +1510,11 @@ document.getElementById('sidebarNav').innerHTML      = renderSidebar(mod.sidebar
 document.getElementById('pageTitle').textContent     = mod.firstSub;
 document.getElementById('pageMeta').textContent      = mod.pageMeta;
 document.getElementById('newBtnLabel').textContent   = mod.newBtn;
-document.getElementById('searchInput').placeholder   = mod.searchPlaceholder;
 document.getElementById('recordCount').textContent   = mod.recordCount;
 document.getElementById('tableHead').innerHTML       = mod.tableHead;
 document.getElementById('tableBody').innerHTML       = mod.tableBody;
 document.getElementById('paginationInfo').textContent = mod.paginationInfo;
+ntInitTable();
 
 /* ── Nav active toggle ────────────────────────────── */
 function setActive(btn, title) {
@@ -1205,7 +1522,12 @@ function setActive(btn, title) {
   btn.classList.add('active');
   document.getElementById('pageTitle').textContent = title;
   document.getElementById('bcCurrent').textContent = title;
-  /* Close mobile drawer on nav click */
+  if (btn.dataset.complex === 'true') {
+    cgInit();
+  } else {
+    clearAllFilters();
+    cgShowNormal();
+  }
   closeMobileDrawer();
 }
 
@@ -1266,6 +1588,895 @@ document.getElementById('sidebarCloseBtn').addEventListener('click', closeMobile
 window.addEventListener('resize', () => {
   if (window.innerWidth > 768) closeMobileDrawer();
 });
+
+/* ══════════════════════════════════════════════════
+   TOOLBAR FILTERS
+══════════════════════════════════════════════════ */
+var tbFilterStatus   = '';
+var tbFilterDateFrom = '';
+var tbFilterDateTo   = '';
+
+/* ── Status dropdown ──────────────────────────────── */
+function toggleStatusDropdown(e) {
+  e.stopPropagation();
+  document.getElementById('dateDropdown').classList.remove('open');
+  var dd = document.getElementById('statusDropdown');
+  var isOpen = dd.classList.contains('open');
+  if (!isOpen) buildStatusDropdown();
+  dd.classList.toggle('open', !isOpen);
+}
+
+function buildStatusDropdown() {
+  var dd = document.getElementById('statusDropdown');
+  dd.innerHTML = '';
+
+  /* "Hamısı" row */
+  var allItem = document.createElement('div');
+  allItem.className = 'filter-dd-item' + (!tbFilterStatus ? ' active' : '');
+  var allDot = document.createElement('span');
+  allDot.className = 'filter-dd-dot';
+  allDot.style.background = 'var(--clr-border)';
+  allItem.appendChild(allDot);
+  allItem.appendChild(document.createTextNode('Hamısı'));
+  allItem.addEventListener('click', function() { applyStatusFilter(''); });
+  dd.appendChild(allItem);
+
+  var sep = document.createElement('div');
+  sep.className = 'filter-dd-sep';
+  dd.appendChild(sep);
+
+  /* Collect unique statuses — from cgRows when complex grid active, else from DOM */
+  if (cgTable) {
+    var colorMap = { 'badge-success':'var(--clr-success)', 'badge-warning':'var(--clr-warning)', 'badge-error':'var(--clr-error)', 'badge-info':'var(--clr-accent)' };
+    var seen = {};
+    cgRows.forEach(function(row) {
+      if (seen[row.label]) return;
+      seen[row.label] = true;
+      var item = document.createElement('div');
+      item.className = 'filter-dd-item' + (tbFilterStatus === row.label ? ' active' : '');
+      var dot = document.createElement('span'); dot.className = 'filter-dd-dot';
+      dot.style.background = colorMap[row.badge] || 'var(--clr-border)';
+      item.appendChild(dot);
+      item.appendChild(document.createTextNode(row.label));
+      (function(lbl) { item.addEventListener('click', function() { applyStatusFilter(lbl); }); })(row.label);
+      dd.appendChild(item);
+    });
+    return;
+  }
+  var tbody = document.getElementById('tableBody');
+  if (!tbody) return;
+  var seen = {};
+  tbody.querySelectorAll('.badge').forEach(function(badge) {
+    /* get text node only (skip the dot span) */
+    var text = '';
+    badge.childNodes.forEach(function(n) {
+      if (n.nodeType === 3) text += n.textContent;
+    });
+    text = text.trim();
+    if (!text || seen[text]) return;
+    seen[text] = true;
+
+    var color = 'var(--clr-border)';
+    var cls = badge.className;
+    if (cls.includes('badge-success')) color = 'var(--clr-success)';
+    else if (cls.includes('badge-warning')) color = 'var(--clr-warning)';
+    else if (cls.includes('badge-error'))   color = 'var(--clr-error)';
+    else if (cls.includes('badge-info'))    color = 'var(--clr-accent)';
+
+    var item = document.createElement('div');
+    item.className = 'filter-dd-item' + (tbFilterStatus === text ? ' active' : '');
+    var dot = document.createElement('span');
+    dot.className = 'filter-dd-dot';
+    dot.style.background = color;
+    item.appendChild(dot);
+    item.appendChild(document.createTextNode(text));
+    item.addEventListener('click', function() { applyStatusFilter(text); });
+    dd.appendChild(item);
+  });
+}
+
+function applyStatusFilter(status) {
+  tbFilterStatus = status;
+  var btn = document.getElementById('statusFilterBtn');
+  var lbl = document.getElementById('statusFilterLabel');
+  if (lbl) lbl.textContent = status ? 'Status: ' + status : 'Status: Hamısı';
+  if (btn) btn.classList.toggle('active', !!status);
+  document.getElementById('statusDropdown').classList.remove('open');
+  applyToolbarFilters();
+}
+
+/* ── Date range dropdown ──────────────────────────── */
+function toggleDateDropdown(e) {
+  e.stopPropagation();
+  document.getElementById('statusDropdown').classList.remove('open');
+  document.getElementById('dateDropdown').classList.toggle('open');
+}
+
+function applyDateFilter() {
+  tbFilterDateFrom = document.getElementById('dateFrom').value;
+  tbFilterDateTo   = document.getElementById('dateTo').value;
+  var btn = document.getElementById('dateFilterBtn');
+  var lbl = document.getElementById('dateFilterLabel');
+  var active = tbFilterDateFrom || tbFilterDateTo;
+  if (btn) btn.classList.toggle('active', !!active);
+  if (lbl) {
+    if (tbFilterDateFrom && tbFilterDateTo) {
+      lbl.textContent = fmtDate(tbFilterDateFrom) + ' – ' + fmtDate(tbFilterDateTo);
+    } else if (tbFilterDateFrom) {
+      lbl.textContent = fmtDate(tbFilterDateFrom) + ' →';
+    } else if (tbFilterDateTo) {
+      lbl.textContent = '← ' + fmtDate(tbFilterDateTo);
+    } else {
+      lbl.textContent = 'Tarix aralığı';
+    }
+  }
+  document.getElementById('dateDropdown').classList.remove('open');
+  applyToolbarFilters();
+}
+
+function clearDateFilter() {
+  document.getElementById('dateFrom').value = '';
+  document.getElementById('dateTo').value   = '';
+  tbFilterDateFrom = '';
+  tbFilterDateTo   = '';
+  var btn = document.getElementById('dateFilterBtn');
+  var lbl = document.getElementById('dateFilterLabel');
+  if (btn) btn.classList.remove('active');
+  if (lbl) lbl.textContent = 'Tarix aralığı';
+  document.getElementById('dateDropdown').classList.remove('open');
+  applyToolbarFilters();
+}
+
+function clearAllFilters() {
+  if (cgTable) { cgFilterText = ''; var si = document.querySelector('.grid-strip-search input'); if (si) si.value = ''; }
+  applyStatusFilter('');
+  clearDateFilter();
+}
+
+function fmtDate(iso) {
+  /* "2026-06-01" → "01.06.2026" */
+  var parts = iso.split('-');
+  return parts[2] + '.' + parts[1] + '.' + parts[0];
+}
+
+/* ── Core filter engine ───────────────────────────── */
+function applyToolbarFilters() {
+  if (cgTable) {
+    var lts = { 'Ödənilib':'paid', 'Gözlənilir':'pending', 'Emal edilir':'processing', 'İmtina edilib':'cancelled' };
+    cgFilterStatus = lts[tbFilterStatus] || '';
+    cgRender();
+    return;
+  }
+  var tbody = document.getElementById('tableBody');
+  if (!tbody) return;
+
+  var rows = tbody.querySelectorAll('tr');
+  var visibleCount = 0;
+
+  rows.forEach(function(tr) {
+    var show = true;
+
+    /* Status filter — match any badge text node in row */
+    if (tbFilterStatus) {
+      var matched = false;
+      tr.querySelectorAll('.badge').forEach(function(badge) {
+        var text = '';
+        badge.childNodes.forEach(function(n) {
+          if (n.nodeType === 3) text += n.textContent;
+        });
+        if (text.trim() === tbFilterStatus) matched = true;
+      });
+      if (!matched) show = false;
+    }
+
+    /* Date filter — find first DD.MM.YYYY cell and compare */
+    if (show && (tbFilterDateFrom || tbFilterDateTo)) {
+      var checkedDate = false;
+      tr.querySelectorAll('td').forEach(function(td) {
+        if (checkedDate) return;
+        var text = td.textContent.trim();
+        if (/^\d{2}\.\d{2}\.\d{4}$/.test(text)) {
+          checkedDate = true;
+          var p = text.split('.');
+          var d = new Date(+p[2], +p[1] - 1, +p[0]);
+          if (tbFilterDateFrom && d < new Date(tbFilterDateFrom)) show = false;
+          if (tbFilterDateTo) {
+            var to = new Date(tbFilterDateTo);
+            to.setHours(23, 59, 59, 999);
+            if (d > to) show = false;
+          }
+        }
+      });
+    }
+
+    tr.style.display = show ? '' : 'none';
+    if (show) visibleCount++;
+  });
+
+  /* Update record count label */
+  var countEl = document.getElementById('recordCount');
+  if (countEl) {
+    var total = rows.length;
+    countEl.textContent = visibleCount < total
+      ? visibleCount + ' / ' + total + ' qeyd'
+      : mod.recordCount;
+  }
+}
+
+/* Close dropdowns on outside click */
+document.addEventListener('click', function(e) {
+  var sd = document.getElementById('statusDropdown');
+  var dd = document.getElementById('dateDropdown');
+  var sw = document.getElementById('statusFilterWrap');
+  var dw = document.getElementById('dateFilterWrap');
+  if (sd && sw && !sw.contains(e.target)) sd.classList.remove('open');
+  if (dd && dw && !dw.contains(e.target)) dd.classList.remove('open');
+});
+
+/* ══════════════════════════════════════════════════
+   COMPLEX DATA GRID — Ödəniş tapşırıqları
+══════════════════════════════════════════════════ */
+var cgNormalHTML = null;
+var cgTable = null;
+var cgColPanel = null;
+var cgCtxEl = null;
+var _cgColsBtnHandler = null;
+
+/* ── Normal-table column toggle ───────────────────── */
+var _ntColPanel = null;
+var _ntHiddenCols = {};
+var _ntColsBtnHandler = null;
+
+function ntGetHeaders() {
+  var table = document.querySelector('.data-card table:not(.data-grid)');
+  if (!table) return [];
+  var ths = Array.from(table.querySelectorAll('thead th'));
+  return ths.map(function(th, i) {
+    return { th: th, idx: i, label: th.textContent.replace(/[↑↓↕]/g, '').trim() };
+  }).filter(function(h) { return h.idx !== 0 && h.idx !== ths.length - 1 && h.label; });
+}
+
+function ntApplyVisibility() {
+  var table = document.querySelector('.data-card table:not(.data-grid)');
+  if (!table) return;
+  var ths = Array.from(table.querySelectorAll('thead th'));
+  ths.forEach(function(th, i) {
+    if (i === 0 || i === ths.length - 1) return;
+    var label = th.textContent.replace(/[↑↓↕]/g, '').trim();
+    var hide = !!_ntHiddenCols[label];
+    th.style.display = hide ? 'none' : '';
+    table.querySelectorAll('tbody tr').forEach(function(tr) {
+      var td = tr.querySelectorAll('td')[i];
+      if (td) td.style.display = hide ? 'none' : '';
+    });
+  });
+}
+
+function ntBuildPanel(btn) {
+  if (!_ntColPanel) {
+    _ntColPanel = document.createElement('div');
+    _ntColPanel.className = 'col-toggle-panel';
+    _ntColPanel.style.cssText = 'position:fixed;z-index:500';
+    document.body.appendChild(_ntColPanel);
+  }
+  _ntColPanel.innerHTML = '';
+  var hdr = document.createElement('div');
+  hdr.className = 'col-toggle-header';
+  hdr.textContent = 'Sütunları göstər / gizlət';
+  _ntColPanel.appendChild(hdr);
+
+  ntGetHeaders().forEach(function(h) {
+    var item = document.createElement('div');
+    item.className = 'col-toggle-item';
+    var chk = document.createElement('div');
+    chk.className = 'col-toggle-check' + (_ntHiddenCols[h.label] ? '' : ' on');
+    chk.textContent = _ntHiddenCols[h.label] ? '' : '✓';
+    var lbl = document.createElement('span');
+    lbl.textContent = h.label;
+    item.appendChild(chk);
+    item.appendChild(lbl);
+    item.addEventListener('click', function() {
+      if (_ntHiddenCols[h.label]) {
+        delete _ntHiddenCols[h.label];
+        chk.className = 'col-toggle-check on'; chk.textContent = '✓';
+      } else {
+        var visible = ntGetHeaders().filter(function(x) { return !_ntHiddenCols[x.label]; });
+        if (visible.length <= 1) return;
+        _ntHiddenCols[h.label] = true;
+        chk.className = 'col-toggle-check'; chk.textContent = '';
+      }
+      ntApplyVisibility();
+    });
+    _ntColPanel.appendChild(item);
+  });
+
+  var rect = btn.getBoundingClientRect();
+  _ntColPanel.style.top   = (rect.bottom + 6) + 'px';
+  _ntColPanel.style.right = (window.innerWidth - rect.right) + 'px';
+  _ntColPanel.style.left  = 'auto';
+}
+
+function ntInitTable() {
+  /* Reset column visibility for the new tab's table */
+  _ntHiddenCols = {};
+  ntApplyVisibility();
+
+  var columnsBtn = document.getElementById('columnsBtn');
+  if (!columnsBtn) return;
+  if (_ntColsBtnHandler) {
+    columnsBtn.removeEventListener('click', _ntColsBtnHandler);
+  }
+  _ntColsBtnHandler = function(e) {
+    e.stopPropagation();
+    if (!_ntColPanel || !_ntColPanel.classList.contains('open')) {
+      ntBuildPanel(columnsBtn);
+      if (_ntColPanel) _ntColPanel.classList.add('open');
+    } else {
+      _ntColPanel.classList.remove('open');
+    }
+  };
+  columnsBtn.addEventListener('click', _ntColsBtnHandler);
+
+  document._ntOutsideHandler && document.removeEventListener('click', document._ntOutsideHandler);
+  document._ntOutsideHandler = function(e) {
+    if (_ntColPanel && columnsBtn && !_ntColPanel.contains(e.target) && !columnsBtn.contains(e.target)) {
+      _ntColPanel.classList.remove('open');
+    }
+  };
+  document.addEventListener('click', document._ntOutsideHandler);
+}
+
+var cgRows = [
+  { doc:'ODP-2026-0041', date:'04.06.2026', payee:'Baku Steel MMC',      purpose:'Avans ödəniş',    amount:5400,   amtFmt:'5,400.00',  currency:'AZN', bank:'AZ12 AIIB 0000 0000 0012 3456', status:'paid',       label:'Ödənilib',      badge:'badge-success', sel:false },
+  { doc:'ODP-2026-0040', date:'03.06.2026', payee:'Caspian Energy ASC',  purpose:'Kommunal ödəniş', amount:2100,   amtFmt:'2,100.00',  currency:'AZN', bank:'AZ12 AIIB 0000 0000 0012 3456', status:'pending',    label:'Gözlənilir',    badge:'badge-warning', sel:false },
+  { doc:'ODP-2026-0039', date:'03.06.2026', payee:'ABB Bank ASC',        purpose:'Kredit ödənişi',  amount:8750,   amtFmt:'8,750.00',  currency:'AZN', bank:'AZ34 AIIB 0000 0000 0034 5678', status:'paid',       label:'Ödənilib',      badge:'badge-success', sel:false },
+  { doc:'ODP-2026-0038', date:'02.06.2026', payee:'Azərenerji MMC',      purpose:'Elektrik hesabı', amount:1200,   amtFmt:'1,200.00',  currency:'USD', bank:'AZ56 AIIB 0000 0000 0056 7890', status:'cancelled',  label:'İmtina edilib', badge:'badge-error',   sel:false },
+  { doc:'ODP-2026-0037', date:'02.06.2026', payee:'Silk Way Airlines',   purpose:'Xidmət haqqı',    amount:4320,   amtFmt:'4,320.00',  currency:'AZN', bank:'AZ12 AIIB 0000 0000 0012 3456', status:'processing', label:'Emal edilir',   badge:'badge-info',    sel:false },
+  { doc:'ODP-2026-0036', date:'01.06.2026', payee:'Kapital Bank ASC',    purpose:'Kredit ödənişi',  amount:15000,  amtFmt:'15,000.00', currency:'AZN', bank:'AZ34 AIIB 0000 0000 0034 5678', status:'paid',       label:'Ödənilib',      badge:'badge-success', sel:false },
+  { doc:'ODP-2026-0035', date:'01.06.2026', payee:'Azərqold MMC',        purpose:'Mal alışı',       amount:3640,   amtFmt:'3,640.00',  currency:'EUR', bank:'AZ78 AIIB 0000 0000 0078 9012', status:'pending',    label:'Gözlənilir',    badge:'badge-warning', sel:false },
+  { doc:'ODP-2026-0034', date:'31.05.2026', payee:'Baku Bus MMC',        purpose:'İcarə haqqı',     amount:980,    amtFmt:'980.00',    currency:'AZN', bank:'AZ12 AIIB 0000 0000 0012 3456', status:'paid',       label:'Ödənilib',      badge:'badge-success', sel:false },
+];
+
+var cgAllCols   = ['doc','date','payee','purpose','amount','currency','bank','status'];
+var cgColLabels = { doc:'Sənəd №', date:'Tarix', payee:'Ödəniş alıcısı', purpose:'Məqsəd', amount:'Məbləğ', currency:'Valyuta', bank:'Bank hesabı', status:'Status' };
+var cgColWidths = { doc:145, date:105, payee:175, purpose:155, amount:110, currency:80, bank:210, status:120 };
+var cgHiddenCols = {};
+var cgCols = cgAllCols.slice();
+var cgSortCol = 'doc', cgSortDir = 'desc';
+var cgFilterText = '', cgFilterStatus = '';
+var cgDragSrc = null;
+var cgEditRow = null;
+
+function cgShowNormal() {
+  if (!cgNormalHTML) return;
+  cgEditRow = null;
+  /* detach cgInit's columnsBtn listener */
+  var cb = document.getElementById('columnsBtn');
+  if (cb && _cgColsBtnHandler) {
+    cb.removeEventListener('click', _cgColsBtnHandler);
+    _cgColsBtnHandler = null;
+  }
+  document.querySelector('.data-card').innerHTML = cgNormalHTML;
+  cgTable = null;
+  if (cgColPanel) { cgColPanel.classList.remove('open'); cgColPanel = null; }
+  if (cgCtxEl) cgCtxEl.style.display = 'none';
+  ntInitTable();
+}
+
+function cgInit() {
+  var dataCard = document.querySelector('.data-card');
+  if (!cgNormalHTML) cgNormalHTML = dataCard.innerHTML;
+  dataCard.innerHTML = '';
+
+  /* ── Filter strip (search only — count and column toggle moved to toolbar) */
+  var strip = document.createElement('div');
+  strip.className = 'grid-strip';
+
+  var searchWrap = document.createElement('div');
+  searchWrap.className = 'grid-strip-search';
+  var searchIcon = document.createElement('span');
+  searchIcon.className = 'grid-strip-search-icon';
+  searchIcon.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>';
+  var searchEl = document.createElement('input');
+  searchEl.placeholder = 'Sənəd, alıcı, məqsəd axtar…';
+  searchEl.addEventListener('input', function() { if (cgEditRow) cgSaveEdit(true); cgFilterText = this.value.toLowerCase(); cgRender(); });
+  searchWrap.appendChild(searchIcon);
+  searchWrap.appendChild(searchEl);
+  strip.appendChild(searchWrap);
+  dataCard.appendChild(strip);
+
+  /* ── Build cgColPanel (body-level so it escapes overflow:hidden) ─── */
+  if (!cgColPanel) {
+    cgColPanel = document.createElement('div');
+    cgColPanel.className = 'col-toggle-panel';
+    cgColPanel.style.position = 'fixed';
+    cgColPanel.style.zIndex   = '500';
+    document.body.appendChild(cgColPanel);
+  }
+  cgColPanel.innerHTML = '';
+  var panelHdr = document.createElement('div');
+  panelHdr.className = 'col-toggle-header';
+  panelHdr.textContent = 'Sütunları göstər / gizlət';
+  cgColPanel.appendChild(panelHdr);
+
+  cgAllCols.forEach(function(col) {
+    var item = document.createElement('div');
+    item.className = 'col-toggle-item';
+    var chk = document.createElement('div');
+    chk.className = 'col-toggle-check' + (cgHiddenCols[col] ? '' : ' on');
+    chk.textContent = cgHiddenCols[col] ? '' : '✓';
+    var lbl = document.createElement('span');
+    lbl.textContent = cgColLabels[col];
+    item.appendChild(chk);
+    item.appendChild(lbl);
+    item.addEventListener('click', function() {
+      if (cgHiddenCols[col]) {
+        delete cgHiddenCols[col];
+        chk.className = 'col-toggle-check on'; chk.textContent = '✓';
+      } else {
+        if (Object.keys(cgHiddenCols).length >= cgAllCols.length - 1) return;
+        cgHiddenCols[col] = true;
+        chk.className = 'col-toggle-check'; chk.textContent = '';
+      }
+      cgCols = cgAllCols.filter(function(c) { return !cgHiddenCols[c]; });
+      cgRender();
+    });
+    cgColPanel.appendChild(item);
+  });
+
+  /* ── Wire toolbar Sütunlar button to cgColPanel ─── */
+  var columnsBtn = document.getElementById('columnsBtn');
+  if (columnsBtn) {
+    _cgColsBtnHandler = function(e) {
+      e.stopPropagation();
+      var isOpen = cgColPanel.classList.contains('open');
+      if (isOpen) {
+        cgColPanel.classList.remove('open');
+      } else {
+        var rect = columnsBtn.getBoundingClientRect();
+        cgColPanel.style.top   = (rect.bottom + 6) + 'px';
+        cgColPanel.style.right = (window.innerWidth - rect.right) + 'px';
+        cgColPanel.style.left  = 'auto';
+        cgColPanel.classList.add('open');
+      }
+    };
+    columnsBtn.addEventListener('click', _cgColsBtnHandler);
+  }
+
+  /* ── Table scroll wrapper ─────────────────────────── */
+  var tableScroll = document.createElement('div');
+  tableScroll.style.overflowX = 'auto';
+
+  cgTable = document.createElement('table');
+  cgTable.className = 'data-grid';
+  cgTable.style.minWidth = '900px';
+
+  var thead = document.createElement('thead');
+  thead.appendChild(document.createElement('tr'));
+  cgTable.appendChild(thead);
+  cgTable.appendChild(document.createElement('tbody'));
+  tableScroll.appendChild(cgTable);
+  dataCard.appendChild(tableScroll);
+
+  /* ── Context menu (singleton) ─────────────────────── */
+  if (!cgCtxEl) {
+    cgCtxEl = document.createElement('div');
+    cgCtxEl.className = 'cgrid-ctx';
+    document.body.appendChild(cgCtxEl);
+  }
+
+  /* Close panels on outside click */
+  document._cgOutsideHandler && document.removeEventListener('click', document._cgOutsideHandler);
+  document._cgOutsideHandler = function(e) {
+    if (cgEditRow && !cgEditRow.tr.contains(e.target)) { cgSaveEdit(true); cgRender(); }
+    if (cgColPanel && columnsBtn && !cgColPanel.contains(e.target) && !columnsBtn.contains(e.target)) {
+      cgColPanel.classList.remove('open');
+    }
+    if (cgCtxEl && !cgCtxEl.contains(e.target)) cgCtxEl.style.display = 'none';
+  };
+  document.addEventListener('click', document._cgOutsideHandler);
+
+  /* sync filter state from toolbar before first render */
+  var _lts = { 'Ödənilib':'paid', 'Gözlənilir':'pending', 'Emal edilir':'processing', 'İmtina edilib':'cancelled' };
+  cgFilterStatus = _lts[tbFilterStatus] || '';
+
+  cgRender();
+}
+
+function cgRender() {
+  if (!cgTable) return;
+
+  /* Filter */
+  var visible = cgRows.filter(function(r) {
+    var ft = cgFilterText;
+    var okText = !ft
+      || r.doc.toLowerCase().indexOf(ft) >= 0
+      || r.payee.toLowerCase().indexOf(ft) >= 0
+      || r.purpose.toLowerCase().indexOf(ft) >= 0
+      || r.label.toLowerCase().indexOf(ft) >= 0;
+    var okStatus = !cgFilterStatus || r.status === cgFilterStatus;
+    var okDate = true;
+    if (tbFilterDateFrom || tbFilterDateTo) {
+      var dp = r.date.split('.');
+      var rd = new Date(+dp[2], +dp[1]-1, +dp[0]);
+      if (tbFilterDateFrom && rd < new Date(tbFilterDateFrom)) okDate = false;
+      if (tbFilterDateTo) { var dto = new Date(tbFilterDateTo); dto.setHours(23,59,59,999); if (rd > dto) okDate = false; }
+    }
+    return okText && okStatus && okDate;
+  });
+
+  /* Sort */
+  visible.sort(function(a, b) {
+    var av, bv;
+    switch (cgSortCol) {
+      case 'doc':      av = a.doc;      bv = b.doc;      break;
+      case 'date':     av = a.date.split('.').reverse().join(''); bv = b.date.split('.').reverse().join(''); break;
+      case 'payee':    av = a.payee;    bv = b.payee;    break;
+      case 'purpose':  av = a.purpose;  bv = b.purpose;  break;
+      case 'amount':   av = a.amount;   bv = b.amount;   break;
+      case 'currency': av = a.currency; bv = b.currency; break;
+      case 'bank':     av = a.bank;     bv = b.bank;     break;
+      case 'status':   av = a.status;   bv = b.status;   break;
+      default:         av = a.doc;      bv = b.doc;
+    }
+    if (av < bv) return cgSortDir === 'asc' ? -1 :  1;
+    if (av > bv) return cgSortDir === 'asc' ?  1 : -1;
+    return 0;
+  });
+
+  var countEl = document.getElementById('cg-count');
+  if (countEl) countEl.textContent = visible.length + ' qeyd';
+  var rcEl = document.getElementById('recordCount');
+  if (rcEl) rcEl.textContent = visible.length < cgRows.length
+    ? visible.length + ' / ' + cgRows.length + ' qeyd'
+    : cgRows.length + ' qeyd';
+
+  /* ── Build thead ──────────────────────────────────── */
+  var thead = cgTable.querySelector('thead tr');
+  while (thead.firstChild) thead.removeChild(thead.firstChild);
+
+  /* Checkbox th */
+  var thCb = document.createElement('th');
+  thCb.style.cssText = 'width:32px;padding:10px 8px 10px 14px;';
+  var selectAll = document.createElement('input');
+  selectAll.type = 'checkbox';
+  selectAll.style.cssText = 'cursor:pointer;accent-color:var(--clr-accent)';
+  thCb.appendChild(selectAll);
+  thead.appendChild(thCb);
+
+  cgCols.forEach(function(col) {
+    var th = document.createElement('th');
+    th.draggable = true;
+    th.dataset.col = col;
+    th.style.width = (cgColWidths[col] || 120) + 'px';
+    th.style.minWidth = '60px';
+    th.title = 'Sıralamaq üçün klik · Yerini dəyişmək üçün sürüşdür · Eni dəyişmək üçün sağ kənarı sürüşdür';
+
+    var isActive = cgSortCol === col;
+    th.appendChild(document.createTextNode(cgColLabels[col] + ' '));
+    var sortSpan = document.createElement('span');
+    sortSpan.className = 'sort-icon' + (isActive ? ' asc' : '');
+    sortSpan.textContent = isActive ? (cgSortDir === 'asc' ? '▲' : '▼') : '⇅';
+    th.appendChild(sortSpan);
+
+    /* Sort on click */
+    th.addEventListener('click', function() {
+      if (cgEditRow) cgSaveEdit(true);
+      if (cgSortCol === col) cgSortDir = cgSortDir === 'asc' ? 'desc' : 'asc';
+      else { cgSortCol = col; cgSortDir = 'asc'; }
+      cgRender();
+    });
+
+    /* Column drag-to-reorder */
+    th.addEventListener('dragstart', function(e) {
+      cgDragSrc = col;
+      th.style.opacity = '.45';
+      e.dataTransfer.effectAllowed = 'move';
+    });
+    th.addEventListener('dragend', function() {
+      th.style.opacity = '';
+      cgTable.querySelectorAll('th').forEach(function(h) { h.classList.remove('drag-over'); });
+    });
+    th.addEventListener('dragover', function(e) {
+      e.preventDefault();
+      cgTable.querySelectorAll('th').forEach(function(h) { h.classList.remove('drag-over'); });
+      th.classList.add('drag-over');
+    });
+    th.addEventListener('drop', function(e) {
+      e.stopPropagation();
+      if (cgDragSrc && cgDragSrc !== col && !cgHiddenCols[cgDragSrc]) {
+        var fi = cgCols.indexOf(cgDragSrc), ti = cgCols.indexOf(col);
+        if (fi >= 0 && ti >= 0) { cgCols.splice(fi, 1); cgCols.splice(ti, 0, cgDragSrc); }
+        cgDragSrc = null;
+        cgRender();
+      }
+    });
+
+    /* Resize handle */
+    var rh = document.createElement('div');
+    rh.className = 'resize-handle';
+    rh.addEventListener('mousedown', function(e) {
+      e.preventDefault(); e.stopPropagation();
+      var startX = e.clientX;
+      var startW = cgColWidths[col] || th.offsetWidth;
+      rh.classList.add('resizing');
+      th.classList.add('being-resized');
+      document.body.style.cursor = 'col-resize';
+      document.body.style.userSelect = 'none';
+      function onMove(ev) {
+        var newW = Math.max(60, startW + (ev.clientX - startX));
+        cgColWidths[col] = newW;
+        th.style.width = newW + 'px';
+      }
+      function onUp() {
+        rh.classList.remove('resizing');
+        th.classList.remove('being-resized');
+        document.body.style.cursor = '';
+        document.body.style.userSelect = '';
+        document.removeEventListener('mousemove', onMove);
+        document.removeEventListener('mouseup', onUp);
+      }
+      document.addEventListener('mousemove', onMove);
+      document.addEventListener('mouseup', onUp);
+    });
+    rh.addEventListener('click', function(e) { e.stopPropagation(); });
+    th.appendChild(rh);
+
+    thead.appendChild(th);
+  });
+
+  /* Select-all state */
+  selectAll.checked = visible.length > 0 && visible.every(function(r) { return r.sel; });
+  selectAll.indeterminate = !selectAll.checked && visible.some(function(r) { return r.sel; });
+  selectAll.addEventListener('change', function() {
+    visible.forEach(function(r) { r.sel = selectAll.checked; });
+    cgRender();
+  });
+
+  /* ── Build tbody ──────────────────────────────────── */
+  var tbody = cgTable.querySelector('tbody');
+  while (tbody.firstChild) tbody.removeChild(tbody.firstChild);
+
+  if (!visible.length) {
+    var emptyTr = document.createElement('tr');
+    var emptyTd = document.createElement('td');
+    emptyTd.colSpan = cgCols.length + 1;
+    emptyTd.style.cssText = 'text-align:center;padding:40px;color:var(--clr-text-muted);font-size:13px';
+    emptyTd.textContent = 'Filtrə uyğun qeyd tapılmadı';
+    emptyTr.appendChild(emptyTd);
+    tbody.appendChild(emptyTr);
+    return;
+  }
+
+  visible.forEach(function(row) {
+    var tr = document.createElement('tr');
+    if (row.sel) tr.classList.add('selected');
+
+    /* Checkbox td */
+    var tdCb = document.createElement('td');
+    tdCb.style.cssText = 'padding:10px 8px 10px 14px;width:32px';
+    var cb = document.createElement('input');
+    cb.type = 'checkbox'; cb.checked = row.sel;
+    cb.style.cssText = 'cursor:pointer;accent-color:var(--clr-accent)';
+    cb.addEventListener('change', function() {
+      row.sel = cb.checked;
+      tr.classList.toggle('selected', row.sel);
+      selectAll.indeterminate = !cgRows.every(function(r) { return r.sel; }) && cgRows.some(function(r) { return r.sel; });
+    });
+    tdCb.appendChild(cb);
+    tr.appendChild(tdCb);
+
+    /* Data cells */
+    cgCols.forEach(function(col) {
+      var td = document.createElement('td');
+      switch (col) {
+        case 'doc':
+          td.style.cssText = 'font-family:"JetBrains Mono",monospace;font-size:12px;color:var(--clr-input-label);font-weight:500';
+          td.textContent = row.doc;
+          break;
+        case 'date':
+          td.style.cssText = 'color:var(--clr-text-secondary);font-size:12.5px';
+          td.textContent = row.date;
+          break;
+        case 'payee':
+          td.style.fontWeight = '500';
+          td.textContent = row.payee;
+          break;
+        case 'purpose':
+          td.style.cssText = 'color:var(--clr-text-secondary);font-size:12.5px';
+          td.textContent = row.purpose;
+          break;
+        case 'amount':
+          td.style.cssText = 'font-family:"JetBrains Mono",monospace;font-size:13px;font-weight:600;text-align:right;color:var(--clr-primary)';
+          td.textContent = row.amtFmt;
+          break;
+        case 'currency':
+          td.style.cssText = 'font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--clr-text-muted);font-weight:500';
+          td.textContent = row.currency;
+          break;
+        case 'bank':
+          td.style.cssText = 'font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--clr-text-secondary)';
+          td.textContent = row.bank;
+          break;
+        case 'status':
+          var badge = document.createElement('span');
+          badge.className = 'badge ' + row.badge;
+          var dot = document.createElement('span');
+          dot.className = 'badge-dot';
+          badge.appendChild(dot);
+          badge.appendChild(document.createTextNode(row.label));
+          td.appendChild(badge);
+          break;
+      }
+      tr.appendChild(td);
+    });
+
+    tr.addEventListener('dblclick', function(e) {
+      if (!e.target.matches('.cg-edit-input,.cg-edit-select,input,select,label')) cgStartEdit(tr, row);
+    });
+    tr.addEventListener('contextmenu', function(e) { e.preventDefault(); cgShowCtx(e, row); });
+
+    tbody.appendChild(tr);
+  });
+}
+
+function cgShowCtx(btnOrEvent, row) {
+  while (cgCtxEl.firstChild) cgCtxEl.removeChild(cgCtxEl.firstChild);
+
+  var items = [
+    { icon: '↗', label: 'Ətraflı bax',        fn: function() {} },
+    { icon: '✎', label: 'Redaktə et',          fn: function() {} },
+    null,
+  ];
+  if (row.status !== 'paid') {
+    items.push({ icon: '✓', label: 'Ödənilib işarələ', fn: function() {
+      row.status = 'paid'; row.label = 'Ödənilib'; row.badge = 'badge-success';
+      cgRender();
+    }});
+  }
+  if (row.status !== 'pending') {
+    items.push({ icon: '⏳', label: 'Gözlənilir işarələ', fn: function() {
+      row.status = 'pending'; row.label = 'Gözlənilir'; row.badge = 'badge-warning';
+      cgRender();
+    }});
+  }
+  items.push({ icon: '✕', label: 'Sil', danger: true, fn: function() {
+    var i = cgRows.indexOf(row);
+    if (i >= 0) cgRows.splice(i, 1);
+    cgRender();
+  }});
+
+  items.forEach(function(a) {
+    if (!a) {
+      var div = document.createElement('div');
+      div.className = 'cgrid-ctx-divider';
+      cgCtxEl.appendChild(div);
+      return;
+    }
+    var item = document.createElement('div');
+    item.className = 'cgrid-ctx-item' + (a.danger ? ' danger' : '');
+    var iconEl = document.createElement('span');
+    iconEl.className = 'cgrid-ctx-icon';
+    iconEl.textContent = a.icon;
+    item.appendChild(iconEl);
+    item.appendChild(document.createTextNode(a.label));
+    item.addEventListener('click', function() { cgCtxEl.style.display = 'none'; a.fn(); });
+    cgCtxEl.appendChild(item);
+  });
+
+  cgCtxEl.style.display = 'block';
+  var left, top;
+  if (btnOrEvent instanceof MouseEvent) {
+    left = btnOrEvent.clientX - 92;
+    top  = btnOrEvent.clientY + 4;
+  } else {
+    var rect = btnOrEvent.getBoundingClientRect();
+    left = rect.right - 185;
+    top  = rect.bottom + 4;
+  }
+  if (left < 8) left = 8;
+  if (top + 220 > window.innerHeight) top = rect.top - 224;
+  cgCtxEl.style.left = left + 'px';
+  cgCtxEl.style.top  = top  + 'px';
+}
+
+function cgStartEdit(tr, row) {
+  if (cgEditRow) cgSaveEdit(true);
+  cgEditRow = { tr: tr, row: row, orig: JSON.parse(JSON.stringify(row)) };
+  tr.classList.add('editing');
+
+  var colIdx = 0;
+  tr.querySelectorAll('td').forEach(function(td, idx) {
+    if (idx === 0) return; /* skip checkbox */
+    var col = cgCols[colIdx++];
+    if (!col) return;
+    while (td.firstChild) td.removeChild(td.firstChild);
+
+    var inp;
+    if (col === 'status') {
+      inp = document.createElement('select');
+      inp.className = 'cg-edit-select';
+      [['paid','Ödənilib'],['pending','Gözlənilir'],['processing','Emal edilir'],['cancelled','İmtina edilib']].forEach(function(s) {
+        var opt = document.createElement('option');
+        opt.value = s[0]; opt.textContent = s[1];
+        if (s[0] === row.status) opt.selected = true;
+        inp.appendChild(opt);
+      });
+    } else if (col === 'currency') {
+      inp = document.createElement('select');
+      inp.className = 'cg-edit-select';
+      ['AZN','USD','EUR','GBP'].forEach(function(c) {
+        var opt = document.createElement('option');
+        opt.value = c; opt.textContent = c;
+        if (c === row.currency) opt.selected = true;
+        inp.appendChild(opt);
+      });
+    } else if (col === 'amount') {
+      inp = document.createElement('input');
+      inp.className = 'cg-edit-input';
+      inp.type = 'number'; inp.step = '0.01';
+      inp.style.fontFamily = "'JetBrains Mono',monospace";
+      inp.value = row.amount;
+    } else if (col === 'date') {
+      inp = document.createElement('input');
+      inp.className = 'cg-edit-input';
+      inp.type = 'date';
+      var p = row.date.split('.');
+      inp.value = p[2] + '-' + p[1] + '-' + p[0];
+    } else if (col === 'bank') {
+      inp = document.createElement('input');
+      inp.className = 'cg-edit-input';
+      inp.type = 'text';
+      inp.style.fontFamily = "'JetBrains Mono',monospace";
+      inp.style.fontSize = '11px';
+      inp.value = row[col];
+    } else {
+      inp = document.createElement('input');
+      inp.className = 'cg-edit-input';
+      inp.type = 'text';
+      inp.value = row[col];
+      if (col === 'doc') { inp.style.fontFamily = "'JetBrains Mono',monospace"; inp.style.fontSize = '12px'; }
+    }
+    inp.dataset.col = col;
+    inp.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter')  { e.preventDefault(); cgSaveEdit(true);  cgRender(); }
+      if (e.key === 'Escape') { e.preventDefault(); cgSaveEdit(false); cgRender(); }
+    });
+    td.appendChild(inp);
+  });
+
+  var firstInp = tr.querySelector('.cg-edit-input,.cg-edit-select');
+  if (firstInp) setTimeout(function() { firstInp.focus(); if (firstInp.select) firstInp.select(); }, 0);
+}
+
+function cgSaveEdit(save) {
+  if (!cgEditRow) return;
+  var row = cgEditRow.row;
+  var orig = cgEditRow.orig;
+  var tr = cgEditRow.tr;
+  cgEditRow = null;
+
+  if (!save) { Object.assign(row, orig); return; }
+
+  tr.querySelectorAll('[data-col]').forEach(function(inp) {
+    var col = inp.dataset.col, val = inp.value;
+    switch (col) {
+      case 'amount':
+        row.amount = parseFloat(val) || 0;
+        row.amtFmt = row.amount.toLocaleString('en-US', {minimumFractionDigits:2});
+        break;
+      case 'date':
+        if (val) { var dp = val.split('-'); row.date = dp[2]+'.'+dp[1]+'.'+dp[0]; }
+        break;
+      case 'status':
+        row.status = val;
+        var smap = {paid:{label:'Ödənilib',badge:'badge-success'},pending:{label:'Gözlənilir',badge:'badge-warning'},processing:{label:'Emal edilir',badge:'badge-info'},cancelled:{label:'İmtina edilib',badge:'badge-error'}};
+        if (smap[val]) { row.label = smap[val].label; row.badge = smap[val].badge; }
+        break;
+      default: row[col] = val;
+    }
+  });
+}
 </script>
 
 </body>
