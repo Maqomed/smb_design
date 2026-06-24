@@ -20,12 +20,13 @@
 
   var style = document.createElement('style');
   style.textContent = [
-    '#personaai-root{position:fixed;z-index:2147483000;font-family:"DM Sans",system-ui,-apple-system,sans-serif}',
+    '#personaai-root{position:fixed;z-index:2147483000;font-family:"DM Sans",system-ui,-apple-system,sans-serif;width:56px;height:56px}',
     '#personaai-root.bottom-right{bottom:24px;right:24px}',
     '#personaai-root.bottom-left{bottom:24px;left:24px}',
-    '#personaai-launcher{width:56px;height:56px;border-radius:50%;border:none;cursor:pointer;color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 28px rgba(0,0,0,.18);transition:transform .2s,box-shadow .2s}',
+    '#personaai-launcher{width:56px;height:56px;border-radius:50%;border:none;cursor:grab;color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 28px rgba(0,0,0,.18);transition:transform .2s,box-shadow .2s;touch-action:none;user-select:none}',
     '#personaai-launcher:hover{transform:scale(1.05);box-shadow:0 12px 32px rgba(0,0,0,.22)}',
-    '#personaai-panel{display:none;width:min(380px,calc(100vw - 32px));height:min(520px,calc(100vh - 100px));background:#fff;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,.18);overflow:hidden;flex-direction:column;margin-bottom:14px}',
+    '#personaai-launcher.dragging{cursor:grabbing;transition:none}',
+    '#personaai-panel{display:none;position:absolute;bottom:calc(100% + 14px);right:0;width:min(380px,calc(100vw - 32px));height:min(520px,calc(100vh - 100px));background:#fff;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,.18);overflow:hidden;flex-direction:column}',
     '#personaai-panel.open{display:flex}',
     '#personaai-header{padding:16px 18px;color:#fff;display:flex;align-items:center;justify-content:space-between;gap:12px}',
     '#personaai-header h3{margin:0;font-size:15px;font-weight:600}',
@@ -281,7 +282,79 @@
     }
   }
 
-  launcher.addEventListener('click', function () { setOpen(!isOpen); });
+  /* ── Draggable launcher — reposition the bubble anywhere on screen ── */
+  var posStorageKey = 'personaai_position';
+  var dragging = false;
+  var dragMoved = false;
+  var dragStartX = 0, dragStartY = 0;
+  var startLeft = 0, startTop = 0;
+
+  function applyPosition(left, top) {
+    var maxLeft = window.innerWidth - root.offsetWidth;
+    var maxTop = window.innerHeight - root.offsetHeight;
+    left = Math.max(0, Math.min(left, maxLeft));
+    top = Math.max(0, Math.min(top, maxTop));
+    root.style.left = left + 'px';
+    root.style.top = top + 'px';
+    root.style.right = 'auto';
+    root.style.bottom = 'auto';
+    return { left: left, top: top };
+  }
+
+  (function restorePosition() {
+    var saved = null;
+    try { saved = JSON.parse(localStorage.getItem(posStorageKey) || 'null'); } catch (e) {}
+    if (saved && typeof saved.left === 'number' && typeof saved.top === 'number') {
+      root.classList.remove('bottom-right', 'bottom-left');
+      applyPosition(saved.left, saved.top);
+    }
+  })();
+
+  function onDragStart(e) {
+    dragging = true;
+    dragMoved = false;
+    var rect = root.getBoundingClientRect();
+    startLeft = rect.left;
+    startTop = rect.top;
+    dragStartX = e.clientX;
+    dragStartY = e.clientY;
+    launcher.classList.add('dragging');
+    launcher.setPointerCapture && e.pointerId != null && launcher.setPointerCapture(e.pointerId);
+  }
+
+  function onDragMove(e) {
+    if (!dragging) return;
+    var dx = e.clientX - dragStartX;
+    var dy = e.clientY - dragStartY;
+    if (Math.abs(dx) > 3 || Math.abs(dy) > 3) dragMoved = true;
+    if (!dragMoved) return;
+    root.classList.remove('bottom-right', 'bottom-left');
+    applyPosition(startLeft + dx, startTop + dy);
+  }
+
+  function onDragEnd() {
+    if (!dragging) return;
+    dragging = false;
+    launcher.classList.remove('dragging');
+    if (dragMoved) {
+      var rect = root.getBoundingClientRect();
+      try { localStorage.setItem(posStorageKey, JSON.stringify({ left: rect.left, top: rect.top })); } catch (e) {}
+    }
+  }
+
+  launcher.addEventListener('pointerdown', onDragStart);
+  window.addEventListener('pointermove', onDragMove);
+  window.addEventListener('pointerup', onDragEnd);
+
+  window.addEventListener('resize', function () {
+    var rect = root.getBoundingClientRect();
+    if (root.style.left || root.style.top) applyPosition(rect.left, rect.top);
+  });
+
+  launcher.addEventListener('click', function () {
+    if (dragMoved) { dragMoved = false; return; }
+    setOpen(!isOpen);
+  });
   closeBtn.addEventListener('click', function () { setOpen(false); });
   form.addEventListener('submit', function (e) {
     e.preventDefault();

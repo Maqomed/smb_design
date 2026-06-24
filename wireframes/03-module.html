@@ -490,6 +490,11 @@ body {
 .btn-primary:hover { background: var(--clr-primary-hover); }
 .btn-ghost { background: transparent; color: var(--clr-primary); border: 1px solid var(--clr-border); }
 .btn-ghost:hover { background: var(--clr-bg-subtle); }
+.btn-ghost-danger { background: transparent; color: var(--clr-error-text); border: 1px solid var(--clr-error); }
+.btn-ghost-danger:hover { background: var(--clr-error-bg); }
+.btn-secondary { background: var(--clr-accent-bg); color: var(--clr-accent-fg); border: 1px solid transparent; }
+.btn-secondary:hover { background: #C7DCF5; }
+.btn-sm { height: 28px; padding: 0 10px; font-size: 12px; }
 .btn-icon { width: 34px; padding: 0; justify-content: center; }
 
 /* Toolbar */
@@ -1284,6 +1289,40 @@ tr:hover td { background: var(--clr-bg-hover); }
 .cgrid-ctx-divider { height: 1px; background: var(--clr-border-light); margin: 3px 0; }
 .cgrid-ctx-icon { width: 16px; text-align: center; font-size: 12px; opacity: 0.7; flex-shrink: 0; }
 
+/* Custom checkbox — avoids a Chromium rendering quirk where native checkboxes
+   with `accent-color` show a faint stray dot at certain zoom/DPI scales */
+.cg-checkbox {
+  appearance: none; -webkit-appearance: none;
+  width: 15px; height: 15px;
+  padding: 0;
+  border: 1.5px solid var(--clr-border);
+  border-radius: 3px;
+  background: #fff;
+  cursor: pointer;
+  position: relative;
+  flex-shrink: 0;
+  display: inline-block;
+  vertical-align: middle;
+  transition: background 0.12s, border-color 0.12s;
+}
+.cg-checkbox:hover { border-color: var(--clr-accent); }
+.cg-checkbox.checked, .cg-checkbox.indeterminate {
+  background: var(--clr-accent); border-color: var(--clr-accent);
+}
+.cg-checkbox.checked::after {
+  content: '';
+  position: absolute; left: 4px; top: 1px;
+  width: 4px; height: 8px;
+  border: solid #fff; border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+.cg-checkbox.indeterminate::after {
+  content: '';
+  position: absolute; left: 3px; top: 6px;
+  width: 7px; height: 2px;
+  background: #fff;
+}
+
 /* Inline row editing */
 .data-grid tr.editing td { background: var(--clr-accent-bg); padding: 3px 6px; }
 .data-grid tr.editing td:first-child { border-left: 3px solid var(--clr-accent); padding-left: 11px; }
@@ -1420,6 +1459,7 @@ textarea.input { height: auto; padding: 10px 12px; resize: vertical; }
 select.input { appearance: none; -webkit-appearance: none; background-image: url("data:image/svg+xml,%3Csvg width='11' height='11' viewBox='0 0 24 24' fill='none' stroke='%23728096' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' xmlns='http://www.w3.org/2000/svg'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; padding-right: 30px; cursor: pointer; }
 .form-group.has-error .input { border-color: var(--clr-error) !important; }
 .form-group.has-error .input:focus { box-shadow: 0 0 0 3px rgba(239,68,68,0.12) !important; }
+.form-group.has-error .select-trigger { border-color: var(--clr-error) !important; }
 .field-error-msg { font-size: 11px; color: var(--clr-error-text); margin-top: 2px; display: none; }
 .field-error-msg.visible { display: block; }
 .select-trigger {
@@ -1432,7 +1472,43 @@ select.input { appearance: none; -webkit-appearance: none; background-image: url
   transition: border-color 0.15s;
 }
 .select-trigger:hover { border-color: var(--clr-accent); }
-.select-chevron { color: var(--clr-text-muted); flex-shrink: 0; }
+.select-trigger:focus-visible { border-color: var(--clr-primary); box-shadow: 0 0 0 3px rgba(30,42,58,0.1); outline: none; }
+.select-trigger[disabled] { background: var(--clr-bg-subtle); color: var(--clr-text-muted); cursor: not-allowed; }
+.select-trigger-label { flex: 1; min-width: 0; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.select-chevron { color: var(--clr-text-muted); flex-shrink: 0; transition: transform 0.15s; }
+.select-wrap { position: relative; }
+.select-wrap.open .select-chevron { transform: rotate(180deg); }
+.select-panel {
+  position: fixed;
+  background: #fff; border: 1px solid var(--clr-border); border-radius: 8px;
+  box-shadow: 0 12px 28px rgba(27,58,92,0.18);
+  z-index: 10500; max-height: 230px; overflow-y: auto; padding: 4px;
+  animation: tbFadeIn 0.12s ease;
+}
+.select-option {
+  padding: 8px 10px; border-radius: 6px;
+  font-size: 13px; color: var(--clr-primary); cursor: pointer;
+}
+.select-option:hover { background: var(--clr-bg-page); }
+.select-option.active { background: var(--clr-accent-bg); color: var(--clr-accent-fg); font-weight: 600; }
+
+.item-lookup-panel { padding: 4px; }
+.item-lookup-item { padding: 8px 10px; border-radius: 6px; cursor: pointer; }
+.item-lookup-item:hover { background: var(--clr-bg-page); }
+.item-lookup-name { font-size: 13px; font-weight: 600; color: var(--clr-primary); line-height: 1.3; }
+.item-lookup-meta { font-size: 11px; color: var(--clr-text-muted); line-height: 1.3; margin-top: 1px; }
+.item-lookup-empty { padding: 10px; font-size: 12px; color: var(--clr-text-muted); }
+.item-lookup-create {
+  display: flex; align-items: center; gap: 8px;
+  padding: 9px 10px; margin-top: 2px; border-top: 1px solid var(--clr-border-light);
+  font-size: 12.5px; font-weight: 600; color: var(--clr-accent); cursor: pointer; border-radius: 6px;
+}
+.item-lookup-create:hover { background: var(--clr-accent-bg); }
+.item-lookup-plus { font-size: 16px; line-height: 1; }
+
+.modal-backdrop.modal-stacked { z-index: 10050; }
+
+.date-picker-panel { max-height: none; overflow: visible; padding: 0; }
 .form-group { display: flex; flex-direction: column; gap: 5px; margin-bottom: 16px; }
 .form-group:last-child { margin-bottom: 0; }
 .form-label { font-size: 12px; font-weight: 600; color: var(--clr-input-label); }
@@ -1586,6 +1662,57 @@ select.input { appearance: none; -webkit-appearance: none; background-image: url
   border-top: 1px solid var(--clr-border-light);
   display: flex; justify-content: flex-end; gap: 8px;
 }
+
+.modal-box-wide { width: min(1080px, calc(100vw - 48px)); }
+.form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+
+.doc-line-table-wrap { border: 1px solid var(--clr-border-light); border-radius: 8px; overflow-x: auto; }
+.doc-line-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.doc-line-table th {
+  background: var(--clr-bg-subtle); color: var(--clr-text-secondary);
+  font-weight: 600; padding: 7px 8px; text-align: left;
+  border: 1px solid var(--clr-border-light); white-space: nowrap;
+}
+.doc-line-table td { padding: 5px 6px; border: 1px solid var(--clr-border-light); }
+.doc-line-table .line-total { text-align: right; font-weight: 600; color: var(--clr-primary); white-space: nowrap; }
+.doc-line-remove {
+  width: 24px; height: 24px; border-radius: 6px; border: 1px solid var(--clr-border-light);
+  background: #fff; color: var(--clr-error); cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+.doc-line-remove:hover { background: var(--clr-error-bg); }
+
+.doc-totals {
+  display: flex; justify-content: flex-end; margin-top: 12px;
+}
+.doc-totals-box { width: 280px; font-size: 12.5px; color: var(--clr-text-secondary); }
+.doc-totals-row { display: flex; justify-content: space-between; padding: 4px 0; }
+.doc-totals-row.final { border-top: 1px solid var(--clr-border-light); margin-top: 4px; padding-top: 8px; font-size: 14px; font-weight: 700; color: var(--clr-primary); }
+
+.alis-tabs { display: flex; gap: 4px; padding: 0 16px; border-bottom: 1px solid var(--clr-border-light); overflow-x: auto; overflow-y: hidden; }
+.alis-tab {
+  background: transparent; border: none; cursor: pointer;
+  padding: 11px 14px; font-size: 12.5px; font-weight: 600;
+  font-family: 'Trebuchet MS', Helvetica, Arial, sans-serif;
+  color: var(--clr-text-secondary); white-space: nowrap;
+  box-shadow: inset 0 -2px 0 0 transparent;
+  transition: color 0.12s, box-shadow 0.12s;
+}
+.alis-tab:hover { color: var(--clr-primary); }
+.alis-tab.active { color: var(--clr-accent); box-shadow: inset 0 -2px 0 0 var(--clr-accent); }
+.alis-tab-panel { padding: 16px; }
+.alis-tab-content { display: none; }
+.alis-tab-content.active { display: block; }
+
+.alis-alert { padding: 10px 14px; border-radius: 8px; font-size: 12.5px; line-height: 1.5; margin-bottom: 14px; }
+.alis-alert-info { background: var(--clr-accent-bg); color: var(--clr-accent-fg); }
+.alis-alert-warning { background: var(--clr-warning-bg); color: var(--clr-warning-text); }
+
+.alis-value { font-size: 13px; color: var(--clr-primary); padding: 6px 0; }
+.alis-history-item { display: flex; gap: 10px; padding: 8px 0; font-size: 12.5px; color: var(--clr-text-secondary); border-bottom: 1px solid var(--clr-border-light); }
+.alis-history-item:last-child { border-bottom: none; }
+.alis-history-icon { width: 26px; height: 26px; border-radius: 7px; background: var(--clr-accent-bg); color: var(--clr-accent-fg); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.alis-history-empty { padding: 24px 0; text-align: center; color: var(--clr-text-muted); font-size: 12.5px; }
 
 /* ── Grid pulse spinner ──────────────────────────────── */
 .sp-grid { display: inline-grid; grid-template-columns: repeat(3,1fr); gap: 4px; vertical-align: middle; }
@@ -1782,7 +1909,7 @@ select.input { appearance: none; -webkit-appearance: none; background-image: url
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
             İxrac
           </button>
-          <button class="btn btn-primary" id="newBtn" onclick="if(key==='maliyye')openHesabModal()">
+          <button class="btn btn-primary" id="newBtn" onclick="if(key==='maliyye')openHesabModal();if(key==='alis-senedleri')openAlisDocModal()">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
             <span id="newBtnLabel"></span>
           </button>
@@ -1818,6 +1945,22 @@ select.input { appearance: none; -webkit-appearance: none; background-image: url
                 </span>
               </button>
               <div class="filter-dropdown dr-dropdown" id="dateDropdown"></div>
+            </div>
+
+            <!-- Extra column filters — shown only for modules that declare mod.extraFilters -->
+            <div class="filter-wrap" id="extraFilterWrap0" style="display:none;">
+              <button class="filter-btn" id="extraFilterBtn0" onclick="toggleExtraFilterDropdown(event, 0)">
+                <span id="extraFilterLabel0"></span>
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+              </button>
+              <div class="filter-dropdown" id="extraFilterDropdown0"></div>
+            </div>
+            <div class="filter-wrap" id="extraFilterWrap1" style="display:none;">
+              <button class="filter-btn" id="extraFilterBtn1" onclick="toggleExtraFilterDropdown(event, 1)">
+                <span id="extraFilterLabel1"></span>
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+              </button>
+              <div class="filter-dropdown" id="extraFilterDropdown1"></div>
             </div>
 
             <!-- Columns toggle — wired by JS (ntInitTable for normal tables, cgInit for complex grid) -->
@@ -2052,6 +2195,252 @@ const MODULES = {
     `,
   },
 
+  alis: {
+    name: 'Alış',
+    iconKey: 'truck',
+    firstSub: 'Alış sifarişləri',
+    newBtn: 'Yeni sifariş',
+    searchPlaceholder: 'Sifariş axtar...',
+    recordCount: '18 sifariş',
+    paginationInfo: '1–8 / 18 qeyd göstərilir',
+    sidebar: [
+      { label: 'Sənədlər', items: [
+        { label: 'Alış sifarişləri',     iconKey: 'fileText', active: true },
+        { label: 'Daxil olan fakturalar',iconKey: 'receipt' },
+      ]},
+      { label: 'Kataloqlar', items: [
+        { label: 'Təchizatçı idarəetməsi', iconKey: 'truck' },
+      ]},
+    ],
+    tableHead: `<tr>
+      <th style="width:32px;padding:10px 8px 10px 14px;"><input type="checkbox" style="cursor:pointer;accent-color:var(--clr-accent);"/></th>
+      <th class="sortable sorted">Sənəd № <span class="sort-icon">↑</span></th>
+      <th>Tarix</th>
+      <th>Təchizatçı</th>
+      <th>Çatdırılma tarixi</th>
+      <th class="sortable" style="text-align:right;">Məbləğ <span class="sort-icon">↕</span></th>
+      <th>Status</th>
+    </tr>`,
+    tableBody: `
+      <tr>${checkCell}<td class="cell-mono">PO-2026-0212</td><td class="cell-muted">04.06.2026</td><td><div style="font-weight:500;">Bakı Tekstil MMC</div><div style="font-size:11px;color:var(--clr-text-muted);">Bakı</div></td><td class="cell-muted">12.06.2026</td><td class="cell-amount">14,200.00 <span style="font-size:10px;font-weight:400;color:var(--clr-text-muted);">AZN</span></td><td><span class="badge badge-info">Gözlənilir</span></td>${actionCell}</tr>
+      <tr>${checkCell}<td class="cell-mono">PO-2026-0211</td><td class="cell-muted">03.06.2026</td><td><div style="font-weight:500;">Gəncə Kimya ASC</div><div style="font-size:11px;color:var(--clr-text-muted);">Gəncə</div></td><td class="cell-muted">09.06.2026</td><td class="cell-amount">6,750.00 <span style="font-size:10px;font-weight:400;color:var(--clr-text-muted);">AZN</span></td><td><span class="badge badge-success">Qəbul edilib</span></td>${actionCell}</tr>
+      <tr>${checkCell}<td class="cell-mono">PO-2026-0210</td><td class="cell-muted">02.06.2026</td><td><div style="font-weight:500;">Naxçıvan Tikinti MMC</div><div style="font-size:11px;color:var(--clr-text-muted);">Naxçıvan</div></td><td class="cell-muted">15.06.2026</td><td class="cell-amount">22,400.00 <span style="font-size:10px;font-weight:400;color:var(--clr-text-muted);">AZN</span></td><td><span class="badge badge-warning">Hazırlanır</span></td>${actionCell}</tr>
+      <tr>${checkCell}<td class="cell-mono">PO-2026-0209</td><td class="cell-muted">01.06.2026</td><td><div style="font-weight:500;">Sumqayıt Polimer MMC</div><div style="font-size:11px;color:var(--clr-text-muted);">Sumqayıt</div></td><td class="cell-muted">07.06.2026</td><td class="cell-amount">3,980.00 <span style="font-size:10px;font-weight:400;color:var(--clr-text-muted);">AZN</span></td><td><span class="badge badge-success">Qəbul edilib</span></td>${actionCell}</tr>
+      <tr>${checkCell}<td class="cell-mono">PO-2026-0208</td><td class="cell-muted">31.05.2026</td><td><div style="font-weight:500;">Şəki İpək Fabriki</div><div style="font-size:11px;color:var(--clr-text-muted);">Şəki</div></td><td class="cell-muted">06.06.2026</td><td class="cell-amount">8,150.00 <span style="font-size:10px;font-weight:400;color:var(--clr-text-muted);">AZN</span></td><td><span class="badge badge-error">Gecikib</span></td>${actionCell}</tr>
+    `,
+  },
+
+  anbar: {
+    name: 'Anbar',
+    iconKey: 'building',
+    firstSub: 'Anbar qalıqları',
+    newBtn: 'Yeni hərəkət',
+    searchPlaceholder: 'Məhsul axtar...',
+    recordCount: '156 məhsul',
+    paginationInfo: '1–8 / 156 qeyd göstərilir',
+    sidebar: [
+      { label: 'Sənədlər', items: [
+        { label: 'Qəbul-buraxılış əməliyyatları', iconKey: 'truck', active: true },
+        { label: 'İnventar sayımı',               iconKey: 'refresh' },
+      ]},
+      { label: 'Kataloqlar', items: [
+        { label: 'Məhsul ehtiyatları', iconKey: 'layoutList' },
+      ]},
+    ],
+    tableHead: `<tr>
+      <th style="width:32px;padding:10px 8px 10px 14px;"><input type="checkbox" style="cursor:pointer;accent-color:var(--clr-accent);"/></th>
+      <th class="sortable sorted">Kod <span class="sort-icon">↑</span></th>
+      <th>Məhsul adı</th>
+      <th>Anbar</th>
+      <th class="sortable" style="text-align:right;">Qalıq <span class="sort-icon">↕</span></th>
+      <th>Vahid</th>
+      <th>Status</th>
+    </tr>`,
+    tableBody: `
+      <tr>${checkCell}<td class="cell-mono">WH-1042</td><td style="font-weight:500;">Portland sement (50kg)</td><td class="cell-muted">Mərkəzi anbar</td><td class="cell-amount">1,240.00</td><td class="cell-muted">kisə</td><td><span class="badge badge-success">Kifayətdir</span></td>${actionCell}</tr>
+      <tr>${checkCell}<td class="cell-mono">WH-1041</td><td style="font-weight:500;">Armatur Ø12mm</td><td class="cell-muted">Mərkəzi anbar</td><td class="cell-amount">3,800.00</td><td class="cell-muted">metr</td><td><span class="badge badge-success">Kifayətdir</span></td>${actionCell}</tr>
+      <tr>${checkCell}<td class="cell-mono">WH-1040</td><td style="font-weight:500;">Keramik plitə 60x60</td><td class="cell-muted">Gəncə filialı</td><td class="cell-amount">86.00</td><td class="cell-muted">m²</td><td><span class="badge badge-warning">Azalır</span></td>${actionCell}</tr>
+      <tr>${checkCell}<td class="cell-mono">WH-1039</td><td style="font-weight:500;">İzolyasiya köpüyü</td><td class="cell-muted">Mərkəzi anbar</td><td class="cell-amount">14.00</td><td class="cell-muted">rulon</td><td><span class="badge badge-error">Bitmək üzrədir</span></td>${actionCell}</tr>
+      <tr>${checkCell}<td class="cell-mono">WH-1038</td><td style="font-weight:500;">Elektrik kabeli 2.5mm²</td><td class="cell-muted">Sumqayıt filialı</td><td class="cell-amount">2,150.00</td><td class="cell-muted">metr</td><td><span class="badge badge-success">Kifayətdir</span></td>${actionCell}</tr>
+    `,
+  },
+
+  bank: {
+    name: 'Bank',
+    iconKey: 'creditCard',
+    firstSub: 'Bank hesabları',
+    newBtn: 'Yeni köçürmə',
+    searchPlaceholder: 'Əməliyyat axtar...',
+    recordCount: '32 əməliyyat',
+    paginationInfo: '1–8 / 32 qeyd göstərilir',
+    sidebar: [
+      { label: 'Sənədlər', items: [
+        { label: 'Ödənişlər',  iconKey: 'creditCard', active: true },
+        { label: 'Köçürmələr', iconKey: 'refresh' },
+      ]},
+      { label: 'Kataloqlar', items: [
+        { label: 'Məzənnə əməliyyatları', iconKey: 'dollar' },
+      ]},
+    ],
+    tableHead: `<tr>
+      <th style="width:32px;padding:10px 8px 10px 14px;"><input type="checkbox" style="cursor:pointer;accent-color:var(--clr-accent);"/></th>
+      <th class="sortable sorted">Sənəd № <span class="sort-icon">↑</span></th>
+      <th>Tarix</th>
+      <th>Hesab</th>
+      <th>Əməliyyat növü</th>
+      <th class="sortable" style="text-align:right;">Məbləğ <span class="sort-icon">↕</span></th>
+      <th>Status</th>
+    </tr>`,
+    tableBody: `
+      <tr>${checkCell}<td class="cell-mono">BNK-2026-0341</td><td class="cell-muted">04.06.2026</td><td class="cell-mono">AZ12 AIIB 0000 0012 3456</td><td>Mədaxil</td><td class="cell-amount">24,500.00 <span style="font-size:10px;font-weight:400;color:var(--clr-text-muted);">AZN</span></td><td><span class="badge badge-success">Tamamlandı</span></td>${actionCell}</tr>
+      <tr>${checkCell}<td class="cell-mono">BNK-2026-0340</td><td class="cell-muted">03.06.2026</td><td class="cell-mono">AZ34 AIIB 0000 0034 5678</td><td>Məxaric</td><td class="cell-amount">8,750.00 <span style="font-size:10px;font-weight:400;color:var(--clr-text-muted);">AZN</span></td><td><span class="badge badge-success">Tamamlandı</span></td>${actionCell}</tr>
+      <tr>${checkCell}<td class="cell-mono">BNK-2026-0339</td><td class="cell-muted">03.06.2026</td><td class="cell-mono">AZ56 AIIB 0000 0056 7890</td><td>Köçürmə</td><td class="cell-amount">1,200.00 <span style="font-size:10px;font-weight:400;color:var(--clr-text-muted);">USD</span></td><td><span class="badge badge-warning">Gözlənilir</span></td>${actionCell}</tr>
+      <tr>${checkCell}<td class="cell-mono">BNK-2026-0338</td><td class="cell-muted">02.06.2026</td><td class="cell-mono">AZ12 AIIB 0000 0012 3456</td><td>Mədaxil</td><td class="cell-amount">15,000.00 <span style="font-size:10px;font-weight:400;color:var(--clr-text-muted);">AZN</span></td><td><span class="badge badge-success">Tamamlandı</span></td>${actionCell}</tr>
+      <tr>${checkCell}<td class="cell-mono">BNK-2026-0337</td><td class="cell-muted">01.06.2026</td><td class="cell-mono">AZ78 AIIB 0000 0078 9012</td><td>Məzənnə dəyişikliyi</td><td class="cell-amount">3,640.00 <span style="font-size:10px;font-weight:400;color:var(--clr-text-muted);">EUR</span></td><td><span class="badge badge-info">Emal edilir</span></td>${actionCell}</tr>
+    `,
+  },
+
+  hesabatlar: {
+    name: 'Hesabatlar',
+    iconKey: 'barChart',
+    firstSub: 'Maliyyə hesabatı',
+    newBtn: 'Yeni hesabat',
+    searchPlaceholder: 'Hesabat axtar...',
+    recordCount: '11 hesabat',
+    paginationInfo: '1–8 / 11 qeyd göstərilir',
+    sidebar: [
+      { label: 'Hesabatlar', items: [
+        { label: 'Maliyyə hesabatı', iconKey: 'dollar', active: true },
+        { label: 'Satış hesabatı',   iconKey: 'activity' },
+        { label: 'Anbar hesabatı',   iconKey: 'building' },
+        { label: 'Vergi hesabatı',   iconKey: 'fileText' },
+      ]},
+    ],
+    tableHead: `<tr>
+      <th style="width:32px;padding:10px 8px 10px 14px;"><input type="checkbox" style="cursor:pointer;accent-color:var(--clr-accent);"/></th>
+      <th class="sortable sorted">Hesabat adı <span class="sort-icon">↑</span></th>
+      <th>Növ</th>
+      <th>Dövr</th>
+      <th class="sortable">Yaradılma tarixi <span class="sort-icon">↕</span></th>
+      <th>Status</th>
+    </tr>`,
+    tableBody: `
+      <tr>${checkCell}<td style="font-weight:500;">Mənfəət və zərər hesabatı</td><td class="cell-muted">Maliyyə</td><td class="cell-muted">İyun 2026</td><td class="cell-muted">04.06.2026</td><td><span class="badge badge-success">Hazır</span></td>${actionCell}</tr>
+      <tr>${checkCell}<td style="font-weight:500;">Aylıq satış xülasəsi</td><td class="cell-muted">Satış</td><td class="cell-muted">May 2026</td><td class="cell-muted">01.06.2026</td><td><span class="badge badge-success">Hazır</span></td>${actionCell}</tr>
+      <tr>${checkCell}<td style="font-weight:500;">Anbar dövriyyəsi</td><td class="cell-muted">Anbar</td><td class="cell-muted">II rüb 2026</td><td class="cell-muted">28.05.2026</td><td><span class="badge badge-info">Hazırlanır</span></td>${actionCell}</tr>
+      <tr>${checkCell}<td style="font-weight:500;">ƏDV bəyannaməsi</td><td class="cell-muted">Vergi</td><td class="cell-muted">May 2026</td><td class="cell-muted">25.05.2026</td><td><span class="badge badge-success">Təqdim edilib</span></td>${actionCell}</tr>
+      <tr>${checkCell}<td style="font-weight:500;">Balans hesabatı</td><td class="cell-muted">Maliyyə</td><td class="cell-muted">I rüb 2026</td><td class="cell-muted">10.04.2026</td><td><span class="badge badge-success">Hazır</span></td>${actionCell}</tr>
+    `,
+  },
+
+  kontragentler: {
+    name: 'Kontragentlər',
+    iconKey: 'users',
+    firstSub: 'Müştərilər',
+    newBtn: 'Yeni kontragent',
+    searchPlaceholder: 'Kontragent axtar...',
+    recordCount: '64 kontragent',
+    paginationInfo: '1–8 / 64 qeyd göstərilir',
+    sidebar: [
+      { label: 'Kataloqlar', items: [
+        { label: 'Müştərilər',       iconKey: 'users', active: true },
+        { label: 'Təchizatçılar',    iconKey: 'truck' },
+        { label: 'Əlaqə şəxsləri',   iconKey: 'fileText' },
+      ]},
+      { label: 'Sənədlər', items: [
+        { label: 'Müqavilə reyestri', iconKey: 'receipt' },
+      ]},
+    ],
+    tableHead: `<tr>
+      <th style="width:32px;padding:10px 8px 10px 14px;"><input type="checkbox" style="cursor:pointer;accent-color:var(--clr-accent);"/></th>
+      <th class="sortable sorted">Kod <span class="sort-icon">↑</span></th>
+      <th>Ad</th>
+      <th>Növ</th>
+      <th>Telefon</th>
+      <th>Şəhər</th>
+      <th>Status</th>
+    </tr>`,
+    tableBody: `
+      <tr>${checkCell}<td class="cell-mono">CNT-0118</td><td style="font-weight:500;">Azərbaycan Ərzaq MMC</td><td><span class="badge badge-info">Müştəri</span></td><td class="cell-muted">+994 12 555 4521</td><td class="cell-muted">Bakı</td><td><span class="badge badge-success">Aktiv</span></td>${actionCell}</tr>
+      <tr>${checkCell}<td class="cell-mono">CNT-0117</td><td style="font-weight:500;">Baku Steel MMC</td><td><span class="badge badge-warning">Təchizatçı</span></td><td class="cell-muted">+994 12 555 7732</td><td class="cell-muted">Bakı</td><td><span class="badge badge-success">Aktiv</span></td>${actionCell}</tr>
+      <tr>${checkCell}<td class="cell-mono">CNT-0116</td><td style="font-weight:500;">Gəncə Sənaye MMC</td><td><span class="badge badge-info">Müştəri</span></td><td class="cell-muted">+994 22 256 1190</td><td class="cell-muted">Gəncə</td><td><span class="badge badge-success">Aktiv</span></td>${actionCell}</tr>
+      <tr>${checkCell}<td class="cell-mono">CNT-0115</td><td style="font-weight:500;">Naxçıvan Ticaret AS</td><td><span class="badge badge-info">Müştəri</span></td><td class="cell-muted">+994 36 545 3302</td><td class="cell-muted">Naxçıvan</td><td><span class="badge badge-default">Passiv</span></td>${actionCell}</tr>
+      <tr>${checkCell}<td class="cell-mono">CNT-0114</td><td style="font-weight:500;">Caspian Energy ASC</td><td><span class="badge badge-warning">Təchizatçı</span></td><td class="cell-muted">+994 12 404 8821</td><td class="cell-muted">Bakı</td><td><span class="badge badge-success">Aktiv</span></td>${actionCell}</tr>
+    `,
+  },
+
+  mehsul: {
+    name: 'Məhsul kataloqu',
+    iconKey: 'layoutList',
+    firstSub: 'Məhsul reyestri',
+    newBtn: 'Yeni məhsul',
+    searchPlaceholder: 'Məhsul axtar...',
+    recordCount: '210 məhsul',
+    paginationInfo: '1–8 / 210 qeyd göstərilir',
+    sidebar: [
+      { label: 'Kataloqlar', items: [
+        { label: 'Məhsul reyestri', iconKey: 'layoutList', active: true },
+        { label: 'Kateqoriyalar',   iconKey: 'tag' },
+        { label: 'Vahid ölçüləri',  iconKey: 'percent' },
+      ]},
+      { label: 'Qiymətlər', items: [
+        { label: 'Qiymət siyahıları', iconKey: 'dollar' },
+      ]},
+    ],
+    tableHead: `<tr>
+      <th style="width:32px;padding:10px 8px 10px 14px;"><input type="checkbox" style="cursor:pointer;accent-color:var(--clr-accent);"/></th>
+      <th class="sortable sorted">Kod <span class="sort-icon">↑</span></th>
+      <th>Məhsul adı</th>
+      <th>Kateqoriya</th>
+      <th class="sortable" style="text-align:right;">Qiymət <span class="sort-icon">↕</span></th>
+      <th>Vahid</th>
+      <th>Status</th>
+    </tr>`,
+    tableBody: `
+      <tr>${checkCell}<td class="cell-mono">PRD-3301</td><td style="font-weight:500;">Ofis stolu (1.4m)</td><td class="cell-muted">Mebel</td><td class="cell-amount">186.00</td><td class="cell-muted">ədəd</td><td><span class="badge badge-success">Aktiv</span></td>${actionCell}</tr>
+      <tr>${checkCell}<td class="cell-mono">PRD-3300</td><td style="font-weight:500;">A4 printer kağızı (500 vərəq)</td><td class="cell-muted">Ofis ləvazimatı</td><td class="cell-amount">7.50</td><td class="cell-muted">bağlama</td><td><span class="badge badge-success">Aktiv</span></td>${actionCell}</tr>
+      <tr>${checkCell}<td class="cell-mono">PRD-3299</td><td style="font-weight:500;">Noutbuk dayağı</td><td class="cell-muted">Elektronika</td><td class="cell-amount">42.00</td><td class="cell-muted">ədəd</td><td><span class="badge badge-success">Aktiv</span></td>${actionCell}</tr>
+      <tr>${checkCell}<td class="cell-mono">PRD-3298</td><td style="font-weight:500;">Endüstrial bоyа (20L)</td><td class="cell-muted">Tikinti materialları</td><td class="cell-amount">98.00</td><td class="cell-muted">vedrə</td><td><span class="badge badge-default">Dayandırılıb</span></td>${actionCell}</tr>
+      <tr>${checkCell}<td class="cell-mono">PRD-3297</td><td style="font-weight:500;">Konfrans stulu</td><td class="cell-muted">Mebel</td><td class="cell-amount">64.00</td><td class="cell-muted">ədəd</td><td><span class="badge badge-success">Aktiv</span></td>${actionCell}</tr>
+    `,
+  },
+
+  'alis-senedleri': {
+    name: 'Alış sənədləri',
+    iconKey: 'receipt',
+    firstSub: 'Alış sənədləri',
+    newBtn: 'Yeni sənəd',
+    searchPlaceholder: 'Sənəd axtar...',
+    recordCount: '3 sənəd',
+    paginationInfo: '1–3 / 3 qeyd göstərilir',
+    extraFilters: [
+      { id: 'supplier', allLabel: 'Bütün təchizatçılar', columnIndex: 4, field: 'supplier' },
+      { id: 'currency', allLabel: 'Bütün valyutalar', columnIndex: 5, field: 'currency' },
+    ],
+    sidebar: [
+      { label: 'Sənədlər', items: [
+        { label: 'Alış sənədləri', iconKey: 'receipt', active: true, complex: true },
+      ]},
+    ],
+    tableHead: `<tr>
+      <th style="width:32px;padding:10px 8px 10px 14px;"><input type="checkbox" style="cursor:pointer;accent-color:var(--clr-accent);"/></th>
+      <th class="sortable sorted">Sənəd № <span class="sort-icon">↑</span></th>
+      <th>Tip</th>
+      <th class="sortable">Tarix <span class="sort-icon">↕</span></th>
+      <th>Təchizatçı</th>
+      <th>Valyuta</th>
+      <th class="sortable" style="text-align:right;">Ümumi <span class="sort-icon">↕</span></th>
+      <th style="text-align:right;">Ödənilmiş</th>
+      <th style="text-align:right;">Kreditor qalığı</th>
+      <th>Status</th>
+    </tr>`,
+    tableBody: `
+      <tr>${checkCell}<td class="cell-mono">ALI-2026-00088</td><td class="cell-muted">Alış</td><td class="cell-muted">20.03.2026</td><td style="font-weight:500;">ABC Texnologiya MMC</td><td class="cell-muted">AZN</td><td class="cell-amount">11,800.00</td><td class="cell-amount">5,900.00</td><td class="cell-amount">5,900.00</td><td><span class="badge badge-success">Təsdiqlənmiş</span></td>${actionCell}</tr>
+      <tr>${checkCell}<td class="cell-mono">ALI-2026-00089</td><td class="cell-muted">Alış</td><td class="cell-muted">21.03.2026</td><td style="font-weight:500;">Xəzər İdxalat</td><td class="cell-muted">USD</td><td class="cell-amount">8,500.00</td><td class="cell-amount">0.00</td><td class="cell-amount">8,500.00</td><td><span class="badge badge-default">Qaralama</span></td>${actionCell}</tr>
+      <tr>${checkCell}<td class="cell-mono">ALI-2026-00086</td><td class="cell-muted">Alış</td><td class="cell-muted">15.03.2026</td><td style="font-weight:500;">Kənardan Alış İnc.</td><td class="cell-muted">AZN</td><td class="cell-amount">3,200.00</td><td class="cell-amount">0.00</td><td class="cell-amount">0.00</td><td><span class="badge badge-error">Ləğv edilmiş</span></td>${actionCell}</tr>
+    `,
+  },
+
 };
 
 /* ── Render sidebar ───────────────────────────────── */
@@ -2072,25 +2461,6 @@ function renderSidebar(sections) {
   }).join('');
 }
 
-/* ── Boot ─────────────────────────────────────────── */
-const key = new URLSearchParams(window.location.search).get('m') || 'satis';
-const mod = MODULES[key] || MODULES.satis;
-
-document.title                                        = `SMB ERP — ${mod.name}`;
-document.getElementById('bcModule').textContent      = mod.name;
-document.getElementById('bcCurrent').textContent     = mod.firstSub;
-document.getElementById('sidebarModuleIcon').innerHTML = icon(mod.iconKey, 16);
-document.getElementById('sidebarModuleName').textContent = mod.name;
-document.getElementById('sidebarNav').innerHTML      = renderSidebar(mod.sidebar);
-document.getElementById('pageTitle').textContent     = mod.firstSub;
-document.getElementById('newBtnLabel').textContent   = mod.newBtn;
-document.getElementById('recordCount').textContent   = mod.recordCount;
-document.getElementById('tableHead').innerHTML       = mod.tableHead;
-document.getElementById('tableBody').innerHTML       = mod.tableBody;
-document.getElementById('paginationInfo').textContent = mod.paginationInfo;
-ntInitTable();
-
-/* ── Logo dropdown — quick nav back to dashboard or any module ── */
 /* Static (non-animated) copies of the exact dashboard module icons, for visual consistency */
 const NAV_ICONS = {
   maliyye: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="4" width="11" height="17" rx="1.5"/><line x1="11" y1="2" x2="11" y2="5"/><line x1="14.5" y1="2" x2="14.5" y2="5"/><line x1="18" y1="2" x2="18" y2="5"/><line x1="12" y1="10" x2="17" y2="10"/><line x1="12" y1="13" x2="17" y2="13"/><line x1="12" y1="16" x2="15" y2="16"/><ellipse cx="6.5" cy="19" rx="4" ry="1.7" fill="#E8B23A" stroke="#A6711E" stroke-width="1.1"/><line x1="3.6" y1="19" x2="9.4" y2="19" stroke="#A6711E" stroke-width="0.8"/><ellipse cx="6.5" cy="16.6" rx="4" ry="1.7" fill="#F4C44B" stroke="#B9842A" stroke-width="1.1"/><line x1="3.6" y1="16.6" x2="9.4" y2="16.6" stroke="#B9842A" stroke-width="0.8"/><ellipse cx="6.5" cy="14.2" rx="4" ry="1.7" fill="#FFD666" stroke="#C9941F" stroke-width="1.1"/><line x1="3.6" y1="14.2" x2="9.4" y2="14.2" stroke="#C9941F" stroke-width="0.8"/></svg>`,
@@ -2101,8 +2471,47 @@ const NAV_ICONS = {
   hesabatlar: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="1.5"/><line x1="3" y1="8" x2="21" y2="8"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/><line x1="4" y1="10" x2="20" y2="10" stroke-width="2.6"/><line x1="4" y1="14" x2="20" y2="14" stroke-width="2.6"/><line x1="4" y1="18.3" x2="20" y2="18.3" stroke-width="2.6"/></svg>`,
   kontragentler: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>`,
   mehsul: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>`,
+  'alis-senedleri': `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="1.5"/><line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="13" y2="16"/><circle cx="17.5" cy="17.5" r="4.3"/><polyline points="15.6 17.6 16.9 18.9 19.3 16.3"/></svg>`,
 };
 
+/* ── Boot ─────────────────────────────────────────── */
+const key = new URLSearchParams(window.location.search).get('m') || 'satis';
+const mod = MODULES[key] || MODULES.satis;
+
+document.title                                        = `SMB ERP — ${mod.name}`;
+document.getElementById('bcModule').textContent      = mod.name;
+document.getElementById('bcCurrent').textContent     = mod.firstSub;
+document.getElementById('sidebarModuleIcon').innerHTML = NAV_ICONS[key] || icon(mod.iconKey, 16);
+document.getElementById('sidebarModuleName').textContent = mod.name;
+document.getElementById('sidebarNav').innerHTML      = renderSidebar(mod.sidebar);
+document.getElementById('pageTitle').textContent     = mod.firstSub;
+document.getElementById('newBtnLabel').textContent   = mod.newBtn;
+document.getElementById('recordCount').textContent   = mod.recordCount;
+document.getElementById('paginationInfo').textContent = mod.paginationInfo;
+
+function findActiveSidebarItem(sections) {
+  for (var s = 0; s < sections.length; s++) {
+    for (var i = 0; i < sections[s].items.length; i++) {
+      if (sections[s].items[i].active) return sections[s].items[i];
+    }
+  }
+  return null;
+}
+/* Deferred to the end of the script (see bootRenderTable() call) since the
+   complex-grid dataset arrays/functions are declared further down this file. */
+function bootRenderTable() {
+  var activeItem = findActiveSidebarItem(mod.sidebar);
+  if (activeItem && activeItem.complex) {
+    cgLoadDataset(key);
+    cgInit();
+  } else {
+    document.getElementById('tableHead').innerHTML = mod.tableHead;
+    document.getElementById('tableBody').innerHTML = mod.tableBody;
+    ntInitTable();
+  }
+}
+
+/* ── Logo dropdown — quick nav back to dashboard or any module ── */
 const NAV_MODULES = [
   { key: 'maliyye',       name: 'Maliyyə',     subs: ['Hesablar planı', 'Jurnal qeydləri', 'Ödəniş tapşırıqları', 'Maliyyə nəzarəti'] },
   { key: 'satis',         name: 'Satış',   subs: ['Satış sifarişləri', 'Fakturalar', 'Müştəri reyestri', 'Qiymət siyahıları'] },
@@ -2112,6 +2521,7 @@ const NAV_MODULES = [
   { key: 'hesabatlar',    name: 'Hesabatlar',   subs: ['Maliyyə hesabatı', 'Satış hesabatı', 'Anbar hesabatı', 'Vergi hesabatı'] },
   { key: 'kontragentler', name: 'Kontragentlər',      subs: ['Müştərilər', 'Təchizatçılar', 'Əlaqə şəxsləri', 'Müqavilə reyestri'] },
   { key: 'mehsul',        name: 'Məhsul kataloqu', subs: ['Məhsul reyestri', 'Qiymətlər', 'Kateqoriyalar', 'Vahid ölçüləri'] },
+  { key: 'alis-senedleri', name: 'Alış sənədləri', subs: ['Alış sənədləri'] },
 ];
 
 (function initLogoDropdown() {
@@ -2121,10 +2531,11 @@ const NAV_MODULES = [
   if (!wrap || !btn || !dropdown) return;
 
   const moduleItems = NAV_MODULES.map(m => {
-    const subs = m.subs.map(s => `<a class="logo-dd-sub-item" href="03-module.html?m=${m.key}">${s}</a>`).join('');
+    const url = m.url || `03-module.html?m=${m.key}`;
+    const subs = m.subs.map(s => `<a class="logo-dd-sub-item" href="${url}">${s}</a>`).join('');
     return `
     <div class="logo-dd-item-wrap">
-      <a class="logo-dd-item has-flyout ${m.key === key ? 'active' : ''}" href="03-module.html?m=${m.key}">
+      <a class="logo-dd-item has-flyout ${m.key === key ? 'active' : ''}" href="${url}">
         ${NAV_ICONS[m.key]}<span>${m.name}</span>
         <svg class="logo-dd-chevron" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
       </a>
@@ -2220,6 +2631,7 @@ function setActive(btn, title) {
     showTableLoader();
     setTimeout(function() {
       if (btn.dataset.complex === 'true') {
+        if (cgDatasetDef !== CG_DATASETS[key]) cgLoadDataset(key);
         cgInit();
       } else {
         clearAllFilters(true);
@@ -2372,6 +2784,100 @@ window.addEventListener('resize', () => {
 var tbFilterStatus   = '';
 var tbFilterDateFrom = '';
 var tbFilterDateTo   = '';
+var tbExtraFilterValues = {};
+
+/* ── Extra column filters (e.g. Təchizatçı, Valyuta) — declared per-module via mod.extraFilters ── */
+function initExtraFilters() {
+  tbExtraFilterValues = {};
+  var defs = (mod && mod.extraFilters) || [];
+  for (var i = 0; i < 2; i++) {
+    var wrap = document.getElementById('extraFilterWrap' + i);
+    var label = document.getElementById('extraFilterLabel' + i);
+    var btn = document.getElementById('extraFilterBtn' + i);
+    var def = defs[i];
+    if (!wrap) continue;
+    if (!def) { wrap.style.display = 'none'; continue; }
+    wrap.style.display = '';
+    wrap.dataset.filterId = def.id;
+    wrap.dataset.columnIndex = def.columnIndex;
+    wrap.dataset.field = def.field || '';
+    wrap.dataset.allLabel = def.allLabel;
+    if (label) label.textContent = def.allLabel;
+    if (btn) btn.classList.remove('active');
+  }
+}
+
+function toggleExtraFilterDropdown(e, idx) {
+  e.stopPropagation();
+  document.getElementById('statusDropdown').classList.remove('open');
+  document.getElementById('dateDropdown').classList.remove('open');
+  var otherIdx = idx === 0 ? 1 : 0;
+  var otherDd = document.getElementById('extraFilterDropdown' + otherIdx);
+  if (otherDd) otherDd.classList.remove('open');
+  var dd = document.getElementById('extraFilterDropdown' + idx);
+  var isOpen = dd.classList.contains('open');
+  if (!isOpen) buildExtraFilterDropdown(idx);
+  dd.classList.toggle('open', !isOpen);
+}
+
+function buildExtraFilterDropdown(idx) {
+  var wrap = document.getElementById('extraFilterWrap' + idx);
+  var dd = document.getElementById('extraFilterDropdown' + idx);
+  if (!wrap || !dd) return;
+  var colIdx = Number(wrap.dataset.columnIndex);
+  var allLabel = wrap.dataset.allLabel;
+  var filterId = wrap.dataset.filterId;
+  dd.innerHTML = '';
+
+  var allItem = document.createElement('div');
+  allItem.className = 'filter-dd-item' + (!tbExtraFilterValues[filterId] ? ' active' : '');
+  allItem.appendChild(document.createTextNode(allLabel));
+  allItem.addEventListener('click', function() { applyExtraFilter(idx, ''); });
+  dd.appendChild(allItem);
+
+  var sep = document.createElement('div');
+  sep.className = 'filter-dd-sep';
+  dd.appendChild(sep);
+
+  var seen = {};
+  function addOption(text) {
+    text = (text || '').trim();
+    if (!text || seen[text]) return;
+    seen[text] = true;
+    var item = document.createElement('div');
+    item.className = 'filter-dd-item' + (tbExtraFilterValues[filterId] === text ? ' active' : '');
+    item.appendChild(document.createTextNode(text));
+    item.addEventListener('click', function() { applyExtraFilter(idx, text); });
+    dd.appendChild(item);
+  }
+
+  if (cgTable) {
+    var field = wrap.dataset.field;
+    if (!field) return;
+    cgRows.forEach(function(r) { addOption(r[field]); });
+    return;
+  }
+
+  var tbody = document.getElementById('tableBody');
+  if (!tbody) return;
+  tbody.querySelectorAll('tr').forEach(function(tr) {
+    var cell = tr.children[colIdx];
+    if (cell) addOption(cell.textContent);
+  });
+}
+
+function applyExtraFilter(idx, value) {
+  var wrap = document.getElementById('extraFilterWrap' + idx);
+  var label = document.getElementById('extraFilterLabel' + idx);
+  var btn = document.getElementById('extraFilterBtn' + idx);
+  if (!wrap) return;
+  var filterId = wrap.dataset.filterId;
+  tbExtraFilterValues[filterId] = value;
+  if (label) label.textContent = value || wrap.dataset.allLabel;
+  if (btn) btn.classList.toggle('active', !!value);
+  document.getElementById('extraFilterDropdown' + idx).classList.remove('open');
+  applyToolbarFilters();
+}
 
 /* ── Status dropdown ──────────────────────────────── */
 function toggleStatusDropdown(e) {
@@ -2623,6 +3129,7 @@ function clearAllFilters(silent) {
   applyStatusFilter('');
   clearDateFilter();
   ntChipClear();
+  for (var i = 0; i < 2; i++) applyExtraFilter(i, '');
   if (!silent) showToast('Filtrlər sıfırlandı', 'Bütün aktiv filtrlər ləğv edildi.', 'success');
 }
 
@@ -2735,8 +3242,7 @@ function fmtDate(iso) {
 /* ── Core filter engine ───────────────────────────── */
 function applyToolbarFilters() {
   if (cgTable) {
-    var lts = { 'Ödənilib':'paid', 'Gözlənilir':'pending', 'Emal edilir':'processing', 'İmtina edilib':'cancelled' };
-    cgFilterStatus = lts[tbFilterStatus] || '';
+    cgFilterStatus = tbFilterStatus ? cgStatusValueFromLabel(tbFilterStatus) : '';
     cgRender();
     return;
   }
@@ -2782,6 +3288,17 @@ function applyToolbarFilters() {
       });
     }
 
+    /* Extra column filters — exact match on a specific column's text */
+    if (show) {
+      var defs = (mod && mod.extraFilters) || [];
+      for (var fi = 0; fi < defs.length; fi++) {
+        var fval = tbExtraFilterValues[defs[fi].id];
+        if (!fval) continue;
+        var cell = tr.children[defs[fi].columnIndex];
+        if (!cell || cell.textContent.trim() !== fval) { show = false; break; }
+      }
+    }
+
     /* Chip search — row must match at least one active chip (OR logic) */
     if (show && ntChipActive.length) {
       var rowText = tr.textContent.toLowerCase();
@@ -2815,6 +3332,11 @@ document.addEventListener('click', function(e) {
   if (sd && sw && !sw.contains(e.target)) sd.classList.remove('open');
   /* document.contains check ignores detached nodes (rebuilt by drRender) */
   if (dd && dw && document.contains(e.target) && !dw.contains(e.target)) dd.classList.remove('open');
+  for (var i = 0; i < 2; i++) {
+    var ew = document.getElementById('extraFilterWrap' + i);
+    var ed = document.getElementById('extraFilterDropdown' + i);
+    if (ew && ed && !ew.contains(e.target)) ed.classList.remove('open');
+  }
 });
 
 /* ══════════════════════════════════════════════════
@@ -2965,6 +3487,7 @@ function ntInitTable() {
   _ntHiddenCols = {};
   ntApplyVisibility();
   ntInitSort();
+  initExtraFilters();
   /* Show chip search, init it, hide for complex grid */
   var chipOuter = document.getElementById('toolbarChipOuter');
   if (chipOuter) chipOuter.style.display = '';
@@ -2997,26 +3520,241 @@ function ntInitTable() {
   document.addEventListener('click', document._ntOutsideHandler);
 }
 
-var cgRows = [
-  { doc:'ODP-2026-0041', date:'04.06.2026', payee:'Baku Steel MMC',      purpose:'Avans ödəniş',    amount:5400,   amtFmt:'5,400.00',  currency:'AZN', bank:'AZ12 AIIB 0000 0000 0012 3456', status:'paid',       label:'Ödənilib',      badge:'badge-success', sel:false },
-  { doc:'ODP-2026-0040', date:'03.06.2026', payee:'Caspian Energy ASC',  purpose:'Kommunal ödəniş', amount:2100,   amtFmt:'2,100.00',  currency:'AZN', bank:'AZ12 AIIB 0000 0000 0012 3456', status:'pending',    label:'Gözlənilir',    badge:'badge-warning', sel:false },
-  { doc:'ODP-2026-0039', date:'03.06.2026', payee:'ABB Bank ASC',        purpose:'Kredit ödənişi',  amount:8750,   amtFmt:'8,750.00',  currency:'AZN', bank:'AZ34 AIIB 0000 0000 0034 5678', status:'paid',       label:'Ödənilib',      badge:'badge-success', sel:false },
-  { doc:'ODP-2026-0038', date:'02.06.2026', payee:'Azərenerji MMC',      purpose:'Elektrik hesabı', amount:1200,   amtFmt:'1,200.00',  currency:'USD', bank:'AZ56 AIIB 0000 0000 0056 7890', status:'cancelled',  label:'İmtina edilib', badge:'badge-error',   sel:false },
-  { doc:'ODP-2026-0037', date:'02.06.2026', payee:'Silk Way Airlines',   purpose:'Xidmət haqqı',    amount:4320,   amtFmt:'4,320.00',  currency:'AZN', bank:'AZ12 AIIB 0000 0000 0012 3456', status:'processing', label:'Emal edilir',   badge:'badge-info',    sel:false },
-  { doc:'ODP-2026-0036', date:'01.06.2026', payee:'Kapital Bank ASC',    purpose:'Kredit ödənişi',  amount:15000,  amtFmt:'15,000.00', currency:'AZN', bank:'AZ34 AIIB 0000 0000 0034 5678', status:'paid',       label:'Ödənilib',      badge:'badge-success', sel:false },
-  { doc:'ODP-2026-0035', date:'01.06.2026', payee:'Azərqold MMC',        purpose:'Mal alışı',       amount:3640,   amtFmt:'3,640.00',  currency:'EUR', bank:'AZ78 AIIB 0000 0000 0078 9012', status:'pending',    label:'Gözlənilir',    badge:'badge-warning', sel:false },
-  { doc:'ODP-2026-0034', date:'31.05.2026', payee:'Baku Bus MMC',        purpose:'İcarə haqqı',     amount:980,    amtFmt:'980.00',    currency:'AZN', bank:'AZ12 AIIB 0000 0000 0012 3456', status:'paid',       label:'Ödənilib',      badge:'badge-success', sel:false },
-];
+function fmtAmt(n) { return Number(n || 0).toLocaleString('en-US', { minimumFractionDigits: 2 }); }
 
-var cgAllCols   = ['doc','date','payee','purpose','amount','currency','bank','status'];
-var cgColLabels = { doc:'Sənəd №', date:'Tarix', payee:'Ödəniş alıcısı', purpose:'Məqsəd', amount:'Məbləğ', currency:'Valyuta', bank:'Bank hesabı', status:'Status' };
-var cgColWidths = { doc:145, date:105, payee:175, purpose:155, amount:110, currency:80, bank:210, status:120 };
+/* ── Complex-grid dataset registry — each module's complex sidebar item maps to
+   a dataset here by its module key, so the same grid engine (sort/filter/drag-
+   reorder/resize/inline-edit) can drive multiple, differently-shaped tables. ── */
+var CG_DATASETS = {
+
+  maliyye: {
+    rows: [
+      { doc:'ODP-2026-0041', date:'04.06.2026', payee:'Baku Steel MMC',      purpose:'Avans ödəniş',    amount:5400,   amtFmt:'5,400.00',  currency:'AZN', bank:'AZ12 AIIB 0000 0000 0012 3456', status:'paid',       label:'Ödənilib',      badge:'badge-success', sel:false },
+      { doc:'ODP-2026-0040', date:'03.06.2026', payee:'Caspian Energy ASC',  purpose:'Kommunal ödəniş', amount:2100,   amtFmt:'2,100.00',  currency:'AZN', bank:'AZ12 AIIB 0000 0000 0012 3456', status:'pending',    label:'Gözlənilir',    badge:'badge-warning', sel:false },
+      { doc:'ODP-2026-0039', date:'03.06.2026', payee:'ABB Bank ASC',        purpose:'Kredit ödənişi',  amount:8750,   amtFmt:'8,750.00',  currency:'AZN', bank:'AZ34 AIIB 0000 0000 0034 5678', status:'paid',       label:'Ödənilib',      badge:'badge-success', sel:false },
+      { doc:'ODP-2026-0038', date:'02.06.2026', payee:'Azərenerji MMC',      purpose:'Elektrik hesabı', amount:1200,   amtFmt:'1,200.00',  currency:'USD', bank:'AZ56 AIIB 0000 0000 0056 7890', status:'cancelled',  label:'İmtina edilib', badge:'badge-error',   sel:false },
+      { doc:'ODP-2026-0037', date:'02.06.2026', payee:'Silk Way Airlines',   purpose:'Xidmət haqqı',    amount:4320,   amtFmt:'4,320.00',  currency:'AZN', bank:'AZ12 AIIB 0000 0000 0012 3456', status:'processing', label:'Emal edilir',   badge:'badge-info',    sel:false },
+      { doc:'ODP-2026-0036', date:'01.06.2026', payee:'Kapital Bank ASC',    purpose:'Kredit ödənişi',  amount:15000,  amtFmt:'15,000.00', currency:'AZN', bank:'AZ34 AIIB 0000 0000 0034 5678', status:'paid',       label:'Ödənilib',      badge:'badge-success', sel:false },
+      { doc:'ODP-2026-0035', date:'01.06.2026', payee:'Azərqold MMC',        purpose:'Mal alışı',       amount:3640,   amtFmt:'3,640.00',  currency:'EUR', bank:'AZ78 AIIB 0000 0000 0078 9012', status:'pending',    label:'Gözlənilir',    badge:'badge-warning', sel:false },
+      { doc:'ODP-2026-0034', date:'31.05.2026', payee:'Baku Bus MMC',        purpose:'İcarə haqqı',     amount:980,    amtFmt:'980.00',    currency:'AZN', bank:'AZ12 AIIB 0000 0000 0012 3456', status:'paid',       label:'Ödənilib',      badge:'badge-success', sel:false },
+    ],
+    allCols: ['doc','date','payee','purpose','amount','currency','bank','status'],
+    colLabels: { doc:'Sənəd №', date:'Tarix', payee:'Ödəniş alıcısı', purpose:'Məqsəd', amount:'Məbləğ', currency:'Valyuta', bank:'Bank hesabı', status:'Status' },
+    colWidths: { doc:145, date:105, payee:175, purpose:155, amount:110, currency:80, bank:210, status:120 },
+    defaultSortCol: 'doc', defaultSortDir: 'desc',
+    searchPlaceholder: 'Sənəd, alıcı, məqsəd axtar…',
+    searchFields: ['doc','payee','purpose','label'],
+    nameField: 'payee', amountFmtField: 'amtFmt',
+    statusOptions: [
+      { value:'paid',       label:'Ödənilib',      badge:'badge-success' },
+      { value:'pending',    label:'Gözlənilir',    badge:'badge-warning' },
+      { value:'processing', label:'Emal edilir',   badge:'badge-info' },
+      { value:'cancelled',  label:'İmtina edilib', badge:'badge-error' },
+    ],
+    renderCell: function(td, row, col) {
+      switch (col) {
+        case 'doc':
+          td.style.cssText = 'font-family:Consolas,"Courier New",monospace;font-size:12px;color:var(--clr-input-label);font-weight:500';
+          td.textContent = row.doc;
+          break;
+        case 'date':
+          td.style.cssText = 'color:var(--clr-text-secondary);font-size:12.5px';
+          td.textContent = row.date;
+          break;
+        case 'payee':
+          td.style.fontWeight = '500';
+          td.textContent = row.payee;
+          break;
+        case 'purpose':
+          td.style.cssText = 'color:var(--clr-text-secondary);font-size:12.5px';
+          td.textContent = row.purpose;
+          break;
+        case 'amount':
+          td.style.cssText = 'font-family:Consolas,"Courier New",monospace;font-size:13px;font-weight:600;text-align:right;color:var(--clr-primary)';
+          td.textContent = row.amtFmt;
+          break;
+        case 'currency':
+          td.style.cssText = 'font-family:Consolas,"Courier New",monospace;font-size:11px;color:var(--clr-text-muted);font-weight:500';
+          td.textContent = row.currency;
+          break;
+        case 'bank':
+          td.style.cssText = 'font-family:Consolas,"Courier New",monospace;font-size:11px;color:var(--clr-text-secondary)';
+          td.textContent = row.bank;
+          break;
+        case 'status':
+          var badge = document.createElement('span');
+          badge.className = 'badge ' + row.badge;
+          var dot = document.createElement('span');
+          dot.className = 'badge-dot';
+          badge.appendChild(dot);
+          badge.appendChild(document.createTextNode(row.label));
+          td.appendChild(badge);
+          break;
+      }
+    },
+    sortValue: function(row, col) {
+      switch (col) {
+        case 'date': return row.date.split('.').reverse().join('');
+        case 'amount': return row.amount;
+        default: return row[col];
+      }
+    },
+    editField: function(col) {
+      if (col === 'status')   return { type:'select', options: this.statusOptions.map(function(s) { return [s.value, s.label]; }) };
+      if (col === 'currency') return { type:'select', options: [['AZN','AZN'],['USD','USD'],['EUR','EUR'],['GBP','GBP']] };
+      if (col === 'amount')   return { type:'number', mono:true };
+      if (col === 'date')     return { type:'date' };
+      if (col === 'bank')     return { type:'text', mono:true, fontSize:'11px' };
+      if (col === 'doc')      return { type:'text', mono:true, fontSize:'12px' };
+      return { type:'text' };
+    },
+    applyEdit: function(row, col, val) {
+      switch (col) {
+        case 'amount':
+          row.amount = parseFloat(val) || 0;
+          row.amtFmt = fmtAmt(row.amount);
+          break;
+        case 'date':
+          if (val) { var dp = val.split('-'); row.date = dp[2] + '.' + dp[1] + '.' + dp[0]; }
+          break;
+        case 'status':
+          row.status = val;
+          var match = this.statusOptions.find(function(s) { return s.value === val; });
+          if (match) { row.label = match.label; row.badge = match.badge; }
+          break;
+        default: row[col] = val;
+      }
+    },
+  },
+
+  'alis-senedleri': {
+    rows: [
+      { doc:'ALI-2026-00088', type:'Alış', date:'20.03.2026', supplier:'ABC Texnologiya MMC',  currency:'AZN', total:11800, totalFmt:'11,800.00', paid:5900,  paidFmt:'5,900.00',  balance:5900, balanceFmt:'5,900.00', status:'approved',  label:'Təsdiqlənmiş',  badge:'badge-success', sel:false },
+      { doc:'ALI-2026-00089', type:'Alış', date:'21.03.2026', supplier:'Xəzər İdxalat',         currency:'USD', total:8500,  totalFmt:'8,500.00',  paid:0,     paidFmt:'0.00',      balance:8500, balanceFmt:'8,500.00', status:'draft',     label:'Qaralama',      badge:'badge-default', sel:false },
+      { doc:'ALI-2026-00086', type:'Alış', date:'15.03.2026', supplier:'Kənardan Alış İnc.',    currency:'AZN', total:3200,  totalFmt:'3,200.00',  paid:0,     paidFmt:'0.00',      balance:0,    balanceFmt:'0.00',     status:'cancelled', label:'Ləğv edilmiş',  badge:'badge-error',   sel:false },
+      { doc:'ALI-2026-00090', type:'Alış', date:'24.03.2026', supplier:'Bakı Tekstil MMC',      currency:'AZN', total:14200, totalFmt:'14,200.00', paid:14200, paidFmt:'14,200.00', balance:0,    balanceFmt:'0.00',     status:'approved',  label:'Təsdiqlənmiş',  badge:'badge-success', sel:false },
+      { doc:'ALI-2026-00091', type:'Alış', date:'25.03.2026', supplier:'Gəncə Kimya ASC',       currency:'EUR', total:6750,  totalFmt:'6,750.00',  paid:3000,  paidFmt:'3,000.00',  balance:3750, balanceFmt:'3,750.00', status:'draft',     label:'Qaralama',      badge:'badge-default', sel:false },
+    ],
+    allCols: ['doc','type','date','supplier','currency','total','paid','balance','status'],
+    colLabels: { doc:'Sənəd №', type:'Tip', date:'Tarix', supplier:'Təchizatçı', currency:'Valyuta', total:'Ümumi', paid:'Ödənilmiş', balance:'Kreditor qalığı', status:'Status' },
+    colWidths: { doc:150, type:90, date:105, supplier:190, currency:85, total:120, paid:120, balance:140, status:130 },
+    defaultSortCol: 'doc', defaultSortDir: 'desc',
+    searchPlaceholder: 'Sənəd, təchizatçı axtar…',
+    searchFields: ['doc','supplier','type','label'],
+    nameField: 'supplier', amountFmtField: 'totalFmt',
+    statusOptions: [
+      { value:'approved',  label:'Təsdiqlənmiş', badge:'badge-success' },
+      { value:'draft',     label:'Qaralama',     badge:'badge-default' },
+      { value:'cancelled', label:'Ləğv edilmiş', badge:'badge-error' },
+    ],
+    renderCell: function(td, row, col) {
+      switch (col) {
+        case 'doc':
+          td.style.cssText = 'font-family:Consolas,"Courier New",monospace;font-size:12px;color:var(--clr-input-label);font-weight:500';
+          td.textContent = row.doc;
+          break;
+        case 'type':
+          td.style.cssText = 'color:var(--clr-text-secondary);font-size:12.5px';
+          td.textContent = row.type;
+          break;
+        case 'date':
+          td.style.cssText = 'color:var(--clr-text-secondary);font-size:12.5px';
+          td.textContent = row.date;
+          break;
+        case 'supplier':
+          td.style.fontWeight = '500';
+          td.textContent = row.supplier;
+          break;
+        case 'currency':
+          td.style.cssText = 'font-family:Consolas,"Courier New",monospace;font-size:11px;color:var(--clr-text-muted);font-weight:500';
+          td.textContent = row.currency;
+          break;
+        case 'total':
+          td.style.cssText = 'font-family:Consolas,"Courier New",monospace;font-size:13px;font-weight:600;text-align:right;color:var(--clr-primary)';
+          td.textContent = row.totalFmt;
+          break;
+        case 'paid':
+          td.style.cssText = 'font-family:Consolas,"Courier New",monospace;font-size:12px;text-align:right;color:var(--clr-text-secondary)';
+          td.textContent = row.paidFmt;
+          break;
+        case 'balance':
+          td.style.cssText = 'font-family:Consolas,"Courier New",monospace;font-size:12px;text-align:right;font-weight:600;color:' + (row.balance > 0 ? 'var(--clr-error-text)' : 'var(--clr-text-secondary)');
+          td.textContent = row.balanceFmt;
+          break;
+        case 'status':
+          var badge = document.createElement('span');
+          badge.className = 'badge ' + row.badge;
+          var dot = document.createElement('span');
+          dot.className = 'badge-dot';
+          badge.appendChild(dot);
+          badge.appendChild(document.createTextNode(row.label));
+          td.appendChild(badge);
+          break;
+      }
+    },
+    sortValue: function(row, col) {
+      switch (col) {
+        case 'date': return row.date.split('.').reverse().join('');
+        default: return row[col];
+      }
+    },
+    editField: function(col) {
+      if (col === 'status')   return { type:'select', options: this.statusOptions.map(function(s) { return [s.value, s.label]; }) };
+      if (col === 'currency') return { type:'select', options: [['AZN','AZN'],['USD','USD'],['EUR','EUR'],['GBP','GBP']] };
+      if (col === 'total' || col === 'paid' || col === 'balance') return { type:'number', mono:true };
+      if (col === 'date')     return { type:'date' };
+      if (col === 'doc')      return { type:'text', mono:true, fontSize:'12px' };
+      return { type:'text' };
+    },
+    applyEdit: function(row, col, val) {
+      switch (col) {
+        case 'total':   row.total = parseFloat(val) || 0;   row.totalFmt = fmtAmt(row.total);     break;
+        case 'paid':    row.paid = parseFloat(val) || 0;    row.paidFmt = fmtAmt(row.paid);        break;
+        case 'balance': row.balance = parseFloat(val) || 0; row.balanceFmt = fmtAmt(row.balance);  break;
+        case 'date':
+          if (val) { var dp = val.split('-'); row.date = dp[2] + '.' + dp[1] + '.' + dp[0]; }
+          break;
+        case 'status':
+          row.status = val;
+          var match = this.statusOptions.find(function(s) { return s.value === val; });
+          if (match) { row.label = match.label; row.badge = match.badge; }
+          break;
+        default: row[col] = val;
+      }
+    },
+  },
+
+};
+
+var cgDatasetDef = null;
+var cgRows = [];
+var cgAllCols = [];
+var cgColLabels = {};
+var cgColWidths = {};
 var cgHiddenCols = {};
-var cgCols = cgAllCols.slice();
-var cgSortCol = 'doc', cgSortDir = 'desc';
+var cgCols = [];
+var cgSortCol = '', cgSortDir = 'desc';
 var cgFilterText = '', cgFilterStatus = '';
 var cgDragSrc = null;
 var cgEditRow = null;
+
+function cgLoadDataset(datasetKey) {
+  var def = CG_DATASETS[datasetKey] || CG_DATASETS.maliyye;
+  cgDatasetDef = def;
+  cgRows = def.rows;
+  cgAllCols = def.allCols;
+  cgColLabels = def.colLabels;
+  cgColWidths = Object.assign({}, def.colWidths);
+  cgHiddenCols = {};
+  cgCols = cgAllCols.slice();
+  cgSortCol = def.defaultSortCol;
+  cgSortDir = def.defaultSortDir;
+}
+
+function cgStatusValueFromLabel(label) {
+  var opt = cgDatasetDef.statusOptions.find(function(s) { return s.label === label; });
+  return opt ? opt.value : '';
+}
 
 function cgShowNormal() {
   cgEditRow = null;
@@ -3043,6 +3781,8 @@ function cgInit() {
   var chipOuter = document.getElementById('toolbarChipOuter');
   if (chipOuter) chipOuter.style.display = 'none';
 
+  initExtraFilters();
+
   /* ── Filter strip (search only — count and column toggle moved to toolbar) */
   var strip = document.createElement('div');
   strip.className = 'grid-strip';
@@ -3053,7 +3793,7 @@ function cgInit() {
   searchIcon.className = 'grid-strip-search-icon';
   searchIcon.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>';
   var searchEl = document.createElement('input');
-  searchEl.placeholder = 'Sənəd, alıcı, məqsəd axtar…';
+  searchEl.placeholder = cgDatasetDef.searchPlaceholder;
   searchEl.addEventListener('input', function() { if (cgEditRow) cgSaveEdit(true); cgFilterText = this.value.toLowerCase(); cgRender(); });
   searchWrap.appendChild(searchIcon);
   searchWrap.appendChild(searchEl);
@@ -3172,8 +3912,7 @@ function cgInit() {
   document.addEventListener('click', document._cgOutsideHandler);
 
   /* sync filter state from toolbar before first render */
-  var _lts = { 'Ödənilib':'paid', 'Gözlənilir':'pending', 'Emal edilir':'processing', 'İmtina edilib':'cancelled' };
-  cgFilterStatus = _lts[tbFilterStatus] || '';
+  cgFilterStatus = tbFilterStatus ? cgStatusValueFromLabel(tbFilterStatus) : '';
 
   cgRender();
 }
@@ -3182,13 +3921,12 @@ function cgRender() {
   if (!cgTable) return;
 
   /* Filter */
+  var extraDefs = (mod && mod.extraFilters) || [];
   var visible = cgRows.filter(function(r) {
     var ft = cgFilterText;
-    var okText = !ft
-      || r.doc.toLowerCase().indexOf(ft) >= 0
-      || r.payee.toLowerCase().indexOf(ft) >= 0
-      || r.purpose.toLowerCase().indexOf(ft) >= 0
-      || r.label.toLowerCase().indexOf(ft) >= 0;
+    var okText = !ft || cgDatasetDef.searchFields.some(function(f) {
+      return String(r[f] || '').toLowerCase().indexOf(ft) >= 0;
+    });
     var okStatus = !cgFilterStatus || r.status === cgFilterStatus;
     var okDate = true;
     if (tbFilterDateFrom || tbFilterDateTo) {
@@ -3197,23 +3935,17 @@ function cgRender() {
       if (tbFilterDateFrom && rd < new Date(tbFilterDateFrom)) okDate = false;
       if (tbFilterDateTo) { var dto = new Date(tbFilterDateTo); dto.setHours(23,59,59,999); if (rd > dto) okDate = false; }
     }
-    return okText && okStatus && okDate;
+    var okExtra = extraDefs.every(function(def) {
+      var fval = tbExtraFilterValues[def.id];
+      return !fval || !def.field || String(r[def.field]) === fval;
+    });
+    return okText && okStatus && okDate && okExtra;
   });
 
   /* Sort */
   visible.sort(function(a, b) {
-    var av, bv;
-    switch (cgSortCol) {
-      case 'doc':      av = a.doc;      bv = b.doc;      break;
-      case 'date':     av = a.date.split('.').reverse().join(''); bv = b.date.split('.').reverse().join(''); break;
-      case 'payee':    av = a.payee;    bv = b.payee;    break;
-      case 'purpose':  av = a.purpose;  bv = b.purpose;  break;
-      case 'amount':   av = a.amount;   bv = b.amount;   break;
-      case 'currency': av = a.currency; bv = b.currency; break;
-      case 'bank':     av = a.bank;     bv = b.bank;     break;
-      case 'status':   av = a.status;   bv = b.status;   break;
-      default:         av = a.doc;      bv = b.doc;
-    }
+    var av = cgDatasetDef.sortValue(a, cgSortCol);
+    var bv = cgDatasetDef.sortValue(b, cgSortCol);
     if (av < bv) return cgSortDir === 'asc' ? -1 :  1;
     if (av > bv) return cgSortDir === 'asc' ?  1 : -1;
     return 0;
@@ -3233,9 +3965,14 @@ function cgRender() {
   /* Checkbox th */
   var thCb = document.createElement('th');
   thCb.style.cssText = 'width:32px;padding:10px 8px 10px 14px;';
-  var selectAll = document.createElement('input');
-  selectAll.type = 'checkbox';
-  selectAll.style.cssText = 'cursor:pointer;accent-color:var(--clr-accent)';
+  /* Non-native toggle — a real <input type="checkbox"> can paint a faint
+     stray glyph at some zoom/DPI levels even with appearance:none; a plain
+     button avoids the browser's native form-control rendering entirely. */
+  var selectAll = document.createElement('button');
+  selectAll.type = 'button';
+  selectAll.className = 'cg-checkbox';
+  selectAll.setAttribute('role', 'checkbox');
+  selectAll.setAttribute('aria-checked', 'false');
   thCb.appendChild(selectAll);
   thead.appendChild(thCb);
 
@@ -3326,10 +4063,14 @@ function cgRender() {
   thead.appendChild(thDel);
 
   /* Select-all state */
-  selectAll.checked = visible.length > 0 && visible.every(function(r) { return r.sel; });
-  selectAll.indeterminate = !selectAll.checked && visible.some(function(r) { return r.sel; });
-  selectAll.addEventListener('change', function() {
-    visible.forEach(function(r) { r.sel = selectAll.checked; });
+  var allSelected = visible.length > 0 && visible.every(function(r) { return r.sel; });
+  var someSelected = !allSelected && visible.some(function(r) { return r.sel; });
+  selectAll.classList.toggle('checked', allSelected);
+  selectAll.classList.toggle('indeterminate', someSelected);
+  selectAll.setAttribute('aria-checked', someSelected ? 'mixed' : String(allSelected));
+  selectAll.addEventListener('click', function() {
+    var next = !allSelected;
+    visible.forEach(function(r) { r.sel = next; });
     cgRender();
   });
 
@@ -3355,13 +4096,22 @@ function cgRender() {
     /* Checkbox td */
     var tdCb = document.createElement('td');
     tdCb.style.cssText = 'padding:10px 8px 10px 14px;width:32px';
-    var cb = document.createElement('input');
-    cb.type = 'checkbox'; cb.checked = row.sel;
-    cb.style.cssText = 'cursor:pointer;accent-color:var(--clr-accent)';
-    cb.addEventListener('change', function() {
-      row.sel = cb.checked;
+    var cb = document.createElement('button');
+    cb.type = 'button';
+    cb.className = 'cg-checkbox' + (row.sel ? ' checked' : '');
+    cb.setAttribute('role', 'checkbox');
+    cb.setAttribute('aria-checked', String(!!row.sel));
+    cb.addEventListener('click', function(e) {
+      e.stopPropagation();
+      row.sel = !row.sel;
+      cb.classList.toggle('checked', row.sel);
+      cb.setAttribute('aria-checked', String(row.sel));
       tr.classList.toggle('selected', row.sel);
-      selectAll.indeterminate = !cgRows.every(function(r) { return r.sel; }) && cgRows.some(function(r) { return r.sel; });
+      var allSel = cgRows.every(function(r) { return r.sel; });
+      var someSel = !allSel && cgRows.some(function(r) { return r.sel; });
+      selectAll.classList.toggle('checked', allSel);
+      selectAll.classList.toggle('indeterminate', someSel);
+      selectAll.setAttribute('aria-checked', someSel ? 'mixed' : String(allSel));
     });
     tdCb.appendChild(cb);
     tr.appendChild(tdCb);
@@ -3369,45 +4119,7 @@ function cgRender() {
     /* Data cells */
     cgCols.forEach(function(col) {
       var td = document.createElement('td');
-      switch (col) {
-        case 'doc':
-          td.style.cssText = 'font-family:Consolas,"Courier New",monospace;font-size:12px;color:var(--clr-input-label);font-weight:500';
-          td.textContent = row.doc;
-          break;
-        case 'date':
-          td.style.cssText = 'color:var(--clr-text-secondary);font-size:12.5px';
-          td.textContent = row.date;
-          break;
-        case 'payee':
-          td.style.fontWeight = '500';
-          td.textContent = row.payee;
-          break;
-        case 'purpose':
-          td.style.cssText = 'color:var(--clr-text-secondary);font-size:12.5px';
-          td.textContent = row.purpose;
-          break;
-        case 'amount':
-          td.style.cssText = 'font-family:Consolas,"Courier New",monospace;font-size:13px;font-weight:600;text-align:right;color:var(--clr-primary)';
-          td.textContent = row.amtFmt;
-          break;
-        case 'currency':
-          td.style.cssText = 'font-family:Consolas,"Courier New",monospace;font-size:11px;color:var(--clr-text-muted);font-weight:500';
-          td.textContent = row.currency;
-          break;
-        case 'bank':
-          td.style.cssText = 'font-family:Consolas,"Courier New",monospace;font-size:11px;color:var(--clr-text-secondary)';
-          td.textContent = row.bank;
-          break;
-        case 'status':
-          var badge = document.createElement('span');
-          badge.className = 'badge ' + row.badge;
-          var dot = document.createElement('span');
-          dot.className = 'badge-dot';
-          badge.appendChild(dot);
-          badge.appendChild(document.createTextNode(row.label));
-          td.appendChild(badge);
-          break;
-      }
+      cgDatasetDef.renderCell(td, row, col);
       tr.appendChild(td);
     });
 
@@ -3439,18 +4151,13 @@ function cgShowCtx(btnOrEvent, row) {
     { icon: '✎', label: 'Redaktə et',          fn: function() {} },
     null,
   ];
-  if (row.status !== 'paid') {
-    items.push({ icon: '✓', label: 'Ödənilib işarələ', fn: function() {
-      row.status = 'paid'; row.label = 'Ödənilib'; row.badge = 'badge-success';
+  cgDatasetDef.statusOptions.forEach(function(opt) {
+    if (row.status === opt.value) return;
+    items.push({ icon: '●', label: opt.label + ' işarələ', fn: function() {
+      row.status = opt.value; row.label = opt.label; row.badge = opt.badge;
       cgRender();
     }});
-  }
-  if (row.status !== 'pending') {
-    items.push({ icon: '⏳', label: 'Gözlənilir işarələ', fn: function() {
-      row.status = 'pending'; row.label = 'Gözlənilir'; row.badge = 'badge-warning';
-      cgRender();
-    }});
-  }
+  });
   items.push({ icon: '✕', label: 'Sil', danger: true, fn: function() {
     var i = cgRows.indexOf(row);
     if (i >= 0) cgRows.splice(i, 1);
@@ -3525,50 +4232,31 @@ function cgStartEdit(tr, row) {
     if (!col) return;
     while (td.firstChild) td.removeChild(td.firstChild);
 
+    var spec = cgDatasetDef.editField(col);
     var inp;
-    if (col === 'status') {
+    if (spec.type === 'select') {
       inp = document.createElement('select');
       inp.className = 'cg-edit-select';
-      [['paid','Ödənilib'],['pending','Gözlənilir'],['processing','Emal edilir'],['cancelled','İmtina edilib']].forEach(function(s) {
+      spec.options.forEach(function(pair) {
         var opt = document.createElement('option');
-        opt.value = s[0]; opt.textContent = s[1];
-        if (s[0] === row.status) opt.selected = true;
+        opt.value = pair[0]; opt.textContent = pair[1];
+        if (pair[0] === String(row[col])) opt.selected = true;
         inp.appendChild(opt);
       });
-    } else if (col === 'currency') {
-      inp = document.createElement('select');
-      inp.className = 'cg-edit-select';
-      ['AZN','USD','EUR','GBP'].forEach(function(c) {
-        var opt = document.createElement('option');
-        opt.value = c; opt.textContent = c;
-        if (c === row.currency) opt.selected = true;
-        inp.appendChild(opt);
-      });
-    } else if (col === 'amount') {
-      inp = document.createElement('input');
-      inp.className = 'cg-edit-input';
-      inp.type = 'number'; inp.step = '0.01';
-      inp.style.fontFamily = "Consolas, 'Courier New', monospace";
-      inp.value = row.amount;
-    } else if (col === 'date') {
+    } else if (spec.type === 'date') {
       inp = document.createElement('input');
       inp.className = 'cg-edit-input';
       inp.type = 'date';
-      var p = row.date.split('.');
-      inp.value = p[2] + '-' + p[1] + '-' + p[0];
-    } else if (col === 'bank') {
-      inp = document.createElement('input');
-      inp.className = 'cg-edit-input';
-      inp.type = 'text';
-      inp.style.fontFamily = "Consolas, 'Courier New', monospace";
-      inp.style.fontSize = '11px';
-      inp.value = row[col];
+      var p = String(row[col]).split('.');
+      inp.value = p.length === 3 ? (p[2] + '-' + p[1] + '-' + p[0]) : '';
     } else {
       inp = document.createElement('input');
       inp.className = 'cg-edit-input';
-      inp.type = 'text';
+      inp.type = spec.type === 'number' ? 'number' : 'text';
+      if (spec.type === 'number') inp.step = '0.01';
+      if (spec.mono) inp.style.fontFamily = "Consolas, 'Courier New', monospace";
+      if (spec.fontSize) inp.style.fontSize = spec.fontSize;
       inp.value = row[col];
-      if (col === 'doc') { inp.style.fontFamily = "Consolas, 'Courier New', monospace"; inp.style.fontSize = '12px'; }
     }
     inp.dataset.col = col;
     inp.addEventListener('keydown', function(e) {
@@ -3592,22 +4280,7 @@ function cgSaveEdit(save) {
   if (!save) { Object.assign(row, orig); return; }
 
   tr.querySelectorAll('[data-col]').forEach(function(inp) {
-    var col = inp.dataset.col, val = inp.value;
-    switch (col) {
-      case 'amount':
-        row.amount = parseFloat(val) || 0;
-        row.amtFmt = row.amount.toLocaleString('en-US', {minimumFractionDigits:2});
-        break;
-      case 'date':
-        if (val) { var dp = val.split('-'); row.date = dp[2]+'.'+dp[1]+'.'+dp[0]; }
-        break;
-      case 'status':
-        row.status = val;
-        var smap = {paid:{label:'Ödənilib',badge:'badge-success'},pending:{label:'Gözlənilir',badge:'badge-warning'},processing:{label:'Emal edilir',badge:'badge-info'},cancelled:{label:'İmtina edilib',badge:'badge-error'}};
-        if (smap[val]) { row.label = smap[val].label; row.badge = smap[val].badge; }
-        break;
-      default: row[col] = val;
-    }
+    cgDatasetDef.applyEdit(row, inp.dataset.col, inp.value);
   });
 }
 /* ── Toast ───────────────────────────────────────────── */
@@ -3851,13 +4524,579 @@ function closeHesabModal() {
   document.getElementById('hesabModal').classList.remove('open');
 }
 
+/* ── Yeni Alış Sənədi modal ──────────────────────────── */
+var ALIS_ITEM_CATALOG = [
+  { name: 'Printer HP LaserJet', category: 'İNVENTAR', price: 2000, vat: 18 },
+  { name: 'Çatdırılma xidməti', category: 'XİDMƏT', price: 200, vat: 18 },
+  { name: 'Cərimə xidməti', category: 'MƏSRƏF', price: 500, vat: 18 },
+  { name: 'Ofis masası', category: 'ƏSAS_VƏSAİT', price: 1200, vat: 18 },
+];
+
+function alisAccountFor(category) {
+  if (category === 'İNVENTAR') return '205 - Mallar';
+  if (category === 'ƏSAS_VƏSAİT') return '111 - Torpaq, tikili və avadanlıqların dəyəri';
+  if (category === 'XİDMƏT') return '721 - İnzibati xidmətlər';
+  return '731 - Sair əməliyyat məsrəfləri';
+}
+function alisMeasureFor(category) {
+  return category === 'XİDMƏT' ? 'xidmət' : 'ədəd';
+}
+
+/* ── Custom dropdown — replaces native <select> popup with our own styled panel ──
+   Panel is created fresh on open and appended to <body> with position:fixed, so it
+   can never be clipped by a scrollable ancestor (e.g. the line-items table wrapper). */
+var CHEVRON_SVG = '<svg class="select-chevron" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>';
+var _selectPanelClosers = [];
+
+function closeAllSelectPanels() {
+  _selectPanelClosers.forEach(function(fn) { fn(); });
+}
+
+function enhanceSelect(select) {
+  if (!select || select.dataset.enhanced) return;
+  select.dataset.enhanced = '1';
+  select.style.display = 'none';
+
+  var wrap = document.createElement('div');
+  wrap.className = 'select-wrap';
+
+  var trigger = document.createElement('button');
+  trigger.type = 'button';
+  trigger.className = 'select-trigger';
+  trigger.disabled = select.disabled;
+  var labelSpan = document.createElement('span');
+  labelSpan.className = 'select-trigger-label';
+  trigger.appendChild(labelSpan);
+  trigger.insertAdjacentHTML('beforeend', CHEVRON_SVG);
+
+  select.parentNode.insertBefore(wrap, select);
+  wrap.appendChild(select);
+  wrap.appendChild(trigger);
+
+  var panel = null;
+
+  function closePanel() {
+    if (panel) { panel.remove(); panel = null; }
+    wrap.classList.remove('open');
+  }
+  _selectPanelClosers.push(closePanel);
+
+  function openPanel() {
+    closeAllSelectPanels();
+    panel = document.createElement('div');
+    panel.className = 'select-panel open';
+    Array.from(select.options).forEach(function(opt) {
+      var item = document.createElement('div');
+      item.className = 'select-option' + (opt.value === select.value ? ' active' : '');
+      item.textContent = opt.textContent;
+      item.addEventListener('click', function() {
+        select.value = opt.value;
+        select.dispatchEvent(new Event('change', { bubbles: true }));
+        syncSelectLabel(select);
+        closePanel();
+        var fg = wrap.closest('.form-group');
+        if (fg && select.value.trim()) {
+          fg.classList.remove('has-error');
+          var errEl = fg.querySelector('.field-error-msg');
+          if (errEl) errEl.classList.remove('visible');
+        }
+      });
+      panel.appendChild(item);
+    });
+    document.body.appendChild(panel);
+    var r = trigger.getBoundingClientRect();
+    panel.style.top = (r.bottom + 4) + 'px';
+    panel.style.left = r.left + 'px';
+    panel.style.width = r.width + 'px';
+    wrap.classList.add('open');
+  }
+
+  trigger.addEventListener('click', function(e) {
+    e.stopPropagation();
+    if (trigger.disabled) return;
+    if (panel) closePanel(); else openPanel();
+  });
+
+  syncSelectLabel(select);
+}
+
+function syncSelectLabel(select) {
+  if (!select) return;
+  var wrap = select.closest('.select-wrap');
+  if (!wrap) return;
+  var labelSpan = wrap.querySelector('.select-trigger-label');
+  var trigger = wrap.querySelector('.select-trigger');
+  var opt = select.options[select.selectedIndex];
+  if (labelSpan) labelSpan.textContent = opt ? opt.textContent : '';
+  if (trigger) trigger.disabled = select.disabled;
+}
+
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.select-wrap') && !e.target.closest('.select-panel')) {
+    closeAllSelectPanels();
+  }
+});
+window.addEventListener('scroll', function() { closeAllSelectPanels(); }, true);
+window.addEventListener('resize', closeAllSelectPanels);
+
+/* ── Məhsul və xidmət — quick-add lookup combo ───────── */
+var _itemLookupPanel = null;
+var _itemLookupTargetRow = null;
+
+function alisApplyItemToRow(tr, item) {
+  var typeSelect = tr.querySelector('.line-type');
+  typeSelect.value = item.category;
+  syncSelectLabel(typeSelect);
+  tr.querySelector('.line-account').value = alisAccountFor(item.category);
+  tr.querySelector('.line-measure').value = alisMeasureFor(item.category);
+  tr.querySelector('.line-name').value = item.name;
+  tr.querySelector('.line-price').value = item.price.toFixed(2);
+  alisDocRecalcLine(tr);
+}
+
+function closeItemLookup() {
+  if (_itemLookupPanel) { _itemLookupPanel.remove(); _itemLookupPanel = null; }
+}
+
+function openItemLookup(input, tr) {
+  closeAllSelectPanels();
+  closeItemLookup();
+  _itemLookupTargetRow = tr;
+
+  var query = input.value.trim().toLowerCase();
+  var matches = query
+    ? ALIS_ITEM_CATALOG.filter(function(i) { return i.name.toLowerCase().indexOf(query) !== -1; })
+    : ALIS_ITEM_CATALOG.slice();
+
+  var panel = document.createElement('div');
+  panel.className = 'select-panel item-lookup-panel open';
+
+  if (matches.length) {
+    matches.slice(0, 6).forEach(function(it) {
+      var row = document.createElement('div');
+      row.className = 'item-lookup-item';
+      row.innerHTML = '<div class="item-lookup-name"></div><div class="item-lookup-meta"></div>';
+      row.querySelector('.item-lookup-name').textContent = it.name;
+      row.querySelector('.item-lookup-meta').textContent = 'Ölçü vahidi: ' + alisMeasureFor(it.category);
+      row.addEventListener('mousedown', function(e) {
+        e.preventDefault();
+        alisApplyItemToRow(tr, it);
+        closeItemLookup();
+      });
+      panel.appendChild(row);
+    });
+  } else {
+    var empty = document.createElement('div');
+    empty.className = 'item-lookup-empty';
+    empty.textContent = 'Uyğun nəticə tapılmadı';
+    panel.appendChild(empty);
+  }
+
+  var createRow = document.createElement('div');
+  createRow.className = 'item-lookup-create';
+  createRow.innerHTML = '<span class="item-lookup-plus">+</span><span>Yeni məhsul və xidmət</span>';
+  createRow.addEventListener('mousedown', function(e) {
+    e.preventDefault();
+    openAlisItemCreateModal(tr, input.value.trim());
+    closeItemLookup();
+  });
+  panel.appendChild(createRow);
+
+  document.body.appendChild(panel);
+  var r = input.getBoundingClientRect();
+  panel.style.top = (r.bottom + 4) + 'px';
+  panel.style.left = r.left + 'px';
+  panel.style.width = Math.max(r.width, 220) + 'px';
+  _itemLookupPanel = panel;
+}
+
+document.addEventListener('mousedown', function(e) {
+  if (_itemLookupPanel && !e.target.closest('.item-lookup-panel') && !e.target.classList.contains('line-name')) {
+    closeItemLookup();
+  }
+});
+window.addEventListener('scroll', function() { closeItemLookup(); }, true);
+window.addEventListener('resize', closeItemLookup);
+
+/* ── Yeni məhsul və xidmət yarat (quick-create modal) ── */
+function alisItemCreateClearErrors() {
+  ['adi', 'kateqoriya', 'olcu', 'qiymet'].forEach(function(id) {
+    var fg = document.getElementById('alisItemFg-' + id);
+    var err = document.getElementById('alisItemErr-' + id);
+    if (fg) fg.classList.remove('has-error');
+    if (err) err.classList.remove('visible');
+  });
+}
+
+function alisItemSyncAccount() {
+  var cat = document.getElementById('alisItemFieldKateqoriya').value;
+  document.getElementById('alisItemFieldHesab').value = alisAccountFor(cat);
+}
+
+function openAlisItemCreateModal(tr, draftName) {
+  _itemLookupTargetRow = tr;
+  alisItemCreateClearErrors();
+  document.getElementById('alisItemFieldAd').value = draftName || '';
+  document.getElementById('alisItemFieldKateqoriya').value = 'XİDMƏT';
+  document.getElementById('alisItemFieldOlcu').value = 'xidmət';
+  document.getElementById('alisItemFieldQiymet').value = '0';
+  enhanceSelect(document.getElementById('alisItemFieldKateqoriya'));
+  enhanceSelect(document.getElementById('alisItemFieldOlcu'));
+  syncSelectLabel(document.getElementById('alisItemFieldKateqoriya'));
+  syncSelectLabel(document.getElementById('alisItemFieldOlcu'));
+  alisItemSyncAccount();
+  document.getElementById('alisItemCreateModal').classList.add('open');
+}
+
+function closeAlisItemCreateModal() {
+  document.getElementById('alisItemCreateModal').classList.remove('open');
+}
+
+function submitAlisItemCreateModal() {
+  alisItemCreateClearErrors();
+  var name = document.getElementById('alisItemFieldAd').value.trim();
+  var category = document.getElementById('alisItemFieldKateqoriya').value;
+  var measure = document.getElementById('alisItemFieldOlcu').value;
+  var price = Number(document.getElementById('alisItemFieldQiymet').value || 0);
+
+  var valid = true;
+  if (!name) { valid = false; document.getElementById('alisItemFg-adi').classList.add('has-error'); document.getElementById('alisItemErr-adi').classList.add('visible'); }
+  if (!category) { valid = false; document.getElementById('alisItemFg-kateqoriya').classList.add('has-error'); document.getElementById('alisItemErr-kateqoriya').classList.add('visible'); }
+  if (!measure) { valid = false; document.getElementById('alisItemFg-olcu').classList.add('has-error'); document.getElementById('alisItemErr-olcu').classList.add('visible'); }
+  if (!(price >= 0)) { valid = false; document.getElementById('alisItemFg-qiymet').classList.add('has-error'); document.getElementById('alisItemErr-qiymet').classList.add('visible'); }
+  if (!valid) return;
+
+  var item = ALIS_ITEM_CATALOG.find(function(i) { return i.name.toLowerCase() === name.toLowerCase(); });
+  if (!item) {
+    item = { name: name, category: category, price: price, vat: 18 };
+    ALIS_ITEM_CATALOG.push(item);
+  }
+
+  if (_itemLookupTargetRow) alisApplyItemToRow(_itemLookupTargetRow, item);
+  closeAlisItemCreateModal();
+  showToast('Məhsul və xidmət yaradıldı', name + ' kataloqa əlavə olundu və sətirə tətbiq edildi.', 'success');
+}
+
+/* ── Single-date picker — reuses the existing dr-cal-* calendar design ── */
+var _datePickerPanel = null;
+var _datePickerTrigger = null;
+var _datePickerState = { fieldId: null, year: 0, month: 0, selected: null };
+
+function isoToday() {
+  var d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+}
+
+function formatDisplayDate(iso) {
+  var p = (iso || '').split('-');
+  return p.length === 3 ? (p[2] + '.' + p[1] + '.' + p[0]) : '';
+}
+
+function closeDatePicker() {
+  if (_datePickerPanel) { _datePickerPanel.remove(); _datePickerPanel = null; }
+  _datePickerTrigger = null;
+}
+
+function toggleDatePicker(fieldId) {
+  var wasOpenForThis = _datePickerPanel && _datePickerState.fieldId === fieldId;
+  closeAllSelectPanels();
+  closeItemLookup();
+  closeDatePicker();
+  if (wasOpenForThis) return;
+
+  var trigger = document.getElementById(fieldId + 'Trigger');
+  if (!trigger || trigger.disabled) return;
+  var iso = document.getElementById(fieldId).value || isoToday();
+  var parts = iso.split('-');
+  _datePickerState = { fieldId: fieldId, year: Number(parts[0]), month: Number(parts[1]) - 1, selected: iso };
+  _datePickerTrigger = trigger;
+  renderDatePicker();
+}
+
+function renderDatePicker() {
+  var st = _datePickerState;
+  var today = new Date(); today.setHours(0, 0, 0, 0);
+  var first = new Date(st.year, st.month, 1);
+  var last = new Date(st.year, st.month + 1, 0);
+  var startDow = (first.getDay() + 6) % 7;
+
+  var cells = '';
+  for (var i = 0; i < startDow; i++) cells += '<div class="dr-cal-day empty"></div>';
+  for (var d = 1; d <= last.getDate(); d++) {
+    var iso = st.year + '-' + String(st.month + 1).padStart(2, '0') + '-' + String(d).padStart(2, '0');
+    var dt = new Date(st.year, st.month, d); dt.setHours(0, 0, 0, 0);
+    var cls = 'dr-cal-day';
+    if (dt.getTime() === today.getTime()) cls += ' today';
+    if (iso === st.selected) cls += ' range-start range-end';
+    cells += '<div class="' + cls + '" data-iso="' + iso + '">' + d + '</div>';
+  }
+
+  if (!_datePickerPanel) {
+    _datePickerPanel = document.createElement('div');
+    _datePickerPanel.className = 'select-panel date-picker-panel open';
+    document.body.appendChild(_datePickerPanel);
+  }
+  _datePickerPanel.innerHTML =
+    '<div class="dr-cal-hd">' +
+      '<button type="button" class="dr-cal-nav" onclick="datePickerPrev(event)">&#8249;</button>' +
+      '<span class="dr-cal-month-lbl">' + DR_MONTHS[st.month] + ' ' + st.year + '</span>' +
+      '<button type="button" class="dr-cal-nav" onclick="datePickerNext(event)">&#8250;</button>' +
+    '</div>' +
+    '<div class="dr-cal-wdays">' + DR_WDAYS.map(function(w) { return '<div class="dr-cal-wd">' + w + '</div>'; }).join('') + '</div>' +
+    '<div class="dr-cal-days" id="datePickerDaysGrid">' + cells + '</div>' +
+    '<div class="dr-cal-footer">' +
+      '<button type="button" class="btn btn-ghost" style="height:28px;font-size:12px;padding:0 10px;" onclick="datePickerToday(event)">Bu gün</button>' +
+    '</div>';
+
+  _datePickerPanel.querySelectorAll('#datePickerDaysGrid .dr-cal-day:not(.empty)').forEach(function(el) {
+    el.addEventListener('click', function(e) {
+      e.stopPropagation();
+      datePickerSelect(el.dataset.iso);
+    });
+  });
+
+  var r = _datePickerTrigger.getBoundingClientRect();
+  _datePickerPanel.style.top = (r.bottom + 4) + 'px';
+  _datePickerPanel.style.left = r.left + 'px';
+  _datePickerPanel.style.minWidth = Math.max(r.width, 260) + 'px';
+}
+
+function datePickerPrev(e) {
+  e.stopPropagation();
+  var st = _datePickerState;
+  if (st.month === 0) { st.month = 11; st.year--; } else { st.month--; }
+  renderDatePicker();
+}
+function datePickerNext(e) {
+  e.stopPropagation();
+  var st = _datePickerState;
+  if (st.month === 11) { st.month = 0; st.year++; } else { st.month++; }
+  renderDatePicker();
+}
+function datePickerToday(e) {
+  e.stopPropagation();
+  datePickerSelect(isoToday());
+}
+
+function datePickerSelect(iso) {
+  var st = _datePickerState;
+  var input = document.getElementById(st.fieldId);
+  var label = document.getElementById(st.fieldId + 'Label');
+  input.value = iso;
+  if (label) label.textContent = formatDisplayDate(iso);
+  input.dispatchEvent(new Event('change', { bubbles: true }));
+
+  var trigger = document.getElementById(st.fieldId + 'Trigger');
+  var fg = trigger ? trigger.closest('.form-group') : null;
+  if (fg && iso) {
+    fg.classList.remove('has-error');
+    var errEl = fg.querySelector('.field-error-msg');
+    if (errEl) errEl.classList.remove('visible');
+  }
+
+  /* Approval date mirrors document date by default */
+  if (st.fieldId === 'alisFieldTarix') {
+    var tesdiq = document.getElementById('alisFieldTesdiqTarix');
+    var tesdiqLabel = document.getElementById('alisFieldTesdiqTarixLabel');
+    if (tesdiq) tesdiq.value = iso;
+    if (tesdiqLabel) tesdiqLabel.textContent = formatDisplayDate(iso);
+  }
+
+  closeDatePicker();
+}
+
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.date-picker-panel') && !e.target.closest('[id$="Trigger"]')) {
+    closeDatePicker();
+  }
+});
+window.addEventListener('scroll', function() { closeDatePicker(); }, true);
+window.addEventListener('resize', closeDatePicker);
+
+var alisDocLineSeq = 0;
+
+function alisDocAddLine(prefill) {
+  var tbody = document.getElementById('alisDocLineBody');
+  if (!tbody) return;
+  alisDocLineSeq++;
+  var item = prefill ? ALIS_ITEM_CATALOG.find(function(i) { return i.name === prefill; }) : null;
+  var category = item ? item.category : 'XİDMƏT';
+  var price = item ? item.price : 0;
+
+  var tr = document.createElement('tr');
+  tr.innerHTML =
+    '<td class="line-num">' + alisDocLineSeq + '</td>' +
+    '<td><select class="input line-type">' +
+      ['İNVENTAR','XİDMƏT','MƏSRƏF','ƏSAS_VƏSAİT'].map(function(c) {
+        return '<option' + (c === category ? ' selected' : '') + '>' + c + '</option>';
+      }).join('') +
+    '</select></td>' +
+    '<td><input class="input line-account" value="' + alisAccountFor(category) + '" readonly /></td>' +
+    '<td><input class="input line-name" autocomplete="off" value="' + (item ? item.name : '') + '" placeholder="Məhsul və xidmət axtar..." /></td>' +
+    '<td><input class="input line-qty" type="number" value="1" min="0" style="width:64px" /></td>' +
+    '<td><input class="input line-measure" value="' + alisMeasureFor(category) + '" readonly style="width:76px" /></td>' +
+    '<td><input class="input line-price" type="number" value="' + price.toFixed(2) + '" min="0" step="0.01" style="width:96px" /></td>' +
+    '<td><input class="input line-discount" type="number" value="0" min="0" max="100" style="width:64px" /></td>' +
+    '<td class="line-vat-amt" style="text-align:right;font-family:Consolas,\'Courier New\',monospace;font-size:12px;color:var(--clr-text-secondary);">0.00</td>' +
+    '<td class="line-total">0.00</td>' +
+    '<td><button class="doc-line-remove" onclick="alisDocRemoveLine(this)" title="Sətri sil"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></td>';
+
+  tbody.appendChild(tr);
+
+  var typeSelect = tr.querySelector('.line-type');
+  enhanceSelect(typeSelect);
+  typeSelect.addEventListener('change', function() {
+    var cat = typeSelect.value;
+    tr.querySelector('.line-account').value = alisAccountFor(cat);
+    tr.querySelector('.line-measure').value = alisMeasureFor(cat);
+    alisDocRecalcLine(tr);
+  });
+  var nameInput = tr.querySelector('.line-name');
+  nameInput.addEventListener('focus', function() { openItemLookup(nameInput, tr); });
+  nameInput.addEventListener('input', function() { openItemLookup(nameInput, tr); });
+  tr.querySelectorAll('.line-qty,.line-price,.line-discount').forEach(function(inp) {
+    inp.addEventListener('input', function() { alisDocRecalcLine(tr); });
+  });
+
+  alisDocRecalcLine(tr);
+}
+
+function alisDocRemoveLine(btn) {
+  var tr = btn.closest('tr');
+  if (!tr) return;
+  tr.parentNode.removeChild(tr);
+  var rows = document.querySelectorAll('#alisDocLineBody tr');
+  rows.forEach(function(r, i) { r.querySelector('.line-num').textContent = i + 1; });
+  alisDocRecalcTotals();
+}
+
+var ALIS_VAT_RATE = 0.18;
+
+function alisDocRecalcLine(tr) {
+  var qty = Number(tr.querySelector('.line-qty').value || 0);
+  var price = Number(tr.querySelector('.line-price').value || 0);
+  var discount = Number(tr.querySelector('.line-discount').value || 0);
+  var net = qty * price * (1 - discount / 100);
+  var vatAmt = net * ALIS_VAT_RATE;
+  var total = net + vatAmt;
+  tr.querySelector('.line-vat-amt').textContent = vatAmt.toFixed(2);
+  tr.querySelector('.line-total').textContent = total.toFixed(2);
+  tr.dataset.net = String(net);
+  tr.dataset.vat = String(vatAmt);
+  alisDocRecalcTotals();
+}
+
+function alisDocRecalcTotals() {
+  var rows = document.querySelectorAll('#alisDocLineBody tr');
+  var net = 0, vat = 0;
+  rows.forEach(function(tr) {
+    net += Number(tr.dataset.net || 0);
+    vat += Number(tr.dataset.vat || 0);
+  });
+  var currency = document.getElementById('alisFieldValyuta').value;
+  var fmt = function(v, cur) { return v.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ' + cur; };
+  document.getElementById('alisDocNet').textContent = fmt(net, currency);
+  document.getElementById('alisDocVat').textContent = fmt(vat, currency);
+  document.getElementById('alisDocTotal').textContent = fmt(net + vat, currency);
+
+  /* Mirror into the Valyuta tab */
+  var entityCurrencyEl = document.getElementById('alisFieldEntityCurrency');
+  var entityCurrency = entityCurrencyEl ? entityCurrencyEl.value : currency;
+  var rateEl = document.getElementById('alisFieldEntityRate');
+  if (rateEl) rateEl.value = (entityCurrency === currency ? 1 : 1).toFixed(4);
+  var curDocLabel = document.getElementById('alisCurDocLabel');
+  if (curDocLabel) curDocLabel.textContent = currency;
+  var curDocNet = document.getElementById('alisCurDocNet');
+  if (curDocNet) curDocNet.textContent = fmt(net, currency);
+  var curDocVat = document.getElementById('alisCurDocVat');
+  if (curDocVat) curDocVat.textContent = fmt(vat, currency);
+  var curDocTotal = document.getElementById('alisCurDocTotal');
+  if (curDocTotal) curDocTotal.textContent = fmt(net + vat, currency);
+}
+
+function alisSwitchTab(btn) {
+  var panel = btn.closest('.form-card');
+  if (!panel) return;
+  panel.querySelectorAll('.alis-tab').forEach(function(t) { t.classList.remove('active'); });
+  panel.querySelectorAll('.alis-tab-content').forEach(function(c) { c.classList.remove('active'); });
+  btn.classList.add('active');
+  var content = document.getElementById('alisTabPanel-' + btn.dataset.tab);
+  if (content) content.classList.add('active');
+}
+
+function alisDocClearErrors() {
+  ['tarix', 'techizatci', 'departament'].forEach(function(id) {
+    var fg = document.getElementById('alisFg-' + id);
+    var err = document.getElementById('alisErr-' + id);
+    if (fg) fg.classList.remove('has-error');
+    if (err) err.classList.remove('visible');
+  });
+}
+
+function openAlisDocModal() {
+  alisDocClearErrors();
+  closeAllSelectPanels();
+  closeDatePicker();
+  ['alisFieldTarix', 'alisFieldTesdiqTarix'].forEach(function(id) {
+    var label = document.getElementById(id + 'Label');
+    if (label) label.textContent = formatDisplayDate(document.getElementById(id).value);
+  });
+  ['alisFieldValyuta', 'alisFieldAnbar', 'alisFieldTechizatci', 'alisFieldDepartament', 'alisFieldEntityCurrency'].forEach(function(id) {
+    enhanceSelect(document.getElementById(id));
+  });
+  document.getElementById('alisDocLineBody').innerHTML = '';
+  alisDocLineSeq = 0;
+  alisDocAddLine('Printer HP LaserJet');
+  alisDocAddLine('Çatdırılma xidməti');
+  var firstTab = document.querySelector('#alisDocModal .alis-tab');
+  if (firstTab) alisSwitchTab(firstTab);
+  document.getElementById('alisDocModal').classList.add('open');
+}
+
+function closeAlisDocModal() {
+  closeAllSelectPanels();
+  closeDatePicker();
+  document.getElementById('alisDocModal').classList.remove('open');
+}
+
+function submitAlisDocModal(status) {
+  alisDocClearErrors();
+  var valid = true;
+  [
+    { id: 'alisFieldTarix', fg: 'alisFg-tarix', err: 'alisErr-tarix' },
+    { id: 'alisFieldTechizatci', fg: 'alisFg-techizatci', err: 'alisErr-techizatci' },
+    { id: 'alisFieldDepartament', fg: 'alisFg-departament', err: 'alisErr-departament' },
+  ].forEach(function(f) {
+    var el = document.getElementById(f.id);
+    if (el && !el.value.trim()) {
+      valid = false;
+      document.getElementById(f.fg).classList.add('has-error');
+      document.getElementById(f.err).classList.add('visible');
+    }
+  });
+  if (!valid) {
+    var firstErr = document.querySelector('#alisDocModalScroll .has-error');
+    if (firstErr) firstErr.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return;
+  }
+
+  var docNo = document.getElementById('alisFieldDocNo').value;
+  var techizatci = document.getElementById('alisFieldTechizatci').value;
+  closeAlisDocModal();
+  if (status === 'approved') {
+    showToast('Sənəd təsdiqləndi', docNo + ' — ' + techizatci + ' üzrə təsdiqləndi.', 'success');
+  } else {
+    showToast('Qaralama saxlanıldı', docNo + ' qaralama kimi yadda saxlanıldı.', 'success');
+  }
+}
+
 /* ── Delete row confirmation modal ──────────────────── */
 var cgDeleteTarget = null;
 function cgAskDelete(row) {
   cgDeleteTarget = row;
   document.getElementById('delModalDoc').textContent = row.doc;
-  document.getElementById('delModalPayee').textContent = row.payee;
-  document.getElementById('delModalAmt').textContent = row.currency + ' ' + row.amtFmt;
+  document.getElementById('delModalPayee').textContent = row[cgDatasetDef.nameField];
+  document.getElementById('delModalAmt').textContent = row.currency + ' ' + row[cgDatasetDef.amountFmtField];
   document.getElementById('deleteModal').classList.add('open');
 }
 function cgConfirmDelete() {
@@ -3869,12 +5108,14 @@ function cgConfirmDelete() {
   }
   document.getElementById('deleteModal').classList.remove('open');
   cgRender();
-  if (deleted) showToast('Qeyd silindi', deleted.doc + ' · ' + deleted.payee, 'error');
+  if (deleted) showToast('Qeyd silindi', deleted.doc + ' · ' + deleted[cgDatasetDef.nameField], 'error');
 }
 function closeDeleteModal() {
   cgDeleteTarget = null;
   document.getElementById('deleteModal').classList.remove('open');
 }
+
+bootRenderTable();
 </script>
 
 <!-- ══ Toast stack ═══════════════════════════════════ -->
@@ -3989,6 +5230,295 @@ function closeDeleteModal() {
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
         Yadda saxla
       </button>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── Yeni Alış Sənədi modal ───────────────────────── -->
+<div id="alisDocModal" class="modal-backdrop" onclick="if(event.target===this)closeAlisDocModal()">
+  <div class="modal-box modal-box-wide">
+
+    <div class="modal-hd">
+      <div>
+        <div class="modal-ttl">Yeni Alış Sənədi</div>
+        <div class="modal-ttl-sub" id="alisDocNumberPreview">ALI-2026-00090</div>
+      </div>
+      <button class="modal-x" onclick="closeAlisDocModal()">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+
+    <div class="modal-scroll" id="alisDocModalScroll">
+    <div class="modal-bd">
+
+      <!-- Section 1 — Sənəd məlumatları -->
+      <div class="form-card">
+        <div class="form-card-header">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          Sənəd məlumatları
+        </div>
+        <div class="form-card-body">
+          <div class="form-row-3">
+            <div class="form-group">
+              <label class="form-label">Sənəd tipi</label>
+              <input class="input" value="Alış" disabled />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Sənəd nömrəsi</label>
+              <input class="input" id="alisFieldDocNo" value="ALI-2026-00090" disabled />
+            </div>
+            <div class="form-group" id="alisFg-tarix">
+              <label class="form-label required" for="alisFieldTarixTrigger">Tarix</label>
+              <input type="hidden" id="alisFieldTarix" value="2026-06-24" />
+              <button type="button" class="select-trigger" id="alisFieldTarixTrigger" onclick="toggleDatePicker('alisFieldTarix')">
+                <span class="select-trigger-label" id="alisFieldTarixLabel">24.06.2026</span>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              </button>
+              <div class="field-error-msg" id="alisErr-tarix">Bu xana məcburidir</div>
+            </div>
+          </div>
+          <div class="form-row-3">
+            <div class="form-group">
+              <label class="form-label">Təsdiqləmə tarixi</label>
+              <input type="hidden" id="alisFieldTesdiqTarix" value="2026-06-24" />
+              <button type="button" class="select-trigger" id="alisFieldTesdiqTarixTrigger" disabled>
+                <span class="select-trigger-label" id="alisFieldTesdiqTarixLabel">24.06.2026</span>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              </button>
+            </div>
+            <div class="form-group">
+              <label class="form-label required">Valyuta</label>
+              <div style="display:flex; gap:8px;">
+                <select class="input" id="alisFieldValyuta" style="flex:1" onchange="alisDocRecalcTotals()">
+                  <option value="AZN" selected>AZN</option>
+                  <option value="USD">USD</option>
+                  <option value="EUR">EUR</option>
+                </select>
+                <input class="input" id="alisFieldMezenne" type="number" value="1.0000" step="0.0001" style="width:100px" disabled />
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Defolt anbar</label>
+              <select class="input" id="alisFieldAnbar">
+                <option>WH-01</option>
+                <option>WH-02</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row-3">
+            <div class="form-group" id="alisFg-techizatci">
+              <label class="form-label required" for="alisFieldTechizatci">Təchizatçı</label>
+              <select class="input" id="alisFieldTechizatci">
+                <option value="">Seçin…</option>
+                <option value="ABC Texnologiya MMC">ABC Texnologiya MMC (VÖEN: 1400123456)</option>
+                <option value="Xəzər İdxalat">Xəzər İdxalat Ltd</option>
+                <option value="Kənardan Alış İnc.">Kənardan Alış İnc.</option>
+              </select>
+              <div class="field-error-msg" id="alisErr-techizatci">Təchizatçı seçilməlidir</div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Təchizatçı qaiməsi №</label>
+              <input class="input" id="alisFieldVendorNo" placeholder="məs. VND-2026-0441" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Müqavilə sənədi</label>
+              <input class="input" id="alisFieldMuqavile" placeholder="məs. CON-2026-0102" />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group" id="alisFg-departament">
+              <label class="form-label required" for="alisFieldDepartament">Departament</label>
+              <select class="input" id="alisFieldDepartament">
+                <option value="">Seçin…</option>
+                <option>Satınalma Departamenti</option>
+                <option>Texniki Departament</option>
+                <option>Maliyyə Departamenti</option>
+              </select>
+              <div class="field-error-msg" id="alisErr-departament">Departament seçilməlidir</div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Qeyd</label>
+              <input class="input" id="alisFieldQeyd" placeholder="Daxili qeyd" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 2 — Sətir elementi cədvəli -->
+      <div class="form-card">
+        <div class="form-card-header">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="9" x2="9" y2="21"/></svg>
+          Sətir elementi cədvəli
+        </div>
+        <div class="form-card-body">
+          <div class="doc-line-table-wrap">
+          <table class="doc-line-table">
+            <thead><tr>
+              <th>#</th><th>Sətir tipi</th><th>Hesab</th><th>Məhsul və xidmət</th>
+              <th>Miqdar</th><th>Ölçü vahidi</th><th>Vahidin qiyməti</th><th>Endirim%</th><th>ƏDV məbləği</th><th>Ümumi</th><th></th>
+            </tr></thead>
+            <tbody id="alisDocLineBody"></tbody>
+          </table>
+          </div>
+          <div style="margin-top:10px">
+            <button class="btn btn-ghost btn-sm" onclick="alisDocAddLine()">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Sətir əlavə et
+            </button>
+          </div>
+          <div class="doc-totals">
+            <div class="doc-totals-box">
+              <div class="doc-totals-row"><span>Xalis məbləğ</span><span id="alisDocNet">0.00 AZN</span></div>
+              <div class="doc-totals-row"><span>ƏDV cəmi</span><span id="alisDocVat">0.00 AZN</span></div>
+              <div class="doc-totals-row final"><span>Cəm</span><span id="alisDocTotal">0.00 AZN</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 3 — Əlavə məlumat (tabs) -->
+      <div class="form-card">
+        <div class="alis-tabs">
+          <button class="alis-tab active" data-tab="payments" onclick="alisSwitchTab(this)">Bağlanmış ödənişlər</button>
+          <button class="alis-tab" data-tab="advances" onclick="alisSwitchTab(this)">Açıq avanslar</button>
+          <button class="alis-tab" data-tab="currency" onclick="alisSwitchTab(this)">Valyuta</button>
+          <button class="alis-tab" data-tab="notes" onclick="alisSwitchTab(this)">Qeydlər</button>
+          <button class="alis-tab" data-tab="history" onclick="alisSwitchTab(this)">Tarixçə</button>
+        </div>
+        <div class="alis-tab-panel">
+
+          <div class="alis-tab-content active" id="alisTabPanel-payments">
+            <div class="alis-alert alis-alert-info">Bu bölmədə Bank sənədlərində bu alış sənədinə istinad verilmiş ödənişlər yalnız oxu rejimində görünür.</div>
+            <table class="doc-line-table">
+              <thead><tr><th>Bank sənədi</th><th>Tarix</th><th>Məbləğ</th><th>İstinad tipi</th><th>Qeyd</th></tr></thead>
+              <tbody>
+                <tr><td class="cell-mono">BNK-2026-00142</td><td>22.03.2026</td><td class="line-total">5,000.00</td><td>PURCHASE</td><td>Yalnız oxu</td></tr>
+                <tr><td class="cell-mono">BNK-2026-00157</td><td>24.03.2026</td><td class="line-total">900.00</td><td>PURCHASE</td><td>Yalnız oxu</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="alis-tab-content" id="alisTabPanel-advances">
+            <div class="alis-alert alis-alert-warning">Açıq avanslar burada göstərilir. Avans bağlama yalnız "Təsdiqlənmiş" statusda aktivdir.</div>
+            <table class="doc-line-table">
+              <thead><tr><th>Avans sənədi</th><th>Tarix</th><th>Açıq məbləğ</th><th>Bağlanacaq məbləğ</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td class="cell-mono">BNK-ADV-2026-00012</td><td>18.03.2026</td><td class="line-total">3,000.00</td>
+                  <td><input class="input" type="number" value="1000.00" style="width:120px" disabled title="Yalnız Təsdiqlənmiş statusda aktivdir" /></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="alis-tab-content" id="alisTabPanel-currency">
+            <div class="form-row-3">
+              <div class="form-group"><label class="form-label">Sənəd valyutası</label><div class="alis-value" id="alisCurDocLabel">AZN</div></div>
+              <div class="form-group"><label class="form-label">Müəssisənin əsas valyutası</label>
+                <select class="input" id="alisFieldEntityCurrency" onchange="alisDocRecalcTotals()">
+                  <option value="AZN" selected>AZN</option>
+                  <option value="USD">USD</option>
+                  <option value="EUR">EUR</option>
+                </select>
+              </div>
+              <div class="form-group"><label class="form-label">Konversiya məzənnəsi</label><input class="input" id="alisFieldEntityRate" type="number" value="1.0000" step="0.0001" disabled /></div>
+            </div>
+            <div class="form-row-3">
+              <div class="form-group"><label class="form-label">Sənəd valyutasında xalis məbləğ</label><div class="alis-value" id="alisCurDocNet">0.00 AZN</div></div>
+              <div class="form-group"><label class="form-label">Sənəd valyutasında ƏDV</label><div class="alis-value" id="alisCurDocVat">0.00 AZN</div></div>
+              <div class="form-group"><label class="form-label">Sənəd valyutasında məbləğ</label><div class="alis-value" id="alisCurDocTotal">0.00 AZN</div></div>
+            </div>
+          </div>
+
+          <div class="alis-tab-content" id="alisTabPanel-notes">
+            <div class="form-group">
+              <label class="form-label">Daxili qeyd</label>
+              <textarea class="input" style="height:64px" placeholder="Sənədlə bağlı qeyd..."></textarea>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Xarici qeyd (çapdakı)</label>
+              <textarea class="input" style="height:48px" placeholder="Təchizatçı görəcək..."></textarea>
+            </div>
+          </div>
+
+          <div class="alis-tab-content" id="alisTabPanel-history">
+            <div class="alis-history-empty">Sənəd yadda saxlanıldıqdan sonra tarixçə buraya əlavə olunacaq.</div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+    </div><!-- /modal-scroll -->
+
+    <div class="modal-ft">
+      <button class="btn btn-ghost-danger" onclick="closeAlisDocModal()">İmtina et</button>
+      <button class="btn btn-secondary" onclick="submitAlisDocModal('draft')">Yadda saxla</button>
+      <button class="btn btn-primary" onclick="submitAlisDocModal('approved')">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        Təsdiqlə
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── Yeni məhsul və xidmət yarat (quick-create, opens on top of Yeni Alış Sənədi) ── -->
+<div id="alisItemCreateModal" class="modal-backdrop modal-stacked" onclick="if(event.target===this)closeAlisItemCreateModal()">
+  <div class="modal-box">
+
+    <div class="modal-hd">
+      <div class="modal-ttl">Yeni məhsul və xidmət yarat</div>
+      <button class="modal-x" onclick="closeAlisItemCreateModal()">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+
+    <div class="modal-bd">
+      <div class="form-row">
+        <div class="form-group" id="alisItemFg-adi">
+          <label class="form-label required" for="alisItemFieldAd">Ad</label>
+          <input class="input" id="alisItemFieldAd" placeholder="Məhsul və ya xidmət adı" />
+          <div class="field-error-msg" id="alisItemErr-adi">Bu xana məcburidir</div>
+        </div>
+        <div class="form-group" id="alisItemFg-kateqoriya">
+          <label class="form-label required" for="alisItemFieldKateqoriya">Kateqoriya</label>
+          <select class="input" id="alisItemFieldKateqoriya" onchange="alisItemSyncAccount()">
+            <option>İNVENTAR</option>
+            <option>XİDMƏT</option>
+            <option>MƏSRƏF</option>
+            <option>ƏSAS_VƏSAİT</option>
+          </select>
+          <div class="field-error-msg" id="alisItemErr-kateqoriya">Kateqoriya seçilməlidir</div>
+        </div>
+      </div>
+      <div class="form-row-3">
+        <div class="form-group" id="alisItemFg-olcu">
+          <label class="form-label required" for="alisItemFieldOlcu">Ölçü vahidi</label>
+          <select class="input" id="alisItemFieldOlcu">
+            <option>ədəd</option>
+            <option>kq</option>
+            <option>metr</option>
+            <option>xidmət</option>
+          </select>
+          <div class="field-error-msg" id="alisItemErr-olcu">Ölçü vahidi seçilməlidir</div>
+        </div>
+        <div class="form-group" id="alisItemFg-qiymet">
+          <label class="form-label required" for="alisItemFieldQiymet">Vahidin qiyməti</label>
+          <input class="input" id="alisItemFieldQiymet" type="number" min="0" step="0.01" value="0" />
+          <div class="field-error-msg" id="alisItemErr-qiymet">Düzgün qiymət daxil edin</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Defolt hesab</label>
+          <input class="input" id="alisItemFieldHesab" readonly />
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-ft">
+      <button class="btn btn-ghost" onclick="closeAlisItemCreateModal()">Ləğv et</button>
+      <button class="btn btn-primary" onclick="submitAlisItemCreateModal()">Yarat və seç</button>
     </div>
 
   </div>

@@ -1,0 +1,960 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SMB ERP — Alışlar</title>
+<!-- Lookup mənbələri (SRS soraqçaları):
+  - Kontragent: counterparty_card (07_Kontragentlər)
+  - Məhsul/Xidmət: item_master (06_Məhsul və xidmətlər)
+  - Hesab: coa_account (05_Hesablar planı)
+  - Departament/Anbar: department, warehouse (04_Müəssisə strukturu)
+  - Valyuta: currency.abbreviation (01_Valyuta)
+  - Ölçü vahidi: Ölçü vahidi soraqçası (lookup)
+-->
+<style>
+
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Segoe UI',Arial,sans-serif}
+body{background:#f4f5f7;display:flex;flex-direction:column;height:100vh;overflow:hidden}
+.topbar{background:#1976d2;color:#fff;height:44px;display:flex;align-items:center;padding:0 16px;gap:16px;flex-shrink:0}
+.topbar .logo{font-weight:700;font-size:15px;letter-spacing:.5px}
+.topbar .breadcrumb{font-size:12px;opacity:.85}
+.mockup-note{margin:8px 16px 0;padding:10px 12px;border:1px solid #facc15;background:#fffbeb;color:#854d0e;border-radius:8px;font-size:12px;line-height:1.5}
+.layout{display:flex;flex:1;overflow:hidden}
+.sidebar{width:200px;background:#263238;color:#cfd8dc;display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto}
+.sidebar .menu-section{padding:10px 12px 4px;font-size:10px;text-transform:uppercase;color:#607d8b;letter-spacing:.8px}
+.sidebar a{display:block;padding:8px 16px;font-size:13px;color:#cfd8dc;text-decoration:none;cursor:pointer}
+.sidebar a:hover,.sidebar a.active{background:#37474f;color:#fff}
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.content{flex:1;overflow-y:auto;padding:20px}
+.screen{display:none}.screen.active{display:block}
+/* Cards & Sections */
+.page-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.page-title{font-size:18px;font-weight:600;color:#1a237e}
+.cmd-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.btn{padding:7px 14px;border-radius:5px;border:none;cursor:pointer;font-size:13px;font-weight:500}
+.btn-primary{background:#1976d2;color:#fff}.btn-primary:hover{background:#1565c0}
+.btn-secondary{background:#fff;color:#333;border:1px solid #ccc}.btn-secondary:hover{background:#f5f5f5}
+.btn-danger{background:#c62828;color:#fff}.btn-danger:hover{background:#b71c1c}
+.btn-success{background:#2e7d32;color:#fff}.btn-success:hover{background:#1b5e20}
+.btn-warning{background:#f57f17;color:#fff}
+.btn-sm{padding:4px 10px;font-size:12px}
+/* Table */
+.data-table{width:100%;border-collapse:collapse;background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.1)}
+.data-table th{background:#e8eaf6;color:#1a237e;font-size:12px;padding:8px 10px;text-align:left;border-bottom:2px solid #c5cae9}
+.data-table td{font-size:12px;padding:7px 10px;border-bottom:1px solid #f0f0f0}
+.data-table tr:hover td{background:#f8f9ff;cursor:pointer}
+.data-table th.col-draggable,.line-grid th.col-draggable{cursor:grab;user-select:none;position:relative}
+.data-table th.col-draggable::after,.line-grid th.col-draggable::after{content:'⋮⋮';font-size:10px;color:#94a3b8;margin-left:6px}
+.data-table th.col-drag-over-before::before,.line-grid th.col-drag-over-before::before{content:'';position:absolute;left:-1px;top:0;bottom:0;width:3px;background:#1976d2}
+.data-table th.col-drag-over-after::after,.line-grid th.col-drag-over-after::after{content:'';position:absolute;right:-1px;top:0;bottom:0;width:3px;background:#1976d2}
+/* Badges */
+.badge{display:inline-block;padding:2px 9px;border-radius:12px;font-size:11px;font-weight:600}
+.badge-draft{background:#e0e0e0;color:#424242}
+.badge-approved{background:#c8e6c9;color:#1b5e20}
+.badge-cancelled{background:#ffcdd2;color:#b71c1c}
+.badge-closed{background:#bbdefb;color:#0d47a1}
+/* Form */
+.form-card{background:#fff;border-radius:8px;padding:20px;box-shadow:0 1px 4px rgba(0,0,0,.1);margin-bottom:16px}
+.form-row{display:grid;gap:12px;margin-bottom:12px}
+.form-row.cols-2{grid-template-columns:1fr 1fr}
+.form-row.cols-3{grid-template-columns:1fr 1fr 1fr}
+.form-row.cols-4{grid-template-columns:1fr 1fr 1fr 1fr}
+.field-group{display:flex;flex-direction:column;gap:4px}
+.field-group label{font-size:11px;color:#555;font-weight:600;text-transform:uppercase;letter-spacing:.4px}
+.field-group .value{font-size:13px;color:#1a1a1a;padding:5px 0;border-bottom:1px solid #e0e0e0}
+.field-group .value.readonly{color:#555}
+.field-group input,.field-group select,.field-group textarea{font-size:13px;padding:6px 8px;border:1px solid #ccc;border-radius:4px;width:100%}
+.field-group input:focus,.field-group select:focus{border-color:#1976d2;outline:none}
+.required-label::after{content:" *";color:#c62828}
+/* Status bar */
+.status-bar{display:none}
+.status-step{display:flex;align-items:center}
+.status-dot{width:14px;height:14px;border-radius:50%;border:2px solid #bbb;background:#fff;margin-right:6px}
+.status-label{font-size:12px;color:#888;white-space:nowrap}
+.status-step.active .status-dot{background:#1976d2;border-color:#1976d2}
+.status-step.active .status-label{color:#1976d2;font-weight:700}
+.status-step.done .status-dot{background:#2e7d32;border-color:#2e7d32}
+.status-step.done .status-label{color:#2e7d32}
+.status-line{width:60px;height:2px;background:#bbb;margin:0 4px}
+.status-line.done{background:#2e7d32}
+/* Tabs */
+.tabs{display:flex;gap:0;border-bottom:2px solid #e0e0e0;margin-bottom:16px}
+.tab{padding:8px 16px;font-size:13px;cursor:pointer;color:#666;border-bottom:2px solid transparent;margin-bottom:-2px}
+.tab:hover{color:#1976d2}
+.tab.active{color:#1976d2;font-weight:600;border-bottom-color:#1976d2}
+.tab-content{display:none}.tab-content.active{display:block}
+/* Line grid */
+.line-grid{width:100%;border-collapse:collapse;font-size:12px}
+.line-grid th{background:#fafafa;color:#555;font-weight:600;padding:6px 8px;text-align:left;border:1px solid #e0e0e0}
+.line-grid td{padding:5px 8px;border:1px solid #e0e0e0}
+.line-grid input{width:100%;border:none;font-size:12px;padding:2px 4px;background:transparent}
+.line-grid input[readonly]{background:#f5f5f5}
+.lookup-combo{position:relative;min-width:240px}
+.lookup-combo .item-search{width:100%;border:1px solid #cbd5e1;background:#fff;border-radius:6px;padding:6px 10px;font-size:12px}
+.lookup-combo .item-search:focus{outline:none;border-color:#1976d2;box-shadow:0 0 0 2px rgba(25,118,210,.12)}
+.lookup-panel{display:none;position:fixed;background:#fff;border:1px solid #dbe1ea;border-radius:8px;box-shadow:0 12px 24px rgba(15,23,42,.18);z-index:2500;max-height:300px;overflow:auto}
+.lookup-item{padding:8px 10px;border-bottom:1px solid #eef2f7;cursor:pointer;background:#fff}
+.lookup-item:hover{background:#f8fafc}
+.lookup-name{font-size:12px;color:#0f172a;font-weight:600;line-height:1.2}
+.lookup-meta{font-size:11px;color:#64748b;line-height:1.2;margin-top:2px}
+.lookup-create{display:flex;align-items:center;gap:8px;padding:10px;border-top:1px solid #e2e8f0;background:#f8fafc;cursor:pointer;color:#0f172a}
+.lookup-create:hover{background:#eef2ff}
+.lookup-create .plus{font-size:20px;line-height:1}
+.lookup-empty{padding:8px 10px;font-size:11px;color:#64748b}
+.advance-apply[disabled]{background:#f3f4f6;color:#9ca3af;cursor:not-allowed}
+.totals-block{text-align:right;padding-top:10px;font-size:13px;line-height:1.8}
+.totals-block .total-final{font-size:15px;font-weight:700;color:#1a237e}
+/* Posting preview */
+.posting-table{width:100%;border-collapse:collapse;font-size:12px;margin-top:8px}
+.posting-table th{background:#e8eaf6;padding:6px 10px;text-align:left;font-size:11px;color:#1a237e}
+.posting-table td{padding:5px 10px;border-bottom:1px solid #f0f0f0}
+.posting-dr{color:#c62828;font-weight:600}
+.posting-cr{color:#2e7d32;font-weight:600}
+/* Alert / Warning */
+.alert{padding:8px 14px;border-radius:6px;font-size:12px;margin-bottom:10px}
+.alert-warning{background:#fff8e1;border-left:4px solid #ffc107;color:#795548}
+.alert-danger{background:#ffebee;border-left:4px solid #c62828;color:#b71c1c}
+.alert-info{background:#e3f2fd;border-left:4px solid #1976d2;color:#1565c0}
+/* Modal */
+.modal-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.5);z-index:1000;align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:#fff;border-radius:10px;padding:24px;min-width:440px;max-width:600px;box-shadow:0 4px 24px rgba(0,0,0,.2)}
+.modal-header{font-size:16px;font-weight:700;color:#1a237e;margin-bottom:16px}
+.modal-footer{display:flex;justify-content:flex-end;gap:8px;margin-top:20px}
+/* Summary cards */
+.summary-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+.summary-card{background:#fff;border-radius:8px;padding:14px;box-shadow:0 1px 3px rgba(0,0,0,.1);text-align:center}
+.summary-card .s-label{font-size:11px;color:#777;text-transform:uppercase;letter-spacing:.5px}
+.summary-card .s-value{font-size:20px;font-weight:700;color:#1a237e;margin:4px 0}
+.summary-card .s-sub{font-size:11px;color:#555}
+.tag-ded{display:inline-block;padding:1px 7px;border-radius:10px;font-size:10px;font-weight:600}
+.tag-yes{background:#c8e6c9;color:#1b5e20}
+.tag-no{background:#ffcdd2;color:#b71c1c}
+.tag-part{background:#fff9c4;color:#795548}
+
+</style>
+</head>
+<body>
+<div class="topbar">
+  <span class="logo">&#9733; SMB ERP</span>
+  <span class="breadcrumb" id="bcrumb">Alışlar</span>
+  <span style="flex:1"></span>
+  <span style="font-size:12px">Əli Məmmədov</span>
+</div>
+<div class="mockup-note"><b>Qeyd:</b> Bu interfeys istehsal səviyyəsi üçün son dizayn deyil; yalnız nümayiş və müzakirə məqsədli maket nümunəsidir.</div>
+<div class="layout">
+  <nav class="sidebar">
+    <div style="padding:12px 16px;font-size:14px;font-weight:700;color:#fff;border-bottom:1px solid #37474f">SMB ERP v1.0</div>
+  <a onclick="location.href=''" class="active">Alışlar</a>
+
+  </nav>
+  <div class="main">
+    <div class="content">
+      
+<div class="screen active" id="screen_list">
+  <div class="page-header">
+    <div class="page-title">Alışlar</div>
+    <div style="display:flex;gap:8px">
+      <input type="text" placeholder="🔍 Axtar..." style="padding:6px 10px;border:1px solid #ccc;border-radius:5px;font-size:13px;width:220px">
+      <select style="font-size:13px;padding:6px 10px;border:1px solid #ccc;border-radius:5px"><option>Bütün statuslar</option><option>Qaralama</option><option>Təsdiqlənmiş</option></select>
+      <select style="font-size:13px;padding:6px 10px;border:1px solid #ccc;border-radius:5px"><option>Bütün təchizatçılar</option><option>ABC Texnologiya MMC</option><option>Xəzər İdxalat Ltd</option></select>
+      <select style="font-size:13px;padding:6px 10px;border:1px solid #ccc;border-radius:5px"><option>Bütün valyutalar</option><option>AZN</option><option>USD</option><option>EUR</option></select>
+    </div>
+  </div>
+  <div class="cmd-bar">
+    <button class="btn btn-primary" onclick="goScreen('form');setStatus('draft')">+ Yeni</button>
+  </div>
+  <table class="data-table">
+    <thead><tr>
+      <th><input type="checkbox"></th><th>Sənəd №</th><th>Tip</th><th>Tarix</th>
+      <th>Təchizatçı</th><th>Valyuta</th><th>Ümumi</th><th>Ödənilmiş</th><th>Kreditor qalığı</th><th>Status</th>
+    </tr></thead>
+    <tbody>
+      <tr onclick="goScreen('form');setStatus('approved')">
+        <td><input type="checkbox"></td><td style="color:#1976d2;font-weight:600">ALI-2026-00088</td>
+        <td>Alış</td><td>20.03.2026</td><td>ABC Texnologiya MMC</td>
+        <td>AZN</td><td>11,800.00</td><td>5,900.00</td><td>5,900.00</td>
+        <td><span class="badge badge-approved">Təsdiqlənmiş</span></td>
+      </tr>
+      <tr onclick="goScreen('form');setStatus('draft')">
+        <td><input type="checkbox"></td><td style="color:#1976d2;font-weight:600">ALI-2026-00089</td>
+        <td>Alış</td><td>21.03.2026</td><td>Xəzər İdxalat</td>
+        <td>USD</td><td>8,500.00</td><td>0.00</td><td>8,500.00</td>
+        <td><span class="badge badge-draft">Qaralama</span></td>
+      </tr>
+      <tr onclick="goScreen('form');setStatus('cancelled')">
+        <td><input type="checkbox"></td><td style="color:#1976d2;font-weight:600">ALI-2026-00086</td>
+        <td>Alış</td><td>15.03.2026</td><td>Kənardan Alış İnc.</td>
+        <td>AZN</td><td>3,200.00</td><td>0.00</td><td>0.00</td>
+        <td><span class="badge badge-cancelled">Ləğv edilmiş</span></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="screen" id="screen_form">
+  <!-- Status bar -->
+  <div class="form-card" style="padding:14px 20px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <div id="bc_form" style="font-size:13px;color:#555">Alış › Alışlar › ALI-2026-00088</div>
+    </div>
+    <div class="status-bar" id="status_bar">
+      <div class="status-step active" id="st_draft"><div class="status-dot"></div><div class="status-label">Qaralama</div></div>
+      <div class="status-line" id="sl1"></div>
+      <div class="status-step" id="st_approved"><div class="status-dot"></div><div class="status-label">Təsdiqlənmiş</div></div>
+      <div class="status-line" id="sl2"></div>
+      <div class="status-step" id="st_cancelled"><div class="status-dot"></div><div class="status-label">Ləğv edilmiş</div></div>
+    </div>
+    <!-- Command bar -->
+    <div class="cmd-bar" id="cmd_bar">
+      <button class="btn btn-secondary" id="btn_discard" onclick="goScreen('list')">İmtina et</button>
+      <button class="btn btn-secondary" id="btn_save">Saxla</button>
+      <button class="btn btn-primary" id="btn_approve" onclick="openModal('modal_approve')">Təsdiqlə</button>
+      <button class="btn btn-secondary" id="btn_draft_back" style="display:none" onclick="setStatus('draft')">Qaralamaya qayıt</button>
+      <button class="btn btn-warning" id="btn_reverse" style="display:none" onclick="openModal('modal_reverse')">Əks Yazılış</button>
+      <button class="btn btn-secondary" onclick="alert('PDF çap ilkin baxışı')">Çap ▾</button>
+    </div>
+  </div>
+
+  <!-- Header fields -->
+  <div class="form-card">
+    <div class="form-row cols-3">
+      <div class="field-group"><label class="required-label">Sənəd tipi</label>
+        <div class="value readonly">Alış</div></div>
+      <div class="field-group"><label>Sənəd nömrəsi</label>
+        <div class="value readonly">ALI-2026-00088</div></div>
+      <div class="field-group"><label class="required-label">Tarix</label>
+        <input id="document_date" type="date" value="2026-03-20"></div>
+    </div>
+    <div class="form-row cols-3">
+      <div class="field-group"><label class="required-label">Təsdiqləmə tarixi</label>
+        <input type="date" id="approval_date_display" value="2026-03-20" disabled></div>
+      <div class="field-group"><label class="required-label">Valyuta</label>
+        <div style="display:flex;gap:8px"><select id="doc_currency" style="flex:1"></select><input id="doc_rate" type="number" value="1.0000" step="0.0001" style="width:120px" placeholder="Məzənnə" readonly></div></div>
+      <div class="field-group"><label>Defolt anbar</label>
+        <select><option>WH-01</option><option>WH-02</option></select></div>
+    </div>
+    <div class="form-row cols-3">
+      <div class="field-group"><label class="required-label">Təchizatçı</label>
+        <select><option>ABC Texnologiya MMC (VÖEN: 1400123456)</option><option>Xəzər İdxalat Ltd</option></select></div>
+      <div class="field-group"><label>Təchizatçı Qaiməsi №</label>
+        <input type="text" value="VND-2026-0441" placeholder="Dublikat yoxlama üçün"></div>
+      <div class="field-group"><label>Müqavilə sənədi</label>
+        <input type="text" value="CON-2026-0102" readonly title="Məlumat gələcəkdə Müqavilə modulundan gələcək"></div>
+    </div>
+    <div class="form-row cols-2">
+      <div class="field-group"><label class="required-label">Departament (Q-099)</label>
+        <select><option>Satınalma Departamenti</option><option>Texniki Departament</option><option>Maliyyə Departamenti</option></select></div>
+      <div class="field-group"><label>Qeyd</label>
+        <input type="text" placeholder="Daxili qeyd"></div>
+    </div>
+  </div>
+
+  <!-- Line Items -->
+  <div class="form-card">
+    <div style="font-size:13px;font-weight:700;color:#1a237e;margin-bottom:10px">Sətir elementi cədvəli</div>
+    <div style="overflow-x:auto">
+    <table class="line-grid">
+      <thead><tr>
+        <th>#</th><th>Sətir tipi</th><th>Hesab</th><th>Məhsul və xidmət</th><th>Anbar (əl ilə seçilir)</th><th>Layihə</th>
+        <th>Miqdar</th><th>Ölçü vahidi</th><th>Vahidin qiyməti</th><th>Endirim%</th><th>ƏDV %</th><th>Ümumi</th>
+      </tr></thead>
+      <tbody>
+        <tr>
+          <td>1</td>
+          <td><input class="line-type" value="İNVENTAR" readonly></td>
+          <td><input class="line-account" value="205 - Mallar" readonly></td>
+          <td>
+            <div class="lookup-combo">
+              <input class="item-search" value="Printer HP LaserJet" placeholder="Məhsul və xidmət axtar...">
+              <div class="lookup-panel"></div>
+            </div>
+          </td>
+          <td><select style="font-size:11px"><option>WH-01</option><option>WH-02</option></select></td>
+          <td><input value="PRJ-001"></td>
+          <td><input class="qty" type="number" value="5" style="width:50px"></td>
+          <td><input class="measure" value="ədəd" readonly></td>
+          <td><input class="price" type="number" value="2000.00" style="width:90px"></td>
+          <td><input class="discount" type="number" value="0" style="width:60px"></td>
+          <td><input class="vat" type="number" value="18" style="width:60px"></td>
+          <td class="line-total">10,000.00</td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td><input class="line-type" value="XİDMƏT" readonly></td>
+          <td><input class="line-account" value="721 - İnzibati xidmətlər" readonly></td>
+          <td>
+            <div class="lookup-combo">
+              <input class="item-search" value="Çatdırılma xidməti" placeholder="Məhsul və xidmət axtar...">
+              <div class="lookup-panel"></div>
+            </div>
+          </td>
+          <td><input placeholder="—" style="width:60px;background:#f5f5f5" readonly></td>
+          <td><input value="PRJ-OPS"></td>
+          <td><input class="qty" type="number" value="1" style="width:50px"></td>
+          <td><input class="measure" value="xidmət" readonly></td>
+          <td><input class="price" type="number" value="200.00" style="width:90px"></td>
+          <td><input class="discount" type="number" value="0" style="width:60px"></td>
+          <td><input class="vat" type="number" value="18" style="width:60px"></td>
+          <td class="line-total">200.00</td>
+        </tr>
+        <tr>
+          <td>3</td>
+          <td><input class="line-type" value="MƏSRƏF" readonly></td>
+          <td><input class="line-account" value="731 - Sair əməliyyat məsrəfləri" readonly></td>
+          <td>
+            <div class="lookup-combo">
+              <input class="item-search" value="Cərimə xidməti" placeholder="Məhsul və xidmət axtar...">
+              <div class="lookup-panel"></div>
+            </div>
+          </td>
+          <td><input placeholder="—" style="width:60px;background:#f5f5f5" readonly></td>
+          <td><input value=""></td>
+          <td><input class="qty" type="number" value="1" style="width:50px"></td>
+          <td><input class="measure" value="ədəd" readonly></td>
+          <td><input class="price" type="number" value="500.00" style="width:90px"></td>
+          <td><input class="discount" type="number" value="0" style="width:60px"></td>
+          <td><input class="vat" type="number" value="18" style="width:60px"></td>
+          <td class="line-total">500.00</td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-top:10px;flex-wrap:wrap;gap:10px">
+      <button class="btn btn-secondary btn-sm" onclick="addPurchaseLine()">+ Sətir əlavə et</button>
+      <div class="totals-block">
+        <div>Xalis məbləğ: <b id="doc_net_total">10,700.00 AZN</b></div>
+        <div>ƏDV cəmi: <b id="doc_vat_total">1,926.00 AZN</b></div>
+        <div>Sənəd valyutasında cəm: <b id="doc_total">12,626.00 AZN</b></div>
+        <div class="total-final">Müəssisənin əsas valyutasında cəm: <span id="entity_total">12,626.00 AZN</span></div>
+      </div>
+    </div>
+    <div class="alert alert-danger" style="margin-top:10px;min-height:38px">
+      &nbsp;
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="form-card">
+    <div class="tabs">
+      <div class="tab active" onclick="switchTab(this,'tab_payments')">Bağlanmış ödənişlər</div>
+      <div class="tab" onclick="switchTab(this,'tab_open_advances')">Açıq avanslar</div>
+      <div class="tab" onclick="switchTab(this,'tab_currency')">Valyuta</div>
+      <div class="tab" onclick="switchTab(this,'tab_notes')">Qeydlər</div>
+      <div class="tab" onclick="switchTab(this,'tab_history')">Tarixçə</div>
+    </div>
+
+    <div class="tab-content active" id="tab_payments">
+      <div class="alert alert-info">Bu bölmədə Bank sənədlərində bu alış sənədinə istinad verilmiş ödənişlər yalnız oxu rejimində görünür.</div>
+      <div style="font-size:12px;font-weight:700;color:#1a237e;margin:8px 0">İstinadlı bank ödənişləri (yalnız oxu)</div>
+      <table class="data-table" style="font-size:12px">
+        <thead><tr><th>Bank sənədi</th><th>Tarix</th><th>Məbləğ</th><th>İstinad tipi</th><th>Qeyd</th></tr></thead>
+        <tbody>
+          <tr><td>BNK-2026-00142</td><td>22.03.2026</td><td>5,000.00</td><td>PURCHASE</td><td>Yalnız oxu</td></tr>
+          <tr><td>BNK-2026-00157</td><td>24.03.2026</td><td>900.00</td><td>PURCHASE</td><td>Yalnız oxu</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="tab-content" id="tab_open_advances">
+      <div class="alert alert-warning">Açıq avanslar burada göstərilir. Avans bağlama yalnız `Təsdiqlənmiş` statusda aktivdir.</div>
+      <div style="font-size:12px;font-weight:700;color:#1a237e;margin:12px 0 8px">Açıq avanslar (bağlana bilər)</div>
+      <div id="advance_lock_note" class="alert alert-warning" style="display:none">Avans bağlama yalnız `Təsdiqlənmiş` statusda aktivdir.</div>
+      <table class="data-table" style="font-size:12px">
+        <thead><tr><th>Avans sənədi</th><th>Tarix</th><th>Açıq məbləğ</th><th>Bağlanacaq məbləğ</th></tr></thead>
+        <tbody>
+          <tr><td>BNK-ADV-2026-00012</td><td>18.03.2026</td><td>3,000.00</td><td><input class="advance-apply" type="number" value="1000.00" style="width:100px;font-size:12px"></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="tab-content" id="tab_currency">
+      <div class="form-row cols-3" style="margin-top:8px">
+        <div class="field-group"><label>Sənəd valyutası</label><div class="value" id="cur_doc_label">AZN</div></div>
+        <div class="field-group"><label>Müəssisənin əsas valyutası</label><select id="entity_currency"></select></div>
+        <div class="field-group"><label>Konversiya məzənnəsi (soraqçadan)</label><input id="entity_rate" type="number" value="1.0000" step="0.0001" readonly></div>
+      </div>
+      <div class="form-row cols-3" style="margin-top:8px">
+        <div class="field-group"><label>Sənəd valyutasında xalis məbləğ</label><div class="value" id="cur_doc_net">10,700.00 AZN</div></div>
+        <div class="field-group"><label>Sənəd valyutasında ƏDV</label><div class="value" id="cur_doc_vat">1,926.00 AZN</div></div>
+        <div class="field-group"><label>Sənəd valyutasında məbləğ</label><div class="value" id="cur_doc_amount">12,626.00 AZN</div></div>
+      </div>
+      <div class="form-row cols-3" style="margin-top:8px">
+        <div class="field-group"><label>Entity valyutasında xalis məbləğ</label><div class="value" id="cur_entity_net">10,700.00 AZN</div></div>
+        <div class="field-group"><label>Entity valyutasında ƏDV</label><div class="value" id="cur_entity_vat">1,926.00 AZN</div></div>
+        <div class="field-group"><label>Entity valyutasında məbləğ</label><div class="value" id="cur_entity_amount">12,626.00 AZN</div></div>
+      </div>
+    </div>
+
+    <div class="tab-content" id="tab_notes">
+      <div class="field-group" style="margin-top:8px"><label>Daxili qeyd</label>
+        <textarea rows="3" placeholder="Sənədlə bağlı qeyd...">HP printer alışı — satınalma sifarişi #PO-2026-041 üzrə</textarea></div>
+      <div class="field-group" style="margin-top:8px"><label>Xarici qeyd (çapdakı)</label>
+        <textarea rows="2" placeholder="Təchizatçı görəcək..."></textarea></div>
+    </div>
+
+    <div class="tab-content" id="tab_history">
+      <div style="font-size:12px;line-height:2.2;color:#444">
+        <div>📋 <b>Sənəd yaradıldı</b> — Əli Məmmədov — 20.03.2026 14:23</div>
+        <div>✏️ <b>Sətir yeniləndi</b> — Məhsuldan susmaya görə qiymət gətirildi və redaktə edildi — 20.03.2026 14:31</div>
+        <div>✅ <b>Təsdiqləndi:</b> Qaralama → Təsdiqlənmiş — 20.03.2026 15:10</div>
+        <div>💳 <b>Avans bağlandı:</b> BNK-ADV-2026-00012 → 1,000.00 AZN</div>
+        <div>📎 <b>Bank ödənişi bağlandı:</b> BNK-2026-00142 → 5,000.00 AZN</div>
+        <div>🔒 <b>Yalnız oxu rejimi</b> — İstinadlı bank ödənişləri redaktəyə bağlandı — 22.03.2026 09:12</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal_approve">
+  <div class="modal">
+    <div class="modal-header">Sənədi Təsdiqlə</div>
+    <div style="font-size:13px;color:#444;line-height:1.7">
+      <b>ALI-2026-00088</b> qaimə təsdiqlənəcək:<br>
+      • Baş kitab qeydləri yazılacaq (Dr aktiv/xidmət/məsrəf hesabları + Cr 531)<br>
+      • AP 12,626.00 AZN yaranacaq<br>
+      • Sənəd yalnız oxuma rejimində olacaq<br>
+      <div class="field-group" style="margin-top:12px"><label class="required-label">Təsdiqləmə tarixi</label>
+        <input type="date" id="approval_date_input" value="2026-03-20"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal_approve')">Ləğv et</button>
+      <button class="btn btn-primary" onclick="doApprove()">Təsdiqlə</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal_reverse">
+  <div class="modal">
+    <div class="modal-header">Əks Yazılış</div>
+    <div class="field-group"><label class="required-label">Əks yazılış səbəbi</label>
+      <textarea rows="3" placeholder="Məcburi izahat..."></textarea></div>
+    <div style="font-size:12px;color:#c62828;margin-top:10px">
+      ⚠ Bağlı bank ödənişi varsa əks yazılış BLOCK edilir.
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal_reverse')">Ləğv et</button>
+      <button class="btn btn-danger">Əks Yazılışı Tətbiq Et</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal_item_create">
+  <div class="modal" style="max-width:680px">
+    <div class="modal-header">Yeni məhsul və xidmət yarat</div>
+    <div class="form-row cols-2" style="margin-top:6px">
+      <div class="field-group"><label class="required-label">Ad</label>
+        <input type="text" id="qc_item_name" placeholder="Məhsul və ya xidmət adı"></div>
+      <div class="field-group"><label class="required-label">Kateqoriya</label>
+        <select id="qc_item_category"><option>İNVENTAR</option><option>ƏSAS_VƏSAİT</option><option>XİDMƏT</option><option>MƏSRƏF</option></select></div>
+    </div>
+    <div class="form-row cols-3">
+      <div class="field-group"><label class="required-label">Ölçü vahidi</label>
+        <select id="qc_item_measure"><option>ədəd</option><option>kq</option><option>metr</option><option>xidmət</option></select></div>
+      <div class="field-group"><label class="required-label">Vahidin qiyməti</label>
+        <input type="number" id="qc_item_price" min="0" step="0.01" value="0"></div>
+      <div class="field-group"><label>Defolt hesab</label>
+        <input type="text" id="qc_item_account" readonly></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeItemCreateModal()">Ləğv et</button>
+      <button class="btn btn-primary" onclick="saveQuickCreateItem()">Yarat və seç</button>
+    </div>
+  </div>
+</div>
+
+<script>
+
+const itemCatalog = [
+  { name: 'Printer HP LaserJet', category: 'İNVENTAR', account: '205 - Mallar', measure: 'ədəd', defaultPrice: 2000, vatRate: 18 },
+  { name: 'Çatdırılma xidməti', category: 'XİDMƏT', account: '721 - İnzibati xidmətlər', measure: 'xidmət', defaultPrice: 200, vatRate: 18 },
+  { name: 'Cərimə xidməti', category: 'MƏSRƏF', account: '731 - Sair əməliyyat məsrəfləri', measure: 'ədəd', defaultPrice: 500, vatRate: 18 },
+  { name: 'Ofis masası', category: 'ƏSAS_VƏSAİT', account: '111 - Torpaq, tikili və avadanlıqların dəyəri', measure: 'ədəd', defaultPrice: 1200, vatRate: 18 }
+];
+let quickCreateTargetRow = null;
+let currentStatus = 'draft';
+
+const currencyCatalog = [
+  { code:'AZN', name:'Azərbaycan Manatı' },
+  { code:'USD', name:'ABŞ Dolları' },
+  { code:'EUR', name:'Avro' }
+];
+
+const rateCatalog = [
+  { date:'2026-03-20', currency:'AZN', rate_to_azn:1 },
+  { date:'2026-03-20', currency:'USD', rate_to_azn:1.7 },
+  { date:'2026-03-20', currency:'EUR', rate_to_azn:1.85 },
+  { date:'2026-03-21', currency:'AZN', rate_to_azn:1 },
+  { date:'2026-03-21', currency:'USD', rate_to_azn:1.705 },
+  { date:'2026-03-21', currency:'EUR', rate_to_azn:1.86 }
+];
+
+function populateCurrencySelects(){
+  const docSel = document.getElementById('doc_currency');
+  const entSel = document.getElementById('entity_currency');
+  const options = currencyCatalog.map(c => `<option value="${c.code}">${c.code}</option>`).join('');
+  if(docSel){ docSel.innerHTML = options; docSel.value = 'AZN'; }
+  if(entSel){ entSel.innerHTML = options; entSel.value = 'AZN'; }
+}
+
+function getRateToAzn(date, currency){
+  const hit = rateCatalog.find(r => r.date === date && r.currency === currency);
+  return hit ? hit.rate_to_azn : null;
+}
+
+function syncRateFromCatalog(){
+  const date = document.getElementById('document_date')?.value || '2026-03-20';
+  const docCurrency = document.getElementById('doc_currency')?.value || 'AZN';
+  const entityCurrency = document.getElementById('entity_currency')?.value || 'AZN';
+
+  const docToAzn = getRateToAzn(date, docCurrency);
+  const entityToAzn = getRateToAzn(date, entityCurrency);
+  const docRateEl = document.getElementById('doc_rate');
+  const entityRateEl = document.getElementById('entity_rate');
+
+  if(docRateEl) docRateEl.value = (docToAzn ?? 1).toFixed(4);
+
+  if(docToAzn == null || entityToAzn == null){
+    if(entityRateEl) entityRateEl.value = '0.0000';
+    const curEntityAmount = document.getElementById('cur_entity_amount');
+    if(curEntityAmount) curEntityAmount.textContent = 'Məzənnə soraqçasında məlumat tapılmadı';
+    return;
+  }
+
+  const docToEntity = docToAzn / entityToAzn;
+  if(entityRateEl) entityRateEl.value = docToEntity.toFixed(4);
+}
+
+function syncAdvanceEditability(){
+  const enabled = currentStatus === 'approved';
+  document.querySelectorAll('.advance-apply').forEach(el => el.disabled = !enabled);
+  const lockNote = document.getElementById('advance_lock_note');
+  if(lockNote) lockNote.style.display = enabled ? 'none' : 'block';
+}
+
+function defaultAccountByCategory(category){
+  if(category === 'İNVENTAR') return '205 - Mallar';
+  if(category === 'ƏSAS_VƏSAİT') return '111 - Torpaq, tikili və avadanlıqların dəyəri';
+  if(category === 'XİDMƏT') return '721 - İnzibati xidmətlər';
+  return '731 - Sair əməliyyat məsrəfləri';
+}
+
+function syncQuickCreateAccount(){
+  const cat = document.getElementById('qc_item_category')?.value || 'XİDMƏT';
+  const acc = document.getElementById('qc_item_account');
+  if(acc) acc.value = defaultAccountByCategory(cat);
+}
+
+function openItemCreateModal(row, draftName=''){
+  quickCreateTargetRow = row;
+  const nameEl = document.getElementById('qc_item_name');
+  const catEl = document.getElementById('qc_item_category');
+  const measureEl = document.getElementById('qc_item_measure');
+  const priceEl = document.getElementById('qc_item_price');
+  if(nameEl) nameEl.value = draftName || '';
+  if(catEl) catEl.value = 'XİDMƏT';
+  if(measureEl) measureEl.value = 'xidmət';
+  if(priceEl) priceEl.value = '0';
+  syncQuickCreateAccount();
+  openModal('modal_item_create');
+}
+
+function closeItemCreateModal(){
+  closeModal('modal_item_create');
+  quickCreateTargetRow = null;
+}
+
+function saveQuickCreateItem(){
+  const row = quickCreateTargetRow;
+  if(!row) return;
+  const name = (document.getElementById('qc_item_name')?.value || '').trim();
+  const category = document.getElementById('qc_item_category')?.value || 'XİDMƏT';
+  const measure = document.getElementById('qc_item_measure')?.value || 'xidmət';
+  const defaultPrice = Number(document.getElementById('qc_item_price')?.value || 0);
+  const account = document.getElementById('qc_item_account')?.value || defaultAccountByCategory(category);
+  const vatRate = 18;
+  if(!name){
+    alert('Ad sahəsi məcburidir.');
+    return;
+  }
+
+  let item = findItemByName(name);
+  if(!item){
+    item = { name, category, account, measure, defaultPrice, vatRate };
+    itemCatalog.push(item);
+  }
+
+  const itemInput = row.querySelector('.item-search');
+  if(itemInput) itemInput.value = item.name;
+  applyItemToRow(row, item);
+  closeItemCreateModal();
+}
+
+function formatAmount(value){
+  return Number(value || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function findItemByName(name){
+  const key = (name || '').trim().toLowerCase();
+  return itemCatalog.find(i => i.name.toLowerCase() === key) || null;
+}
+
+function filteredItems(query){
+  const q = (query || '').trim().toLowerCase();
+  if(!q) return itemCatalog.slice(0,6);
+  return itemCatalog.filter(i => i.name.toLowerCase().includes(q)).slice(0,6);
+}
+
+function closeLookupPanels(){
+  document.querySelectorAll('.lookup-panel').forEach(p => p.style.display='none');
+}
+
+function positionPurchaseLookupPanel(input,panel){
+  if(!input||!panel) return;
+  const rect=input.getBoundingClientRect();
+  panel.style.top=`${rect.bottom+4}px`;
+  panel.style.left=`${rect.left}px`;
+  panel.style.width=`${rect.width}px`;
+}
+
+function renderLookupPanel(row){
+  const combo = row.querySelector('.lookup-combo');
+  if(!combo) return;
+  const input = combo.querySelector('.item-search');
+  const panel = combo.querySelector('.lookup-panel');
+  if(!input || !panel) return;
+  positionPurchaseLookupPanel(input,panel);
+  const items = filteredItems(input.value);
+
+  const itemsHtml = items.length
+    ? items.map(i => `<div class="lookup-item" data-name="${i.name}"><div class="lookup-name">${i.name}</div><div class="lookup-meta">Ölçü vahidi: ${i.measure}</div></div>`).join('')
+    : '<div class="lookup-empty">Uyğun nəticə tapılmadı</div>';
+
+  panel.innerHTML = `${itemsHtml}<div class="lookup-create"><span class="plus">+</span><span>Yeni məhsul və xidmət</span></div>`;
+  panel.style.display = 'block';
+
+  panel.querySelectorAll('.lookup-item').forEach(el => {
+    el.addEventListener('mousedown', (e) => {
+      e.preventDefault();
+      const item = findItemByName(el.dataset.name);
+      if(item){
+        input.value = item.name;
+        applyItemToRow(row, item);
+      }
+      panel.style.display='none';
+    });
+  });
+
+  const createEl = panel.querySelector('.lookup-create');
+  if(createEl){
+    createEl.addEventListener('mousedown', (e) => {
+      e.preventDefault();
+      quickCreateItem(row);
+      panel.style.display='none';
+    });
+  }
+}
+
+function applyItemToRow(row, item){
+  if(!row || !item) return;
+  row.querySelector('.line-type').value = item.category;
+  row.querySelector('.line-account').value = item.account;
+  row.querySelector('.measure').value = item.measure;
+  const vatInput = row.querySelector('.vat');
+  if(vatInput) vatInput.value = Number(item.vatRate ?? 18).toFixed(0);
+  const priceInput = row.querySelector('.price');
+  if(priceInput && (!priceInput.value || Number(priceInput.value) === 0)){
+    priceInput.value = item.defaultPrice.toFixed(2);
+  }
+  recalcRow(row);
+}
+
+function quickCreateItem(row){
+  const itemInput = row.querySelector('.item-search');
+  const name = (itemInput ? itemInput.value : '').trim();
+  openItemCreateModal(row, name);
+}
+
+function recalcRow(row){
+  const qty = Number(row.querySelector('.qty')?.value || 0);
+  const price = Number(row.querySelector('.price')?.value || 0);
+  const discount = Number(row.querySelector('.discount')?.value || 0);
+  const vatRate = Number(row.querySelector('.vat')?.value || 0);
+  const net = qty * price * (1 - (discount/100));
+  const vat = net * (vatRate/100);
+  const totalCell = row.querySelector('.line-total');
+  if(totalCell) totalCell.textContent = formatAmount(net);
+  row.dataset.lineNet = String(net);
+  row.dataset.lineVat = String(vat);
+  recalcDocumentTotals();
+}
+
+function recalcDocumentTotals(){
+  const rows = document.querySelectorAll('.line-grid tbody tr');
+  let docNet = 0;
+  let docVat = 0;
+  rows.forEach(r => {
+    docNet += Number(r.dataset.lineNet || 0);
+    docVat += Number(r.dataset.lineVat || 0);
+  });
+  const docTotal = docNet + docVat;
+  const docCurrency = document.getElementById('doc_currency')?.value || 'AZN';
+  const entityCurrency = document.getElementById('entity_currency')?.value || 'AZN';
+  const rate = Number(document.getElementById('entity_rate')?.value || 0);
+  if(rate <= 0){
+    syncRateFromCatalog();
+  }
+  const effectiveRate = Number(document.getElementById('entity_rate')?.value || 1);
+  const multiplier = docCurrency === entityCurrency ? 1 : (effectiveRate > 0 ? effectiveRate : 1);
+  const entityNet = docNet * multiplier;
+  const entityVat = docVat * multiplier;
+  const entityTotal = docTotal * multiplier;
+
+  const docNetLabel = `${formatAmount(docNet)} ${docCurrency}`;
+  const docVatLabel = `${formatAmount(docVat)} ${docCurrency}`;
+  const docLabel = `${formatAmount(docTotal)} ${docCurrency}`;
+  const entityNetLabel = `${formatAmount(entityNet)} ${entityCurrency}`;
+  const entityVatLabel = `${formatAmount(entityVat)} ${entityCurrency}`;
+  const entityLabel = `${formatAmount(entityTotal)} ${entityCurrency}`;
+
+  const docNetEl = document.getElementById('doc_net_total');
+  const docVatEl = document.getElementById('doc_vat_total');
+  const docTotalEl = document.getElementById('doc_total');
+  const entityTotalEl = document.getElementById('entity_total');
+  const curDocLabel = document.getElementById('cur_doc_label');
+  const curDocNet = document.getElementById('cur_doc_net');
+  const curDocVat = document.getElementById('cur_doc_vat');
+  const curDocAmount = document.getElementById('cur_doc_amount');
+  const curEntityNet = document.getElementById('cur_entity_net');
+  const curEntityVat = document.getElementById('cur_entity_vat');
+  const curEntityAmount = document.getElementById('cur_entity_amount');
+
+  if(docNetEl) docNetEl.textContent = docNetLabel;
+  if(docVatEl) docVatEl.textContent = docVatLabel;
+  if(docTotalEl) docTotalEl.textContent = docLabel;
+  if(entityTotalEl) entityTotalEl.textContent = entityLabel;
+  if(curDocLabel) curDocLabel.textContent = docCurrency;
+  if(curDocNet) curDocNet.textContent = docNetLabel;
+  if(curDocVat) curDocVat.textContent = docVatLabel;
+  if(curDocAmount) curDocAmount.textContent = docLabel;
+  if(curEntityNet) curEntityNet.textContent = entityNetLabel;
+  if(curEntityVat) curEntityVat.textContent = entityVatLabel;
+  if(curEntityAmount) curEntityAmount.textContent = entityLabel;
+}
+
+function bindLineInteractions(){
+  document.querySelectorAll('.line-grid tbody tr').forEach(row => {
+    if(row.dataset.bound === '1') return;
+    row.dataset.bound = '1';
+
+    const itemInput = row.querySelector('.item-search');
+    const calcInputs = row.querySelectorAll('.qty,.price,.discount,.vat');
+
+    if(itemInput){
+      itemInput.addEventListener('focus', () => {
+        closeLookupPanels();
+        renderLookupPanel(row);
+      });
+      itemInput.addEventListener('input', () => {
+        closeLookupPanels();
+        renderLookupPanel(row);
+      });
+      itemInput.addEventListener('change', () => {
+        const item = findItemByName(itemInput.value);
+        if(item) applyItemToRow(row, item);
+      });
+      itemInput.addEventListener('keydown', (e) => {
+        if(e.key === 'Enter'){
+          e.preventDefault();
+          const first = filteredItems(itemInput.value)[0];
+          if(first){
+            itemInput.value = first.name;
+            applyItemToRow(row, first);
+          }else{
+            openItemCreateModal(row, itemInput.value);
+          }
+          closeLookupPanels();
+        }
+      });
+    }
+    calcInputs.forEach(inp => inp.addEventListener('input', () => recalcRow(row)));
+  });
+}
+
+function goScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  var el=document.getElementById('screen_'+id);
+  if(el) el.classList.add('active');
+}
+function setStatus(st){
+  currentStatus = st;
+  var draft=document.getElementById('st_draft'),appv=document.getElementById('st_approved'),canc=document.getElementById('st_cancelled');
+  var sl1=document.getElementById('sl1'),sl2=document.getElementById('sl2');
+  [draft,appv,canc].forEach(s=>{s.classList.remove('active','done')});
+  [sl1,sl2].forEach(l=>l.classList.remove('done'));
+  document.getElementById('btn_approve').style.display='';
+  document.getElementById('btn_draft_back').style.display='none';
+  document.getElementById('btn_reverse').style.display='none';
+  document.getElementById('btn_save').style.display='';
+  if(st==='draft'){draft.classList.add('active');}
+  else if(st==='approved'){
+    draft.classList.add('done');sl1.classList.add('done');appv.classList.add('active');
+    document.getElementById('btn_approve').style.display='none';
+    document.getElementById('btn_draft_back').style.display='';
+    document.getElementById('btn_reverse').style.display='';
+    document.getElementById('btn_save').style.display='none';
+  } else if(st==='cancelled'){
+    draft.classList.add('done');sl1.classList.add('done');appv.classList.add('done');sl2.classList.add('done');canc.classList.add('active');
+    document.getElementById('btn_approve').style.display='none';
+    document.getElementById('btn_save').style.display='none';
+  }
+  var sel=document.getElementById('pi_status');
+  if(sel) sel.value=st;
+  syncAdvanceEditability();
+}
+function doApprove(){
+  var approvalDate=document.getElementById('approval_date_input');
+  var approvalDisplay=document.getElementById('approval_date_display');
+  if(approvalDate && approvalDisplay){approvalDisplay.value=approvalDate.value;}
+  closeModal('modal_approve');setStatus('approved');
+}
+function switchTab(el,id){
+  el.closest('.form-card').querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  el.closest('.form-card').querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  var tc=document.getElementById(id);if(tc)tc.classList.add('active');
+}
+function openModal(id){document.getElementById(id).classList.add('open');}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+function addPurchaseLine(){
+  var tbody=document.querySelector('.line-grid tbody');
+  if(!tbody) return;
+  var rowCount=tbody.querySelectorAll('tr').length+1;
+  var row=document.createElement('tr');
+  row.innerHTML='<td>'+rowCount+'</td><td><input class="line-type" value="XİDMƏT" readonly></td><td><input class="line-account" value="721 - İnzibati xidmətlər" readonly></td><td><div class="lookup-combo"><input class="item-search" value="" placeholder="Məhsul və xidmət axtar..."><div class="lookup-panel"></div></div></td><td><select style="font-size:11px"><option>WH-01</option><option>WH-02</option></select></td><td><input value=""></td><td><input class="qty" type="number" value="1" style="width:50px"></td><td><input class="measure" value="xidmət" readonly></td><td><input class="price" type="number" value="0.00" style="width:90px"></td><td><input class="discount" type="number" value="0" style="width:60px"></td><td><input class="vat" type="number" value="18" style="width:60px"></td><td class="line-total">0.00</td>';
+  tbody.appendChild(row);
+  bindLineInteractions();
+  recalcRow(row);
+}
+
+function initDraggableColumns(selector, storagePrefix){
+  const tables=[...document.querySelectorAll(selector)];
+  tables.forEach((table,tableIdx)=>{
+    if(table.dataset.colDndInit==='1') return;
+    table.dataset.colDndInit='1';
+    if(!table.id) table.id=`${storagePrefix}_table_${tableIdx+1}`;
+    const key=`${storagePrefix}:${table.id}:order`;
+
+    const getHeaders=()=>[...table.querySelectorAll('thead th')];
+    const rows=()=>[...table.querySelectorAll('tr')];
+    const clearMarkers=()=>getHeaders().forEach(h=>h.classList.remove('col-drag-over-before','col-drag-over-after'));
+
+    function moveColumnTo(fromIdx,toIdx){
+      if(fromIdx===toIdx) return;
+      rows().forEach(row=>{
+        const cells=[...row.children];
+        const moving=cells[fromIdx];
+        if(!moving) return;
+        const reference=(fromIdx<toIdx)?cells[toIdx+1]:cells[toIdx];
+        row.insertBefore(moving,reference||null);
+      });
+    }
+
+    function saveOrder(){
+      const order=getHeaders().map(h=>h.dataset.colKey);
+      localStorage.setItem(key,JSON.stringify(order));
+    }
+
+    function applyStoredOrder(){
+      const raw=localStorage.getItem(key);
+      if(!raw) return;
+      let order=[];
+      try{order=JSON.parse(raw)||[];}catch(_){order=[];}
+      if(!Array.isArray(order)||!order.length) return;
+      order.forEach((colKey,targetIdx)=>{
+        const headers=getHeaders();
+        const currentIdx=headers.findIndex(h=>h.dataset.colKey===colKey);
+        if(currentIdx>=0 && currentIdx!==targetIdx){
+          moveColumnTo(currentIdx,targetIdx);
+        }
+      });
+    }
+
+    getHeaders().forEach((th,idx)=>{
+      if(!th.dataset.colKey) th.dataset.colKey=`col_${idx+1}`;
+    });
+    applyStoredOrder();
+
+    getHeaders().forEach(th=>{
+      th.classList.add('col-draggable');
+      th.draggable=true;
+      th.addEventListener('dragstart',e=>{
+        const headers=getHeaders();
+        e.dataTransfer.setData('text/plain',String(headers.indexOf(th)));
+        e.dataTransfer.effectAllowed='move';
+      });
+      th.addEventListener('dragover',e=>{
+        e.preventDefault();
+        const rect=th.getBoundingClientRect();
+        const before=(e.clientX-rect.left)<(rect.width/2);
+        th.classList.toggle('col-drag-over-before',before);
+        th.classList.toggle('col-drag-over-after',!before);
+      });
+      th.addEventListener('dragleave',()=>{
+        th.classList.remove('col-drag-over-before','col-drag-over-after');
+      });
+      th.addEventListener('drop',e=>{
+        e.preventDefault();
+        const fromIdx=Number(e.dataTransfer.getData('text/plain'));
+        const headers=getHeaders();
+        const toBaseIdx=headers.indexOf(th);
+        if(Number.isNaN(fromIdx)||toBaseIdx<0){clearMarkers();return;}
+        const before=th.classList.contains('col-drag-over-before');
+        let toIdx=before?toBaseIdx:toBaseIdx+1;
+        if(fromIdx<toIdx) toIdx-=1;
+        toIdx=Math.max(0,Math.min(headers.length-1,toIdx));
+        moveColumnTo(fromIdx,toIdx);
+        clearMarkers();
+        initDraggableColumns(selector,storagePrefix);
+        saveOrder();
+      });
+    });
+  });
+}
+// Init
+goScreen('list');
+bindLineInteractions();
+document.addEventListener('click', (e) => {
+  if(!e.target.closest('.lookup-combo')) closeLookupPanels();
+});
+window.addEventListener('resize', () => {
+  const active = document.querySelector('.lookup-panel[style*="display: block"]');
+  if(!active) return;
+  const input = active.parentElement?.querySelector('.item-search');
+  if(input) positionPurchaseLookupPanel(input,active);
+});
+window.addEventListener('scroll', () => {
+  const active = document.querySelector('.lookup-panel[style*="display: block"]');
+  if(!active) return;
+  const input = active.parentElement?.querySelector('.item-search');
+  if(input) positionPurchaseLookupPanel(input,active);
+}, true);
+populateCurrencySelects();
+document.getElementById('doc_currency')?.addEventListener('change', () => { syncRateFromCatalog(); recalcDocumentTotals(); });
+document.getElementById('entity_currency')?.addEventListener('change', () => { syncRateFromCatalog(); recalcDocumentTotals(); });
+document.getElementById('document_date')?.addEventListener('change', () => { syncRateFromCatalog(); recalcDocumentTotals(); });
+document.getElementById('qc_item_category')?.addEventListener('change', syncQuickCreateAccount);
+document.querySelectorAll('.line-grid tbody tr').forEach(recalcRow);
+syncRateFromCatalog();
+syncAdvanceEditability();
+recalcDocumentTotals();
+initDraggableColumns('.data-table,.line-grid','purchase-grid');
+
+</script>
+</body>
+</html>
