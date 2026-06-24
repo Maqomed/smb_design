@@ -3,611 +3,1137 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>SMB ERP — Modul seçimi</title>
+<title>SMB ERP - Modul secimi</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Display&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Display&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
 <style>
-
-/* ── Design System Tokens ─────────────────────────── */
 :root {
-  --clr-primary:         #1B3A5C;
-  --clr-primary-hover:   #24497A;
-  --clr-accent:          #2E6DA4;
-  --clr-secondary:       #8BAFC8;
+  --clr-primary: #1B3A5C;
+  --clr-primary-hover: #24497A;
+  --clr-accent: #2E6DA4;
+  --clr-secondary: #8BAFC8;
   --clr-secondary-light: #9BBDCF;
-  --clr-input-label:     #2A4E70;
-  --clr-text-secondary:  #4A7296;
-  --clr-text-muted:      #7AAFC5;
-  --clr-border:          #C8DCE8;
-  --clr-border-light:    #E0EBF5;
-  --clr-bg-page:         #EEF3F8;
-  --clr-bg-subtle:       #F4F7FB;
-  --clr-accent-bg:       #DBEAFE;
-  --clr-accent-fg:       #1E3A7A;
+  --clr-input-label: #2A4E70;
+  --clr-text-secondary: #4A7296;
+  --clr-text-muted: #7AAFC5;
+  --clr-border: #C8DCE8;
+  --clr-border-light: #E0EBF5;
+  --clr-bg-page: #EEF3F8;
+  --clr-bg-hover: #F0F6FF;
+  --clr-bg-subtle: #F4F7FB;
+  --clr-accent-bg: #DBEAFE;
+  --clr-accent-fg: #1E3A7A;
 }
 
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+*,
+*::before,
+*::after { box-sizing: border-box; margin: 0; padding: 0; }
+
 body {
-  font-family: 'DM Sans', sans-serif;
+  min-height: 100vh;
   background: var(--clr-bg-page);
   color: var(--clr-primary);
+  font-family: 'Trebuchet MS', Helvetica, Arial, sans-serif;
   font-size: 14px;
-  line-height: 1.6;
+  line-height: 1.55;
   -webkit-font-smoothing: antialiased;
-  min-height: 100vh;
 }
 
-/* ══════════════════════════════════════════════════
-   HEADER
-══════════════════════════════════════════════════ */
-.header {
-  height: 56px;
+a { color: inherit; text-decoration: none; }
+button, input { font: inherit; }
+
+.shell { min-height: 100vh; }
+
+.topbar {
+  height: 64px;
   background: var(--clr-primary);
-  display: flex;
+  border-bottom: 1px solid rgba(255,255,255,0.10);
+  display: grid;
+  grid-template-columns: auto minmax(260px, 420px) auto;
   align-items: center;
-  padding: 0 28px;
+  gap: 24px;
+  padding: 0 32px;
   position: sticky;
   top: 0;
-  z-index: 100;
-  box-shadow: 0 1px 6px rgba(0,0,0,0.18);
+  z-index: 20;
+  min-width: 0;
 }
 
-.header-logo {
-  display: flex;
+.brand {
+  display: inline-flex;
   align-items: center;
   gap: 10px;
-  text-decoration: none;
-}
-.header-logo-mark {
-  width: 30px; height: 30px;
-  border: 1.5px solid rgba(255,255,255,0.45);
-  border-radius: 7px;
-  display: flex; align-items: center; justify-content: center;
-  position: relative;
-  flex-shrink: 0;
-}
-.header-logo-mark::after {
-  content: '';
-  width: 13px; height: 13px;
-  border: 1.5px solid rgba(255,255,255,0.9);
-  border-radius: 3px;
-  transform: rotate(15deg);
-}
-.header-smb {
-  font-family: 'DM Serif Display', serif;
-  font-size: 20px;
-  color: #fff;
-  letter-spacing: -0.3px;
-}
-.header-erp {
-  font-family: 'DM Sans', sans-serif;
-  font-size: 9px;
-  font-weight: 700;
-  color: rgba(155,189,207,0.8);
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  margin-left: -2px;
+  min-width: 0;
 }
 
-.header-spacer { flex: 1; }
-
-.header-right {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.header-user {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  padding: 4px 8px 4px 4px;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background 0.15s;
-}
-.header-user:hover { background: rgba(255,255,255,0.10); }
-.header-avatar {
-  width: 32px; height: 32px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, var(--clr-accent), var(--clr-primary));
-  border: 1.5px solid rgba(255,255,255,0.30);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 11px; font-weight: 700; color: #fff;
-  flex-shrink: 0;
-}
-.header-user-info { display: flex; flex-direction: column; }
-.header-user-name { font-size: 12px; font-weight: 600; color: #fff; line-height: 1.2; }
-.header-user-role { font-size: 10px; color: rgba(155,189,207,0.75); line-height: 1.2; }
-
-.header-divider {
-  width: 1px; height: 22px;
-  background: rgba(255,255,255,0.12);
-  margin: 0 4px;
-}
-
-.btn-logout {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 0 14px;
+.brand-mark {
+  width: 34px;
   height: 34px;
-  border-radius: 7px;
-  border: 1px solid rgba(255,255,255,0.18);
-  background: transparent;
-  color: rgba(255,255,255,0.75);
-  font-family: 'DM Sans', sans-serif;
-  font-size: 12px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background 0.15s, color 0.15s, border-color 0.15s;
-}
-.btn-logout:hover {
-  background: rgba(239,68,68,0.15);
-  border-color: rgba(239,68,68,0.35);
-  color: #FCA5A5;
-}
-
-/* ══════════════════════════════════════════════════
-   HUB PAGE
-══════════════════════════════════════════════════ */
-.hub {
-  max-width: 1120px;
-  margin: 0 auto;
-  padding: 48px 28px 80px;
-}
-
-/* Welcome block */
-.hub-welcome {
-  margin-bottom: 44px;
-}
-.hub-greeting {
-  font-family: 'Instrument Serif', serif;
-  font-style: italic;
-  font-size: 38px;
-  color: var(--clr-primary);
-  letter-spacing: -0.5px;
-  line-height: 1.1;
-  margin-bottom: 8px;
-}
-.hub-greeting span {
-  font-style: normal;
-  font-family: 'DM Serif Display', serif;
-  color: var(--clr-accent);
-}
-.hub-subtext {
-  font-size: 14px;
-  color: var(--clr-text-secondary);
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-.hub-date {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 11px;
-  color: var(--clr-text-muted);
-  padding: 3px 10px;
-  background: var(--clr-bg-subtle);
-  border: 1px solid var(--clr-border-light);
-  border-radius: 6px;
-}
-
-/* Section label */
-.hub-section-label {
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.10em;
-  color: var(--clr-text-muted);
-  margin-bottom: 16px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-.hub-section-label::after {
-  content: '';
-  flex: 1;
-  height: 1px;
-  background: var(--clr-border-light);
-}
-
-/* Module grid */
-.module-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 16px;
-  margin-bottom: 40px;
-}
-
-/* Module card */
-.module-card {
-  background: #fff;
-  border: 1.5px solid var(--clr-border);
-  border-radius: 14px;
-  padding: 24px 22px 20px;
-  cursor: pointer;
-  text-decoration: none;
-  color: inherit;
-  transition: border-color 0.2s, box-shadow 0.2s, transform 0.15s;
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-  position: relative;
-  overflow: hidden;
-}
-.module-card::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 3px;
-  background: var(--card-accent, var(--clr-border));
-  opacity: 0;
-  transition: opacity 0.2s;
-}
-.module-card:hover {
-  border-color: var(--card-accent, var(--clr-accent));
-  box-shadow: 0 6px 24px rgba(27,58,92,0.10);
-  transform: translateY(-2px);
-}
-.module-card:hover::before { opacity: 1; }
-
-/* Icon container */
-.module-icon-wrap {
-  width: 46px; height: 46px;
-  border-radius: 12px;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.08);
+  border: 1.5px solid rgba(255,255,255,0.35);
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 16px;
-  background: var(--card-icon-bg, var(--clr-accent-bg));
-  color: var(--card-icon-color, var(--clr-accent));
-  transition: background 0.2s, transform 0.2s;
-  flex-shrink: 0;
-}
-.module-card:hover .module-icon-wrap {
-  background: var(--card-accent, var(--clr-accent));
-  color: #fff;
-  transform: scale(1.08);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.18);
 }
 
-.module-name {
-  font-family: 'DM Sans', sans-serif;
-  font-size: 15px;
+.brand-mark::after {
+  content: '';
+  width: 14px;
+  height: 14px;
+  border: 2px solid #fff;
+  border-radius: 4px;
+  transform: rotate(15deg);
+}
+
+.brand-name {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+}
+
+.brand-smb {
+  font-family: 'Trebuchet MS', Helvetica, Arial, sans-serif;
+  font-size: 22px;
+  line-height: 1;
+  color: #fff;
+}
+
+.brand-erp {
+  font-size: 10px;
   font-weight: 700;
-  color: var(--clr-primary);
-  margin-bottom: 5px;
-  letter-spacing: -0.2px;
+  letter-spacing: 0.14em;
+  color: rgba(155,189,207,0.82);
 }
-.module-desc {
-  font-size: 12px;
-  color: var(--clr-text-secondary);
-  line-height: 1.5;
-  flex: 1;
-  margin-bottom: 16px;
-}
-.module-footer {
+
+.search {
+  height: 38px;
+  border: 1px solid var(--clr-border);
+  border-radius: 8px;
+  background: #fff;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-}
-.module-submeta {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 10px;
+  gap: 9px;
+  padding: 0 12px;
   color: var(--clr-text-muted);
+  box-shadow: 0 1px 3px rgba(27,58,92,0.04);
 }
-.module-arrow {
-  width: 26px; height: 26px;
-  border-radius: 7px;
-  border: 1px solid var(--clr-border);
-  display: flex; align-items: center; justify-content: center;
-  color: var(--clr-text-muted);
-  transition: background 0.15s, border-color 0.15s, color 0.15s;
-  flex-shrink: 0;
+
+.search input {
+  border: 0;
+  outline: 0;
+  width: 100%;
+  color: var(--clr-primary);
+  background: transparent;
+  font-size: 13px;
 }
-.module-card:hover .module-arrow {
-  background: var(--card-accent, var(--clr-accent));
-  border-color: var(--card-accent, var(--clr-accent));
+
+.search input::placeholder { color: var(--clr-text-muted); }
+
+.top-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  min-width: 0;
+}
+
+.icon-btn {
+  width: 36px;
+  height: 36px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: rgba(255,255,255,0.68);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  position: relative;
+}
+
+.icon-btn:hover {
+  background: rgba(255,255,255,0.10);
+  border-color: rgba(255,255,255,0.12);
   color: #fff;
 }
 
-/* Utility grid — settings + help at bottom */
-.utility-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 16px;
+.notify-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #F59E0B;
+  border: 1.5px solid var(--clr-primary);
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  animation: notifyPulse 1.8s ease-out infinite;
 }
-.utility-card {
-  background: #fff;
-  border: 1.5px solid var(--clr-border);
-  border-radius: 14px;
-  padding: 18px 22px;
+@keyframes notifyPulse {
+  0% { box-shadow: 0 0 0 0 rgba(245,158,11,0.55); }
+  70% { box-shadow: 0 0 0 5px rgba(245,158,11,0); }
+  100% { box-shadow: 0 0 0 0 rgba(245,158,11,0); }
+}
+
+.icon-btn:hover svg { animation: bellRing 0.5s ease; transform-origin: 50% 0%; }
+@keyframes bellRing {
+  0%, 100% { transform: rotate(0deg); }
+  20% { transform: rotate(14deg); }
+  40% { transform: rotate(-12deg); }
+  60% { transform: rotate(8deg); }
+  80% { transform: rotate(-4deg); }
+}
+
+.user-menu {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 8px 4px 4px;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  background: transparent;
+  color: #fff;
   cursor: pointer;
-  text-decoration: none;
-  color: inherit;
+}
+
+.user-menu:hover {
+  background: rgba(255,255,255,0.10);
+  border-color: rgba(255,255,255,0.12);
+}
+
+.avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--clr-accent), var(--clr-primary));
+  color: #fff;
+  border: 1.5px solid rgba(255,255,255,0.30);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 12px;
+}
+
+.user-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  line-height: 1.2;
+}
+
+.user-name { font-size: 13px; font-weight: 700; }
+.user-role { font-size: 11px; color: var(--clr-text-muted); margin-top: 2px; }
+.topbar .user-role { color: rgba(155,189,207,0.78); }
+
+.logout {
+  height: 36px;
+  padding: 0 12px;
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 8px;
+  background: transparent;
+  color: rgba(255,255,255,0.68);
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  cursor: pointer;
+}
+
+.logout:hover {
+  border-color: rgba(239,68,68,0.32);
+  color: #FCA5A5;
+  background: rgba(239,68,68,0.15);
+}
+
+.page {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 22px 24px 42px;
+}
+
+.hero-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(190px, 260px);
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+.welcome-panel {
+  min-height: 158px;
+  border: 1px solid var(--clr-border-light);
+  border-radius: 8px;
+  background:
+    linear-gradient(135deg, rgba(255,255,255,0.96), rgba(240,246,255,0.82)),
+    radial-gradient(circle at 92% 10%, rgba(139,175,200,0.22), transparent 32%);
+  padding: 28px 30px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(27,58,92,0.05);
+}
+
+.welcome-panel::after {
+  content: '';
+  position: absolute;
+  right: -80px;
+  bottom: -100px;
+  width: 360px;
+  height: 210px;
+  border: 1px solid rgba(46,109,164,0.13);
+  border-radius: 50%;
+  transform: rotate(-18deg);
+}
+
+.welcome-title {
+  font-family: 'Trebuchet MS', Helvetica, Arial, sans-serif;
+  font-size: 32px;
+  line-height: 1.1;
+  font-weight: 400;
+  letter-spacing: 0;
+  margin-bottom: 8px;
+}
+
+.welcome-title span { color: var(--clr-accent); }
+
+.welcome-sub {
+  color: var(--clr-text-secondary);
+  max-width: 470px;
+  margin-bottom: 18px;
+}
+
+.date-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 30px;
+  padding: 0 11px;
+  border-radius: 7px;
+  background: var(--clr-accent-bg);
+  color: var(--clr-accent-fg);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.stat-card {
+  min-height: 158px;
+  border: 1px solid var(--clr-border-light);
+  border-radius: 8px;
+  background: #fff;
+  padding: 22px 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: 0 1px 4px rgba(27,58,92,0.05);
+}
+
+.stat-top {
   display: flex;
   align-items: center;
   gap: 14px;
-  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
 }
-.utility-card:hover {
-  border-color: var(--clr-border);
-  background: var(--clr-bg-subtle);
-  box-shadow: 0 2px 10px rgba(27,58,92,0.06);
-}
-.utility-icon {
-  width: 38px; height: 38px;
-  border-radius: 10px;
-  background: var(--clr-bg-subtle);
-  border: 1px solid var(--clr-border-light);
-  display: flex; align-items: center; justify-content: center;
-  color: var(--clr-text-secondary);
+
+.stat-icon {
+  width: 46px;
+  height: 46px;
+  border-radius: 13px;
+  background:
+    linear-gradient(135deg, rgba(255,255,255,0.38), rgba(255,255,255,0) 55%),
+    var(--stat-bg, var(--clr-accent-bg));
+  color: var(--stat-fg, var(--clr-accent-fg));
+  display: flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
+  box-shadow: 0 4px 10px -2px var(--stat-bg, rgba(27,58,92,0.25)), inset 0 1px 0 rgba(255,255,255,0.3);
 }
-.utility-name { font-size: 13.5px; font-weight: 600; color: var(--clr-primary); }
-.utility-desc { font-size: 11.5px; color: var(--clr-text-secondary); }
 
-/* ── Responsive ───────────────────────────────────── */
+.stat-label {
+  font-size: 12px;
+  color: var(--clr-text-secondary);
+  margin-bottom: 4px;
+}
 
-/* Tablet */
-@media (max-width: 1024px) {
+.stat-value {
+  font-size: 27px;
+  line-height: 1;
+  font-weight: 700;
+  color: var(--clr-primary);
+}
+
+.stat-note {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 11.5px;
+  color: var(--clr-text-secondary);
+}
+
+.status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #22C55E;
+}
+
+.sign-card { gap: 10px; }
+
+.stat-icon svg .sign-line { stroke-dasharray: 20; stroke-dashoffset: 20; }
+.sign-card:hover .stat-icon svg .sign-line {
+  animation: signLineDraw 0.9s ease both;
+}
+@keyframes signLineDraw { to { stroke-dashoffset: 0; } }
+
+.sign-card:hover .stat-icon svg .pen-unit {
+  animation: penSign 0.9s ease both;
+  transform-box: fill-box;
+  transform-origin: 70% 70%;
+}
+@keyframes penSign {
+  0%   { transform: rotate(-8deg) translate(-2px, 1px); }
+  20%  { transform: rotate(6deg) translate(-1px, -1px); }
+  40%  { transform: rotate(-10deg) translate(1px, 1px); }
+  60%  { transform: rotate(7deg) translate(2px, -1px); }
+  80%  { transform: rotate(-4deg) translate(3px, 0); }
+  100% { transform: rotate(0deg) translate(4px, 0); }
+}
+
+.sign-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.sign-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 11.5px;
+}
+
+.sign-item-name {
+  color: var(--clr-primary);
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sign-tag {
+  flex-shrink: 0;
+  padding: 2px 7px;
+  border-radius: 20px;
+  font-size: 10px;
+  font-weight: 700;
+  background: var(--clr-bg-subtle);
+  color: var(--clr-text-secondary);
+}
+
+.sign-tag.overdue { background: #FEE2E2; color: #B91C1C; }
+.sign-tag.soon { background: #FEF3C7; color: #B45309; }
+
+.sign-link {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--clr-accent);
+  text-decoration: none;
+}
+.sign-link:hover { text-decoration: underline; }
+
+.tabs-bar {
+  height: 54px;
+  border: 1px solid var(--clr-border-light);
+  border-radius: 8px;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  padding: 7px;
+  gap: 6px;
+  margin-bottom: 14px;
+  box-shadow: 0 1px 4px rgba(27,58,92,0.04);
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: thin;
+}
+
+.tab-btn {
+  flex: 0 0 auto;
+  height: 38px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--clr-text-secondary);
+  padding: 0 16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.tab-btn:hover { background: var(--clr-bg-hover); color: var(--clr-primary); }
+.tab-btn.active { background: var(--clr-accent); color: #fff; box-shadow: 0 2px 8px rgba(46,109,164,0.22); }
+
+.module-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+}
+
+.module-card {
+  min-height: 112px;
+  border: 1px solid var(--clr-border-light);
+  border-radius: 8px;
+  background: #fff;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  color: inherit;
+  box-shadow: 0 1px 4px rgba(27,58,92,0.05);
+  transition: border-color 0.16s ease, box-shadow 0.16s ease, transform 0.16s ease;
+  position: relative;
+  z-index: 1;
+}
+
+.module-card:hover {
+  border-color: var(--card-accent, var(--clr-accent));
+  box-shadow: 0 8px 22px rgba(27,58,92,0.10);
+  transform: translateY(-2px);
+  z-index: 50;
+}
+
+.module-icon {
+  width: 46px;
+  height: 46px;
+  border-radius: 13px;
+  background:
+    linear-gradient(135deg, rgba(255,255,255,0.38), rgba(255,255,255,0) 55%),
+    var(--card-bg, var(--clr-accent-bg));
+  color: var(--card-fg, var(--clr-accent-fg));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 14px;
+  position: relative;
+  box-shadow: 0 4px 10px -2px var(--card-bg, rgba(27,58,92,0.25)), inset 0 1px 0 rgba(255,255,255,0.3);
+  transition: transform 0.25s cubic-bezier(.34,1.56,.64,1);
+}
+
+.module-card:hover .module-icon { transform: scale(1.06) rotate(-2deg); }
+
+.module-name {
+  font-size: 15px;
+  font-weight: 700;
+  margin-bottom: 0;
+}
+
+.module-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  margin-top: auto;
+}
+
+.module-tooltip {
+  position: absolute;
+  left: 14px;
+  right: 14px;
+  bottom: calc(100% + 9px);
+  background: var(--clr-primary);
+  color: #fff;
+  border-radius: 8px;
+  padding: 11px 13px;
+  box-shadow: 0 10px 24px rgba(27,58,92,0.28);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(4px);
+  transition: opacity 0.16s ease, transform 0.16s ease, visibility 0.16s;
+  z-index: 30;
+  pointer-events: none;
+}
+
+.module-tooltip::before {
+  content: '';
+  position: absolute;
+  bottom: -5px;
+  left: 22px;
+  width: 10px;
+  height: 10px;
+  background: var(--clr-primary);
+  transform: rotate(45deg);
+}
+
+.module-card:hover .module-tooltip {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.module-tooltip-desc {
+  font-size: 12px;
+  line-height: 1.45;
+  color: rgba(255,255,255,0.92);
+  margin-bottom: 7px;
+}
+
+.module-tooltip-count {
+  font-family: Consolas, 'Courier New', monospace;
+  font-size: 10.5px;
+  color: rgba(255,255,255,0.6);
+}
+
+.module-arrow {
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--clr-border);
+  border-radius: 8px;
+  color: var(--clr-accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.module-card:hover .module-arrow {
+  border-color: var(--card-accent, var(--clr-accent));
+  background: var(--card-accent, var(--clr-accent));
+  color: #fff;
+}
+
+/* ── Icon micro-animations ─────────────────────────── */
+.module-icon svg { transform-origin: center; }
+
+.module-card:hover .module-arrow svg { animation: iconArrowNudge 0.4s ease; }
+@keyframes iconArrowNudge {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(3px); }
+}
+
+/* Maliyyə — coins drop from above onto the ledger, stacking up */
+.module-icon[data-anim="coins"] svg .coin { transform-box: fill-box; transform-origin: center; }
+.module-card:hover .module-icon[data-anim="coins"] svg .coin-1 { animation: coinDrop 0.45s cubic-bezier(.34,1.56,.64,1) both; }
+.module-card:hover .module-icon[data-anim="coins"] svg .coin-2 { animation: coinDrop 0.45s cubic-bezier(.34,1.56,.64,1) both 0.12s; }
+.module-card:hover .module-icon[data-anim="coins"] svg .coin-3 { animation: coinDrop 0.45s cubic-bezier(.34,1.56,.64,1) both 0.24s; }
+@keyframes coinDrop {
+  0% { transform: translateY(-16px); opacity: 0.35; }
+  70% { transform: translateY(2px); opacity: 1; }
+  100% { transform: translateY(0); }
+}
+
+/* Satış — price tag ripples in curved bands like a waving flag */
+.module-icon[data-anim="tagwave"] svg .tag-strip { transform-box: fill-box; transform-origin: center; }
+.module-card:hover .module-icon[data-anim="tagwave"] svg .tag-strip-1 { animation: tagRipple 0.9s ease-in-out infinite; }
+.module-card:hover .module-icon[data-anim="tagwave"] svg .tag-strip-2 { animation: tagRipple 0.9s ease-in-out infinite 0.1s; }
+.module-card:hover .module-icon[data-anim="tagwave"] svg .tag-strip-3 { animation: tagRipple 0.9s ease-in-out infinite 0.2s; }
+.module-card:hover .module-icon[data-anim="tagwave"] svg .tag-strip-4 { animation: tagRipple 0.9s ease-in-out infinite 0.3s; }
+@keyframes tagRipple {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50%      { transform: translateY(-1.4px) rotate(2deg); }
+}
+
+/* Alış — shopping cart drives along, wheels spin, wind lines stream past */
+.module-icon[data-anim="drive"] svg .cart-unit,
+.module-icon[data-anim="drive"] svg .wheel,
+.module-icon[data-anim="drive"] svg .wind { transform-box: fill-box; transform-origin: center; }
+.module-icon[data-anim="drive"] svg .wind { opacity: 0; }
+
+.module-card:hover .module-icon[data-anim="drive"] svg .cart-unit { animation: cartDrive 0.5s ease-in-out infinite; }
+.module-card:hover .module-icon[data-anim="drive"] svg .wheel { animation: wheelSpin 0.6s linear infinite; }
+.module-card:hover .module-icon[data-anim="drive"] svg .wind-1 { animation: windBlow 0.5s ease-in-out infinite; }
+.module-card:hover .module-icon[data-anim="drive"] svg .wind-2 { animation: windBlow 0.5s ease-in-out infinite 0.1s; }
+.module-card:hover .module-icon[data-anim="drive"] svg .wind-3 { animation: windBlow 0.5s ease-in-out infinite 0.2s; }
+
+@keyframes cartDrive {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(1px, -1px); }
+}
+@keyframes wheelSpin { to { transform: rotate(360deg); } }
+@keyframes windBlow {
+  0% { opacity: 0; transform: translateX(3px); }
+  40% { opacity: 1; transform: translateX(0); }
+  100% { opacity: 0; transform: translateX(-3px); }
+}
+
+/* Anbar — top box drops onto the stack, shakes, then settles */
+.module-icon[data-anim="boxdrop"] svg .box-drop { transform-box: fill-box; transform-origin: 50% 100%; }
+.module-card:hover .module-icon[data-anim="boxdrop"] svg .box-drop {
+  animation: boxDrop 1.1s both;
+}
+@keyframes boxDrop {
+  0%   { transform: translateY(-15px) rotate(0deg); opacity: 0.4; animation-timing-function: cubic-bezier(.55,.06,.68,.19); }
+  42%  { transform: translateY(0) rotate(0deg); opacity: 1; animation-timing-function: ease-out; }
+  55%  { transform: translateY(-2.2px) rotate(-5deg); animation-timing-function: ease-in; }
+  65%  { transform: translateY(0.4px) rotate(4deg); animation-timing-function: ease-out; }
+  75%  { transform: translateY(-1px) rotate(-2.5deg); animation-timing-function: ease-in; }
+  85%  { transform: translateY(0.3px) rotate(1.3deg); animation-timing-function: ease-out; }
+  93%  { transform: translateY(-0.15px) rotate(-0.5deg); }
+  100% { transform: translateY(0) rotate(0deg); }
+}
+
+/* Bank — card tilts like a swipe */
+.module-card:hover .module-icon[data-anim="swipe"] svg {
+  animation: iconSwipe 0.5s ease;
+  transform-origin: 50% 80%;
+}
+@keyframes iconSwipe {
+  0%, 100% { transform: rotate(0deg) translateY(0); }
+  50% { transform: rotate(-9deg) translateY(-2px); }
+}
+
+/* Hesabatlar — bars grow up from baseline, staggered */
+/* Hesabatlar — spreadsheet rows fill in, one after another, on a loop */
+.module-icon[data-anim="sheetfill"] svg .row-fill { stroke-dasharray: 16; stroke-dashoffset: 16; opacity: 0; }
+.module-card:hover .module-icon[data-anim="sheetfill"] svg .row-fill-1 { animation: sheetRowFill 1.4s ease-in-out infinite; }
+.module-card:hover .module-icon[data-anim="sheetfill"] svg .row-fill-2 { animation: sheetRowFill 1.4s ease-in-out infinite 0.35s; }
+.module-card:hover .module-icon[data-anim="sheetfill"] svg .row-fill-3 { animation: sheetRowFill 1.4s ease-in-out infinite 0.7s; }
+@keyframes sheetRowFill {
+  0%   { stroke-dashoffset: 16; opacity: 1; }
+  35%  { stroke-dashoffset: 0;  opacity: 1; }
+  75%  { stroke-dashoffset: 0;  opacity: 1; }
+  90%  { stroke-dashoffset: 0;  opacity: 0; }
+  100% { stroke-dashoffset: 16; opacity: 0; }
+}
+
+/* Kontragentlər — people icon pulses */
+.module-card:hover .module-icon[data-anim="pulse"] svg { animation: iconPulse 0.5s ease 2; }
+@keyframes iconPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.18); }
+}
+
+/* Məhsul kataloqu — list rows slide in, staggered */
+.module-icon[data-anim="slide"] svg line { transform-box: fill-box; }
+.module-card:hover .module-icon[data-anim="slide"] svg line:nth-child(1) { animation: iconSlideIn 0.3s ease 0s; }
+.module-card:hover .module-icon[data-anim="slide"] svg line:nth-child(2) { animation: iconSlideIn 0.3s ease 0.05s; }
+.module-card:hover .module-icon[data-anim="slide"] svg line:nth-child(3) { animation: iconSlideIn 0.3s ease 0.1s; }
+.module-card:hover .module-icon[data-anim="slide"] svg line:nth-child(4) { animation: iconSlideIn 0.3s ease 0.15s; }
+.module-card:hover .module-icon[data-anim="slide"] svg line:nth-child(5) { animation: iconSlideIn 0.3s ease 0.2s; }
+.module-card:hover .module-icon[data-anim="slide"] svg line:nth-child(6) { animation: iconSlideIn 0.3s ease 0.25s; }
+@keyframes iconSlideIn {
+  from { transform: translateX(-5px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+/* Generic bounce — used by tab/logout icons on hover */
+@keyframes iconPop {
+  0%, 100% { transform: scale(1) rotate(0deg); }
+  35% { transform: scale(1.16) rotate(-6deg); }
+  65% { transform: scale(0.94) rotate(4deg); }
+}
+.tab-btn:hover svg { animation: iconPop 0.45s ease; }
+.logout:hover svg { animation: iconPop 0.45s ease; }
+
+.hidden { display: none !important; }
+
+@media (max-width: 1080px) {
+  .topbar {
+    grid-template-columns: auto minmax(220px, 1fr) auto;
+    gap: 16px;
+    padding: 0 22px;
+  }
+  .hero-row { grid-template-columns: 1fr 1fr; }
+  .welcome-panel { grid-column: 1 / -1; }
   .module-grid { grid-template-columns: repeat(3, 1fr); }
-  .hub { padding: 36px 24px 60px; }
 }
 
-/* Mobile */
-@media (max-width: 768px) {
-  /* Header */
-  .header { padding: 0 16px; gap: 8px; }
-  .header-user-info { display: none; }
-  .logout-label { display: none; }
-  .btn-logout { padding: 0 10px; }
-  .header-divider { display: none; }
-  .header-spacer { flex: 1; }
-
-  /* Module grid */
-  .module-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
-  .hub { padding: 24px 16px 48px; }
-
-  /* Welcome */
-  .hub-greeting { font-size: 28px; }
-  .hub-subtext { flex-direction: column; align-items: flex-start; gap: 6px; }
-
-  /* Section labels */
-  .hub-section-label { font-size: 10px; }
-
-  /* Module cards — more compact */
-  .module-card { padding: 18px 16px 16px; }
-  .module-icon-wrap { width: 38px; height: 38px; border-radius: 10px; margin-bottom: 12px; }
-  .module-icon-wrap svg { width: 18px; height: 18px; }
-  .module-name { font-size: 13.5px; }
-  .module-desc { font-size: 11.5px; margin-bottom: 12px; }
-
-  /* Utility cards */
-  .utility-grid { grid-template-columns: 1fr; gap: 10px; }
+@media (max-width: 900px) {
+  .topbar {
+    grid-template-columns: auto 1fr auto;
+    height: auto;
+    padding: 12px 18px;
+  }
+  .search {
+    grid-column: 1 / -1;
+    order: 3;
+    width: 100%;
+  }
+  .page { padding: 18px 18px 36px; }
+  .hero-row { grid-template-columns: minmax(0, 1fr) minmax(180px, 220px); }
+  .module-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
-/* Small phones */
-@media (max-width: 480px) {
-  .module-grid { grid-template-columns: 1fr; gap: 10px; }
-  .hub-greeting { font-size: 24px; }
-  .hub-date { font-size: 10px; }
-  .module-card { padding: 16px 14px 14px; flex-direction: row; align-items: center; gap: 12px; }
-  .module-icon-wrap { margin-bottom: 0; flex-shrink: 0; }
-  .module-desc { display: none; }
-  .module-footer { display: none; }
-  .module-name { margin-bottom: 0; }
+@media (max-width: 760px) {
+  .topbar {
+    height: auto;
+    grid-template-columns: 1fr auto;
+    padding: 12px 16px;
+    gap: 12px;
+  }
+  .search { grid-column: 1 / -1; order: 3; }
+  .user-meta, .logout span { display: none; }
+  .page { padding: 16px 14px 32px; }
+  .hero-row, .module-grid { grid-template-columns: 1fr; }
+  .welcome-panel {
+    min-height: 0;
+    padding: 22px;
+  }
+  .welcome-panel::after {
+    right: -170px;
+    bottom: -130px;
+    opacity: 0.65;
+  }
+  .welcome-title { font-size: 27px; }
+  .stat-card {
+    min-height: 112px;
+    padding: 18px;
+  }
+  .module-card {
+    min-height: 100px;
+    padding: 16px;
+  }
 }
 
+@media (max-width: 520px) {
+  .topbar {
+    grid-template-columns: 1fr auto;
+    padding: 10px 12px;
+    gap: 10px;
+  }
+  .brand { gap: 8px; }
+  .brand-mark {
+    width: 31px;
+    height: 31px;
+    border-radius: 7px;
+  }
+  .brand-smb { font-size: 20px; }
+  .brand-erp { display: none; }
+  .top-actions { gap: 6px; }
+  .icon-btn,
+  .logout,
+  .user-menu { height: 34px; }
+  .logout { width: 34px; padding: 0; justify-content: center; }
+  .user-menu { padding: 2px; }
+  .avatar {
+    width: 32px;
+    height: 32px;
+  }
+  .search {
+    height: 36px;
+    padding: 0 10px;
+  }
+  .page { padding: 12px 10px 28px; }
+  .hero-row {
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  .welcome-panel {
+    padding: 18px;
+    border-radius: 8px;
+  }
+  .welcome-title {
+    font-size: 24px;
+    margin-bottom: 8px;
+  }
+  .welcome-sub {
+    font-size: 13px;
+    margin-bottom: 14px;
+  }
+  .date-pill {
+    max-width: 100%;
+    height: auto;
+    min-height: 30px;
+    white-space: normal;
+  }
+  .stat-card {
+    min-height: 96px;
+    padding: 14px;
+  }
+  .stat-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+  }
+  .stat-value { font-size: 24px; }
+  .tabs-bar {
+    height: auto;
+    padding: 6px;
+    margin-bottom: 10px;
+  }
+  .tab-btn {
+    height: 34px;
+    padding: 0 12px;
+    font-size: 12.5px;
+  }
+  .module-grid { gap: 10px; }
+  .module-card {
+    min-height: 0;
+    padding: 14px;
+    display: grid;
+    grid-template-columns: 38px minmax(0, 1fr) 28px;
+    column-gap: 12px;
+    row-gap: 4px;
+    align-items: center;
+  }
+  .module-icon {
+    grid-row: 1 / 4;
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    margin-bottom: 0;
+  }
+  .module-name {
+    margin-bottom: 0;
+    font-size: 14px;
+  }
+  .module-footer {
+    grid-column: 3;
+    grid-row: 1 / 4;
+    justify-content: center;
+  }
+  .module-tooltip { left: 10px; right: 10px; }
+  .module-arrow {
+    width: 28px;
+    height: 28px;
+  }
+}
+
+@media (max-width: 360px) {
+  .top-actions { gap: 4px; }
+  .icon-btn { display: none; }
+  .tab-btn { padding: 0 10px; }
+}
 </style>
 </head>
 <body>
+<div class="shell">
+  <header class="topbar">
+    <a class="brand" href="02-dashboard.html">
+      <span class="brand-mark"></span>
+      <span class="brand-name"><span class="brand-smb">SMB</span><span class="brand-erp">ERP</span></span>
+    </a>
 
-<!-- ═══════════════════════════════════════════════
-     HEADER
-════════════════════════════════════════════════ -->
-<header class="header">
+    <label class="search" aria-label="Axtaris">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input id="moduleSearch" type="search" placeholder="Modul, əməliyyat və ya bölmə axtar..." />
+    </label>
 
-  <a href="#" class="header-logo" style="gap:8px;display:flex;align-items:baseline;">
-    <div class="header-logo-mark"></div>
-    <span class="header-smb">SMB</span>
-    <span class="header-erp">ERP</span>
-  </a>
-
-  <div class="header-spacer"></div>
-
-  <div class="header-right">
-
-    <!-- Notifications — always visible -->
-    <button style="width:34px;height:34px;border-radius:8px;border:none;background:transparent;color:rgba(255,255,255,0.65);display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;transition:background 0.15s;" title="Bildirişlər" onmouseover="this.style.background='rgba(255,255,255,0.10)'" onmouseout="this.style.background='transparent'">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-      <span style="width:7px;height:7px;border-radius:50%;background:#F59E0B;border:1.5px solid var(--clr-primary);position:absolute;top:5px;right:5px;"></span>
-    </button>
-
-    <div class="header-divider"></div>
-
-    <div class="header-user">
-      <div class="header-avatar">AR</div>
-      <div class="header-user-info">
-        <span class="header-user-name">Admin Rəhimov</span>
-        <span class="header-user-role">Sistem administratoru</span>
-      </div>
+    <div class="top-actions">
+      <button class="icon-btn" title="Bildirişlər">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <span class="notify-dot"></span>
+      </button>
+      <button class="user-menu" onclick="window.location.href='04-admin.html'">
+        <span class="avatar">AR</span>
+        <span class="user-meta">
+          <span class="user-name">Admin Rəhimov</span>
+          <span class="user-role">Sistem administratoru</span>
+        </span>
+      </button>
+      <button class="logout" onclick="window.location.href='01-login.html'">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        <span>Çıxış</span>
+      </button>
     </div>
+  </header>
 
-    <div class="header-divider"></div>
+  <main class="page">
+    <section class="hero-row">
+      <div class="welcome-panel">
+        <h1 class="welcome-title">Xoş gəldiniz, <span>Admin</span></h1>
+        <p class="welcome-sub">Gündəlik əməliyyatlara tez keçin və şirkət modullarını vahid iş masasında idarə edin.</p>
+        <span class="date-pill">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          <span id="todayLabel">5 iyun 2026</span>
+        </span>
+      </div>
 
-    <button class="btn-logout" onclick="window.location.href='01-login.html'">
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-      <span class="logout-label">Çıxış</span>
-    </button>
-
-  </div>
-</header>
-
-<!-- ═══════════════════════════════════════════════
-     HUB CONTENT
-════════════════════════════════════════════════ -->
-<div class="hub">
-
-  <!-- Welcome -->
-  <div class="hub-welcome">
-    <div class="hub-greeting">Xoş gəldiniz, <span>Admin</span></div>
-    <div class="hub-subtext">
-      Hansı modulla işləmək istərsiniz?
-      <span class="hub-date" id="hubDate"></span>
-    </div>
-  </div>
-
-  <!-- Main modules -->
-  <div class="hub-section-label">İş modulları</div>
-
-  <div class="module-grid">
-
-    <!-- Maliyyə — clr-primary -->
-    <a class="module-card" href="03-module.html?m=maliyye" style="--card-accent:var(--clr-primary);--card-icon-bg:var(--clr-bg-page);--card-icon-color:var(--clr-primary);">
-      <div class="module-icon-wrap">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-      </div>
-      <div class="module-name">Maliyyə</div>
-      <div class="module-desc">Hesablar planı, jurnal qeydləri, büdcə planlaması və maliyyə hesabatları.</div>
-      <div class="module-footer">
-        <span class="module-submeta">4 alt-modul</span>
-        <div class="module-arrow"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
-      </div>
-    </a>
-
-    <!-- Satış — clr-accent -->
-    <a class="module-card" href="03-module.html?m=satis" style="--card-accent:var(--clr-accent);--card-icon-bg:var(--clr-accent-bg);--card-icon-color:var(--clr-accent-fg);">
-      <div class="module-icon-wrap">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-      </div>
-      <div class="module-name">Satış</div>
-      <div class="module-desc">Satış sifarişləri, fakturalar, müştəri reyestri və qiymət siyahıları.</div>
-      <div class="module-footer">
-        <span class="module-submeta">4 alt-modul</span>
-        <div class="module-arrow"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
-      </div>
-    </a>
-
-    <!-- Alış — clr-input-label -->
-    <a class="module-card" href="03-module.html?m=alis" style="--card-accent:var(--clr-input-label);--card-icon-bg:var(--clr-border-light);--card-icon-color:var(--clr-primary);">
-      <div class="module-icon-wrap">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
-      </div>
-      <div class="module-name">Alış</div>
-      <div class="module-desc">Alış sifarişləri, daxil olan fakturalar və təchizatçı idarəetməsi.</div>
-      <div class="module-footer">
-        <span class="module-submeta">3 alt-modul</span>
-        <div class="module-arrow"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
-      </div>
-    </a>
-
-    <!-- Anbar — success green (design system status color) -->
-    <a class="module-card" href="03-module.html?m=anbar" style="--card-accent:#22C55E;--card-icon-bg:#D1FAE5;--card-icon-color:#065F46;">
-      <div class="module-icon-wrap">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
-      </div>
-      <div class="module-name">Anbar</div>
-      <div class="module-desc">Məhsul ehtiyatları, qəbul-buraxılış əməliyyatları və inventar sayımı.</div>
-      <div class="module-footer">
-        <span class="module-submeta">4 alt-modul</span>
-        <div class="module-arrow"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
-      </div>
-    </a>
-
-    <!-- Bank — clr-secondary -->
-    <a class="module-card" href="03-module.html?m=bank" style="--card-accent:var(--clr-secondary);--card-icon-bg:var(--clr-bg-subtle);--card-icon-color:var(--clr-input-label);">
-      <div class="module-icon-wrap">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-      </div>
-      <div class="module-name">Bank</div>
-      <div class="module-desc">Bank hesabları, ödənişlər, köçürmələr və məzənnə əməliyyatları.</div>
-      <div class="module-footer">
-        <span class="module-submeta">4 alt-modul</span>
-        <div class="module-arrow"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
-      </div>
-    </a>
-
-    <!-- Hesabatlar — warning amber (design system status color) -->
-    <a class="module-card" href="03-module.html?m=hesabatlar" style="--card-accent:#F59E0B;--card-icon-bg:#FEF3C7;--card-icon-color:#92400E;">
-      <div class="module-icon-wrap">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-      </div>
-      <div class="module-name">Hesabatlar</div>
-      <div class="module-desc">Maliyyə, satış, anbar və vergi hesabatları. Xülasə və analitika.</div>
-      <div class="module-footer">
-        <span class="module-submeta">4 alt-modul</span>
-        <div class="module-arrow"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
-      </div>
-    </a>
-
-    <!-- Kontragentlər — clr-text-secondary -->
-    <a class="module-card" href="03-module.html?m=kontragentler" style="--card-accent:var(--clr-text-secondary);--card-icon-bg:var(--clr-border-light);--card-icon-color:var(--clr-primary);">
-      <div class="module-icon-wrap">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-      </div>
-      <div class="module-name">Kontragentlər</div>
-      <div class="module-desc">Müştərilər, təchizatçılar, əlaqə şəxsləri və müqavilə reyestri.</div>
-      <div class="module-footer">
-        <span class="module-submeta">3 alt-modul</span>
-        <div class="module-arrow"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
-      </div>
-    </a>
-
-    <!-- Məhsul kataloqu — error red (design system status color) -->
-    <a class="module-card" href="03-module.html?m=mehsul" style="--card-accent:#EF4444;--card-icon-bg:#FEE2E2;--card-icon-color:#991B1B;">
-      <div class="module-icon-wrap">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
-      </div>
-      <div class="module-name">Məhsul kataloqu</div>
-      <div class="module-desc">Məhsul və xidmət reyestri, qiymətlər, kateqoriyalar və vahid ölçüləri.</div>
-      <div class="module-footer">
-        <span class="module-submeta">3 alt-modul</span>
-        <div class="module-arrow">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      <div class="stat-card sign-card">
+        <div class="stat-top">
+          <div class="stat-icon" style="--stat-bg:#F59E0B;--stat-fg:#fff;">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path class="sign-line" d="M3 20.5q2.5 -2.5 5 0t5 0t5 0"/><g class="pen-unit"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/></g></svg>
+          </div>
+          <div>
+            <div class="stat-label">İmza gözləyən sənədlər</div>
+            <div class="stat-value">5</div>
+          </div>
         </div>
+        <ul class="sign-list">
+          <li class="sign-item">
+            <span class="sign-item-name">Faktura #INV-2024-00147</span>
+            <span class="sign-tag soon">2 gün</span>
+          </li>
+          <li class="sign-item">
+            <span class="sign-item-name">Müqavilə — Bakı MMC</span>
+            <span class="sign-tag overdue">Gecikib</span>
+          </li>
+        </ul>
+        <a class="sign-link" href="03-module.html?m=imza">Hamısına bax →</a>
       </div>
-    </a>
 
-  </div>
+    </section>
 
-  <!-- Utility modules -->
-  <div class="hub-section-label">Sistem</div>
+    <nav class="tabs-bar" aria-label="Modul siyahisi">
+      <button class="tab-btn active" data-filter="all">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
+        Bütün modullar
+      </button>
+      <button class="tab-btn" data-filter="favorite">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        Tez-tez istifadə olunanlar
+      </button>
+      <button class="tab-btn" data-filter="recent">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        Son istifadə edilənlər
+      </button>
+    </nav>
 
-  <div class="utility-grid">
+    <section class="module-grid" id="moduleGrid">
+      <a class="module-card" data-tags="favorite recent maliyye hesab jurnal odenis" href="03-module.html?m=maliyye" style="--card-accent:#6366F1;--card-bg:#6366F1;--card-fg:#fff;">
+        <span class="module-icon" data-anim="coins"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="4" width="11" height="17" rx="1.5"/><line x1="11" y1="2" x2="11" y2="5"/><line x1="14.5" y1="2" x2="14.5" y2="5"/><line x1="18" y1="2" x2="18" y2="5"/><line x1="12" y1="10" x2="17" y2="10"/><line x1="12" y1="13" x2="17" y2="13"/><line x1="12" y1="16" x2="15" y2="16"/><g class="coin coin-1"><ellipse cx="6.5" cy="19" rx="4" ry="1.7" fill="#E8B23A" stroke="#A6711E" stroke-width="1.1"/><line x1="3.6" y1="19" x2="9.4" y2="19" stroke="#A6711E" stroke-width="0.8"/></g><g class="coin coin-2"><ellipse cx="6.5" cy="16.6" rx="4" ry="1.7" fill="#F4C44B" stroke="#B9842A" stroke-width="1.1"/><line x1="3.6" y1="16.6" x2="9.4" y2="16.6" stroke="#B9842A" stroke-width="0.8"/></g><g class="coin coin-3"><ellipse cx="6.5" cy="14.2" rx="4" ry="1.7" fill="#FFD666" stroke="#C9941F" stroke-width="1.1"/><line x1="3.6" y1="14.2" x2="9.4" y2="14.2" stroke="#C9941F" stroke-width="0.8"/></g></svg></span>
+        <span class="module-name">Maliyyə</span>
+        <span class="module-footer"><span class="module-arrow"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span></span>
+        <div class="module-tooltip">
+          <p class="module-tooltip-desc">Hesablar planı, jurnal qeydləri, ödəniş tapşırıqları və maliyyə nəzarəti.</p>
+          <span class="module-tooltip-count">4 alt-modul</span>
+        </div>
+      </a>
 
-    <a class="utility-card" href="#">
-      <div class="utility-icon">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 0-14.14 0M4 12H2M22 12h-2M12 2v2M12 20v2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41M17.66 17.66l1.41 1.41M4.93 4.93l1.41 1.41"/></svg>
-      </div>
-      <div>
-        <div class="utility-name">Parametrlər</div>
-        <div class="utility-desc">Şirkət məlumatları, istifadəçilər, rollar və inteqrasiyalar</div>
-      </div>
-    </a>
+      <a class="module-card" data-tags="favorite recent satis faktura sifaris musteri" href="03-module.html?m=satis" style="--card-accent:#FB923C;--card-bg:#FB923C;--card-fg:#fff;">
+        <span class="module-icon" data-anim="tagwave"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+          <defs>
+            <g id="tagGlyph">
+              <path d="M20.59 13.41L13.42 20.58a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/>
+              <circle cx="7" cy="7" r="0.4" fill="currentColor" stroke="none"/>
+              <path d="M13 8.6h-2.8a1.2 1.2 0 0 0 0 2.4h1.6a1.2 1.2 0 0 1 0 2.4H9" stroke-width="1.4"/>
+              <line x1="11" y1="7.6" x2="11" y2="14.4" stroke-width="1.4"/>
+            </g>
+            <clipPath id="tagStrip1"><rect x="0" y="0" width="6" height="24"/></clipPath>
+            <clipPath id="tagStrip2"><rect x="6" y="0" width="6" height="24"/></clipPath>
+            <clipPath id="tagStrip3"><rect x="12" y="0" width="6" height="24"/></clipPath>
+            <clipPath id="tagStrip4"><rect x="18" y="0" width="6" height="24"/></clipPath>
+          </defs>
+          <g class="tag-strip tag-strip-1" clip-path="url(#tagStrip1)"><use href="#tagGlyph"/></g>
+          <g class="tag-strip tag-strip-2" clip-path="url(#tagStrip2)"><use href="#tagGlyph"/></g>
+          <g class="tag-strip tag-strip-3" clip-path="url(#tagStrip3)"><use href="#tagGlyph"/></g>
+          <g class="tag-strip tag-strip-4" clip-path="url(#tagStrip4)"><use href="#tagGlyph"/></g>
+        </svg></span>
+        <span class="module-name">Satış</span>
+        <span class="module-footer"><span class="module-arrow"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span></span>
+        <div class="module-tooltip">
+          <p class="module-tooltip-desc">Satış sifarişləri, fakturalar, müştəri reyestri və qiymət siyahıları.</p>
+          <span class="module-tooltip-count">4 alt-modul</span>
+        </div>
+      </a>
 
-    <a class="utility-card" href="#">
-      <div class="utility-icon">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-      </div>
-      <div>
-        <div class="utility-name">Kömək mərkəzi</div>
-        <div class="utility-desc">Sənədlər, təlimatlar, dəstək ilə əlaqə</div>
-      </div>
-    </a>
+      <a class="module-card" data-tags="alis satinalma techizatci faktura" href="03-module.html?m=alis" style="--card-accent:#EC4899;--card-bg:#EC4899;--card-fg:#fff;">
+        <span class="module-icon" data-anim="drive"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><g class="wind-lines"><line class="wind wind-1" x1="0" y1="6" x2="4" y2="6"/><line class="wind wind-2" x1="1" y1="9.5" x2="4.5" y2="9.5"/><line class="wind wind-3" x1="0" y1="13" x2="3.5" y2="13"/></g><g class="cart-unit"><path d="M5 2h2.5l2.5 11.5a1.8 1.8 0 0 0 1.8 1.5h7.2a1.8 1.8 0 0 0 1.8-1.5L23 6.5H10"/><circle class="wheel" cx="12" cy="20.3" r="1.7"/><circle class="wheel" cx="19" cy="20.3" r="1.7"/></g></svg></span>
+        <span class="module-name">Alış</span>
+        <span class="module-footer"><span class="module-arrow"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span></span>
+        <div class="module-tooltip">
+          <p class="module-tooltip-desc">Alış sifarişləri, daxil olan fakturalar və təchizatçı idarəetməsi.</p>
+          <span class="module-tooltip-count">3 alt-modul</span>
+        </div>
+      </a>
 
-  </div>
+      <a class="module-card" data-tags="favorite anbar mehsul qaliq inventar" href="03-module.html?m=anbar" style="--card-accent:#22C55E;--card-bg:#22C55E;--card-fg:#fff;">
+        <span class="module-icon" data-anim="boxdrop"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect class="box box-base" x="4.5" y="14" width="7.5" height="7.5"/><line x1="8.25" y1="14" x2="8.25" y2="16.5"/><rect class="box box-base" x="12" y="14" width="7.5" height="7.5"/><line x1="15.75" y1="14" x2="15.75" y2="16.5"/><g class="box-drop"><rect x="8.25" y="6.5" width="7.5" height="7.5"/><line x1="12" y1="6.5" x2="12" y2="9"/></g></svg></span>
+        <span class="module-name">Anbar</span>
+        <span class="module-footer"><span class="module-arrow"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span></span>
+        <div class="module-tooltip">
+          <p class="module-tooltip-desc">Məhsul ehtiyatları, qəbul-buraxılış əməliyyatları və inventar sayımı.</p>
+          <span class="module-tooltip-count">4 alt-modul</span>
+        </div>
+      </a>
 
+      <a class="module-card" data-tags="recent bank odenis kocurme mezene" href="03-module.html?m=bank" style="--card-accent:#0EA5E9;--card-bg:#0EA5E9;--card-fg:#fff;">
+        <span class="module-icon" data-anim="swipe"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></span>
+        <span class="module-name">Bank</span>
+        <span class="module-footer"><span class="module-arrow"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span></span>
+        <div class="module-tooltip">
+          <p class="module-tooltip-desc">Bank hesabları, ödənişlər, köçürmələr və məzənnə əməliyyatları.</p>
+          <span class="module-tooltip-count">4 alt-modul</span>
+        </div>
+      </a>
+
+      <a class="module-card" data-tags="hesabat analitika vergi maliyye satis" href="03-module.html?m=hesabatlar" style="--card-accent:#F59E0B;--card-bg:#F59E0B;--card-fg:#fff;">
+        <span class="module-icon" data-anim="sheetfill"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="1.5"/><line x1="3" y1="8" x2="21" y2="8"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/><line class="row-fill row-fill-1" x1="4" y1="10" x2="20" y2="10" stroke-width="2.6"/><line class="row-fill row-fill-2" x1="4" y1="14" x2="20" y2="14" stroke-width="2.6"/><line class="row-fill row-fill-3" x1="4" y1="18.3" x2="20" y2="18.3" stroke-width="2.6"/></svg></span>
+        <span class="module-name">Hesabatlar</span>
+        <span class="module-footer"><span class="module-arrow"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span></span>
+        <div class="module-tooltip">
+          <p class="module-tooltip-desc">Maliyyə, satış, anbar və vergi hesabatları üçün xülasə və analitika.</p>
+          <span class="module-tooltip-count">4 alt-modul</span>
+        </div>
+      </a>
+
+      <a class="module-card" data-tags="kontragent musteri techizatci muqavile" href="03-module.html?m=kontragentler" style="--card-accent:#8B5CF6;--card-bg:#8B5CF6;--card-fg:#fff;">
+        <span class="module-icon" data-anim="pulse"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
+        <span class="module-name">Kontragentlər</span>
+        <span class="module-footer"><span class="module-arrow"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span></span>
+        <div class="module-tooltip">
+          <p class="module-tooltip-desc">Müştərilər, təchizatçılar, əlaqə şəxsləri və müqavilə reyestri.</p>
+          <span class="module-tooltip-count">3 alt-modul</span>
+        </div>
+      </a>
+
+      <a class="module-card" data-tags="mehsul kataloq qiymet vahid kateqoriya" href="03-module.html?m=mehsul" style="--card-accent:#EF4444;--card-bg:#EF4444;--card-fg:#fff;">
+        <span class="module-icon" data-anim="slide"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></span>
+        <span class="module-name">Məhsul kataloqu</span>
+        <span class="module-footer"><span class="module-arrow"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span></span>
+        <div class="module-tooltip">
+          <p class="module-tooltip-desc">Məhsul və xidmət reyestri, qiymətlər, kateqoriyalar və vahid ölçüləri.</p>
+          <span class="module-tooltip-count">3 alt-modul</span>
+        </div>
+      </a>
+    </section>
+  </main>
 </div>
 
 <script>
-/* Live date */
-const d = new Date();
-const days   = ['Bazar','B.ertəsi','Çərşənbə ax.','Çərşənbə','Cümə ax.','Cümə','Şənbə'];
-const months = ['yanvar','fevral','mart','aprel','may','iyun','iyul','avqust','sentyabr','oktyabr','noyabr','dekabr'];
-document.getElementById('hubDate').textContent =
-  `${days[d.getDay()]}, ${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
+var activeFilter = 'all';
+var searchInput = document.getElementById('moduleSearch');
+var cards = Array.from(document.querySelectorAll('.module-card'));
+var tabButtons = Array.from(document.querySelectorAll('.tab-btn'));
+
+function normalize(text) {
+  return (text || '').toLocaleLowerCase('az-AZ');
+}
+
+function applyFilters() {
+  var query = normalize(searchInput.value);
+  cards.forEach(function(card) {
+    var tags = normalize(card.dataset.tags + ' ' + card.textContent);
+    var matchesTab = activeFilter === 'all' || tags.indexOf(activeFilter) >= 0;
+    var matchesSearch = !query || tags.indexOf(query) >= 0;
+    card.classList.toggle('hidden', !(matchesTab && matchesSearch));
+  });
+}
+
+tabButtons.forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    tabButtons.forEach(function(item) { item.classList.remove('active'); });
+    btn.classList.add('active');
+    activeFilter = btn.dataset.filter;
+    applyFilters();
+  });
+});
+
+searchInput.addEventListener('input', applyFilters);
+
+var days = ['Bazar', 'Bazar ertəsi', 'Çərşənbə axşamı', 'Çərşənbə', 'Cümə axşamı', 'Cümə', 'Şənbə'];
+var months = ['yanvar', 'fevral', 'mart', 'aprel', 'may', 'iyun', 'iyul', 'avqust', 'sentyabr', 'oktyabr', 'noyabr', 'dekabr'];
+var today = new Date();
+document.getElementById('todayLabel').textContent =
+  days[today.getDay()] + ', ' + today.getDate() + ' ' + months[today.getMonth()] + ' ' + today.getFullYear();
 </script>
 
+<!-- PersonaAI Chat Widget -->
+<script>
+window.PersonaAI = {
+  assistantId: 'smb-asistant-1782208620950',
+  apiKey: 'sk_LonESMhzrCoBynpF4Q7UndmkMJ9H8i4t',
+  apiUrl: 'https://www.personaai.site/api/v1/chat',
+  language: 'az',
+  position: 'bottom-right',
+  primaryColor: '#667EEA',
+  title: 'SMB Köməkçi'
+};
+</script>
+<script src="persona-widget.js"></script>
 </body>
 </html>

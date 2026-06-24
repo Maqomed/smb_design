@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SMB ERP — Project Overview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --primary: #1B3A5C;
+    --accent:  #2E6DA4;
+    --light:   #EEF3F8;
+    --border:  #C8DCE8;
+    --muted:   #4A7296;
+    --white:   #ffffff;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--light);
+    color: var(--primary);
+    font-size: 15px;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── Cover ── */
+  .cover {
+    background: linear-gradient(-45deg, #081828, #0F2844, #1B3A5C, #1A3F6F);
+    background-size: 400% 400%;
+    animation: shift 18s ease infinite;
+    color: #fff;
+    padding: 72px 48px 60px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  @keyframes shift {
+    0%   { background-position: 0% 50%; }
+    50%  { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  .cover-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 52px;
+  }
+
+  .cover-mark {
+    width: 38px; height: 38px;
+    border: 2px solid rgba(255,255,255,0.4);
+    border-radius: 9px;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .cover-mark::after {
+    content: '';
+    width: 16px; height: 16px;
+    border: 2px solid #fff;
+    border-radius: 4px;
+    transform: rotate(15deg);
+  }
+
+  .cover-logo-text {
+    font-family: 'DM Serif Display', serif;
+    font-size: 26px;
+  }
+
+  .cover-logo-sub {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    color: rgba(155,189,207,0.8);
+    margin-left: 4px;
+  }
+
+  .cover h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 48px;
+    line-height: 1.1;
+    letter-spacing: -0.5px;
+    margin-bottom: 16px;
+    max-width: 640px;
+  }
+
+  .cover p {
+    font-size: 17px;
+    color: rgba(155,189,207,0.9);
+    max-width: 520px;
+    margin-bottom: 36px;
+  }
+
+  .cover-meta {
+    display: flex;
+    gap: 28px;
+    flex-wrap: wrap;
+  }
+
+  .cover-badge {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 13px;
+    color: rgba(255,255,255,0.55);
+    font-weight: 500;
+  }
+
+  .cover-badge-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: rgba(46,109,164,0.8);
+  }
+
+  /* ── Content wrapper ── */
+  .wrap {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 56px 40px 80px;
+  }
+
+  /* ── Section ── */
+  .section { margin-bottom: 56px; }
+
+  .section-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 10px;
+  }
+
+  .section-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 30px;
+    margin-bottom: 14px;
+    line-height: 1.2;
+  }
+
+  .section-body {
+    color: var(--muted);
+    max-width: 720px;
+  }
+
+  .section-body p + p { margin-top: 12px; }
+
+  /* ── Divider ── */
+  hr {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 48px 0;
+  }
+
+  /* ── Module grid ── */
+  .module-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 14px;
+    margin-top: 24px;
+  }
+
+  .module-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    transition: box-shadow 0.15s;
+  }
+
+  .module-card:hover { box-shadow: 0 6px 18px rgba(27,58,92,0.10); }
+
+  .module-card-icon {
+    width: 40px; height: 40px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 12px;
+    font-size: 20px;
+  }
+
+  .module-card h3 {
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+
+  .module-card p {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  .module-card-sub {
+    margin-top: 10px;
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--accent);
+  }
+
+  /* ── Screen flow ── */
+  .screen-flow {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+    gap: 14px;
+    margin-top: 24px;
+  }
+
+  .screen-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px 18px;
+  }
+
+  .screen-number {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    color: var(--accent);
+    margin-bottom: 8px;
+  }
+
+  .screen-card h3 {
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+
+  .screen-card p {
+    font-size: 12.5px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  /* ── Highlight boxes ── */
+  .highlight-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+    gap: 14px;
+    margin-top: 24px;
+  }
+
+  .highlight {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 10px 10px 0;
+    padding: 18px 20px;
+  }
+
+  .highlight h4 {
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+
+  .highlight p {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  /* ── Language pills ── */
+  .lang-pills { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
+
+  .lang-pill {
+    padding: 6px 16px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    background: var(--white);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--muted);
+  }
+
+  /* ── Footer ── */
+  .footer {
+    background: var(--primary);
+    color: rgba(155,189,207,0.7);
+    text-align: center;
+    padding: 28px 24px;
+    font-size: 12.5px;
+  }
+
+  .footer strong { color: rgba(255,255,255,0.6); }
+
+  @media print {
+    .cover { animation: none; background: #1B3A5C; }
+    body { background: #fff; }
+    .module-card, .screen-card, .highlight { break-inside: avoid; }
+  }
+
+  @media (max-width: 640px) {
+    .cover { padding: 48px 24px 40px; }
+    .cover h1 { font-size: 34px; }
+    .wrap { padding: 36px 20px 60px; }
+    .section-title { font-size: 24px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══ COVER ═══════════════════════════════════════════ -->
+<div class="cover">
+  <div class="cover-logo">
+    <div class="cover-mark"></div>
+    <span class="cover-logo-text">SMB</span>
+    <span class="cover-logo-sub">ERP</span>
+  </div>
+
+  <h1>ERP for Small &amp; Medium Businesses</h1>
+  <p>A unified platform to manage finance, sales, purchasing, inventory, banking, and reporting — all in one place.</p>
+
+  <div class="cover-meta">
+    <div class="cover-badge"><span class="cover-badge-dot"></span> Project Overview</div>
+    <div class="cover-badge"><span class="cover-badge-dot"></span> Non-Technical Summary</div>
+    <div class="cover-badge"><span class="cover-badge-dot"></span> Version 1.0 · 2026</div>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- ═══ WHAT IS IT ═════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-label">Overview</div>
+    <div class="section-title">What is SMB ERP?</div>
+    <div class="section-body">
+      <p>SMB ERP is a business management system designed specifically for small and medium-sized companies. It replaces a scattered collection of spreadsheets, paper records, and disconnected tools with a single, easy-to-use web application.</p>
+      <p>The system covers every core area of a business — from recording a sale or purchase, to tracking stock in the warehouse, to reconciling bank transactions and generating financial reports. Everything is connected, so information entered in one area is immediately reflected everywhere else.</p>
+      <p>The interface is available in three languages — Azerbaijani, English, and Russian — making it accessible to a broad range of users without any additional configuration.</p>
+    </div>
+  </div>
+
+  <hr />
+
+  <!-- ═══ WHO IS IT FOR ══════════════════════════════════ -->
+  <div class="section">
+    <div class="section-label">Audience</div>
+    <div class="section-title">Who is it for?</div>
+    <div class="section-body">
+      <p>SMB ERP is built for businesses that have outgrown spreadsheets but do not need (or cannot afford) the complexity of large enterprise systems like SAP or Oracle.</p>
+      <p>Typical users include business owners who want a clear financial picture of their company, accountants managing invoices and payments, warehouse staff tracking stock movements, and sales teams creating and sending customer orders.</p>
+      <p>The system is designed so that different people can use different parts (modules) relevant to their role, all working from the same underlying data.</p>
+    </div>
+  </div>
+
+  <hr />
+
+  <!-- ═══ MODULES ════════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-label">Core Modules</div>
+    <div class="section-title">What can it do?</div>
+    <div class="section-body">
+      <p>The system is organised into eight modules. Each module covers a distinct area of the business and can be accessed independently from the main dashboard.</p>
+    </div>
+
+    <div class="module-grid">
+
+      <div class="module-card">
+        <div class="module-card-icon" style="background:#DBEAFE; color:#1E3A7A;">💰</div>
+        <h3>Finance</h3>
+        <p>Manage the chart of accounts, journal entries, and payment orders. Provides full visibility over the company's financial position.</p>
+        <div class="module-card-sub">4 sub-modules</div>
+      </div>
+
+      <div class="module-card">
+        <div class="module-card-icon" style="background:#DBEAFE; color:#1E3A7A;">📈</div>
+        <h3>Sales</h3>
+        <p>Create sales orders and invoices, manage customer records, and maintain price lists. Covers the entire customer-facing sales workflow.</p>
+        <div class="module-card-sub">4 sub-modules</div>
+      </div>
+
+      <div class="module-card">
+        <div class="module-card-icon" style="background:#E0EBF5; color:#1B3A5C;">🛒</div>
+        <h3>Purchasing</h3>
+        <p>Raise purchase orders, record incoming supplier invoices, and manage supplier relationships and payment terms.</p>
+        <div class="module-card-sub">3 sub-modules</div>
+      </div>
+
+      <div class="module-card">
+        <div class="module-card-icon" style="background:#D1FAE5; color:#065F46;">📦</div>
+        <h3>Inventory</h3>
+        <p>Track product stock levels across one or more warehouses. Record goods receipts, dispatch, transfers, and stock counts.</p>
+        <div class="module-card-sub">4 sub-modules</div>
+      </div>
+
+      <div class="module-card">
+        <div class="module-card-icon" style="background:#F4F7FB; color:#2A4E70;">🏦</div>
+        <h3>Banking</h3>
+        <p>Connect bank accounts, record payments and transfers, handle foreign currency transactions, and reconcile balances.</p>
+        <div class="module-card-sub">4 sub-modules</div>
+      </div>
+
+      <div class="module-card">
+        <div class="module-card-icon" style="background:#FEF3C7; color:#92400E;">📊</div>
+        <h3>Reports</h3>
+        <p>Generate financial, sales, inventory, and tax reports. Summary dashboards give management an at-a-glance view of business performance.</p>
+        <div class="module-card-sub">4 sub-modules</div>
+      </div>
+
+      <div class="module-card">
+        <div class="module-card-icon" style="background:#E0EBF5; color:#1B3A5C;">👥</div>
+        <h3>Counterparties</h3>
+        <p>A shared registry of all customers and suppliers, including contact details, contract records, and transaction history.</p>
+        <div class="module-card-sub">3 sub-modules</div>
+      </div>
+
+      <div class="module-card">
+        <div class="module-card-icon" style="background:#FEE2E2; color:#991B1B;">📋</div>
+        <h3>Product Catalogue</h3>
+        <p>Define and categorise products and services with prices, units of measure, and descriptions used across sales, purchasing, and inventory.</p>
+        <div class="module-card-sub">3 sub-modules</div>
+      </div>
+
+    </div>
+  </div>
+
+  <hr />
+
+  <!-- ═══ USER EXPERIENCE ════════════════════════════════ -->
+  <div class="section">
+    <div class="section-label">User Experience</div>
+    <div class="section-title">How does a user interact with it?</div>
+    <div class="section-body">
+      <p>The application follows a simple four-screen flow designed to feel intuitive from the first login.</p>
+    </div>
+
+    <div class="screen-flow">
+      <div class="screen-card">
+        <div class="screen-number">SCREEN 01</div>
+        <h3>Login</h3>
+        <p>Users sign in with an email and password. The language of the interface is selected here and persists throughout the session.</p>
+      </div>
+      <div class="screen-card">
+        <div class="screen-number">SCREEN 02</div>
+        <h3>Dashboard</h3>
+        <p>A welcome screen listing all available modules. Users can search by keyword or filter to their most-used or recently visited modules.</p>
+      </div>
+      <div class="screen-card">
+        <div class="screen-number">SCREEN 03</div>
+        <h3>Module View</h3>
+        <p>Each module opens into its own workspace with a sidebar for sub-sections, a data table, and an action panel for creating and editing records.</p>
+      </div>
+      <div class="screen-card">
+        <div class="screen-number">SCREEN 04</div>
+        <h3>Admin Profile</h3>
+        <p>System administrators can view and manage their account settings, permissions, and system configuration from a dedicated profile page.</p>
+      </div>
+    </div>
+  </div>
+
+  <hr />
+
+  <!-- ═══ KEY QUALITIES ══════════════════════════════════ -->
+  <div class="section">
+    <div class="section-label">Key Qualities</div>
+    <div class="section-title">What makes it stand out?</div>
+
+    <div class="highlight-row">
+      <div class="highlight">
+        <h4>Everything in one place</h4>
+        <p>No more jumping between separate apps. Finance, stock, sales, and banking share the same data in real time.</p>
+      </div>
+      <div class="highlight">
+        <h4>Multi-language support</h4>
+        <p>The full interface is available in Azerbaijani, English, and Russian — switchable with a single click.</p>
+        <div class="lang-pills">
+          <span class="lang-pill">AZ</span>
+          <span class="lang-pill">EN</span>
+          <span class="lang-pill">RU</span>
+        </div>
+      </div>
+      <div class="highlight">
+        <h4>Clean, modern design</h4>
+        <p>A professional visual identity that feels approachable — not intimidating like legacy ERP systems.</p>
+      </div>
+      <div class="highlight">
+        <h4>Role-based access</h4>
+        <p>Each user sees only the modules relevant to their job. An accountant, a warehouse manager, and a salesperson each get a tailored experience.</p>
+      </div>
+      <div class="highlight">
+        <h4>Works on any device</h4>
+        <p>The interface is fully responsive — it adapts gracefully to desktops, tablets, and mobile phones.</p>
+      </div>
+      <div class="highlight">
+        <h4>Designed for growth</h4>
+        <p>Built modularly so new capabilities can be added as the business grows, without disrupting existing workflows.</p>
+      </div>
+    </div>
+  </div>
+
+  <hr />
+
+  <!-- ═══ CURRENT STATUS ═════════════════════════════════ -->
+  <div class="section">
+    <div class="section-label">Project Status</div>
+    <div class="section-title">Where are we now?</div>
+    <div class="section-body">
+      <p>The project is currently at the <strong>wireframe and design prototype stage</strong>. All four core screens have been built as interactive HTML wireframes that demonstrate the intended look, feel, and navigation of the system.</p>
+      <p>The wireframes are fully clickable — a user can log in with demo credentials, browse the module dashboard, navigate into a module's detail view, and visit the admin profile page. This allows stakeholders to experience the product's design and flow before any backend development begins.</p>
+      <p>The next step is to validate the design with end users, incorporate feedback, and begin the development of the live application.</p>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══ FOOTER ════════════════════════════════════════════ -->
+<div class="footer">
+  <strong>SMB ERP</strong> &nbsp;·&nbsp; Project Overview Document &nbsp;·&nbsp; v1.0 &nbsp;·&nbsp; 2026
+</div>
+
+</body>
+</html>
