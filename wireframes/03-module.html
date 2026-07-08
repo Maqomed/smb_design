@@ -1824,7 +1824,7 @@ select.input { appearance: none; -webkit-appearance: none; background-image: url
       <div class="header-user" role="button" tabindex="0" title="Admin profili" onclick="window.location.href='04-admin.html'" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();window.location.href='04-admin.html';}">
         <div class="avatar">AR</div>
         <div>
-          <div class="user-name">Admin Rəhimov</div>
+          <div class="user-name">Misir Babayev</div>
           <div class="user-role">Sistem administratoru</div>
         </div>
       </div>
@@ -1859,12 +1859,6 @@ select.input { appearance: none; -webkit-appearance: none; background-image: url
 
       <!-- Scrollable sidebar content -->
       <div class="ov-scroll" id="sidebarScroll" style="flex:1;display:flex;flex-direction:column;overflow-x:hidden;">
-
-        <!-- Back to hub -->
-        <a class="sidebar-back" href="02-dashboard.html">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-          <span class="nav-back-label">Ana səhifə</span>
-        </a>
 
         <!-- Module identity — rendered by JS -->
         <div class="sidebar-module-hd">
@@ -2060,7 +2054,7 @@ function icon(key, size = 15) {
   return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">${ICONS[key]}</svg>`;
 }
 const moreIcon = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><circle cx="5" cy="12" r="1" fill="currentColor"/><circle cx="12" cy="12" r="1" fill="currentColor"/><circle cx="19" cy="12" r="1" fill="currentColor"/></svg>`;
-const checkCell = `<td style="padding:11px 8px 11px 14px;"><input type="checkbox" style="cursor:pointer;accent-color:var(--clr-accent);"/></td>`;
+const checkCell = `<td style="padding:11px 8px 11px 14px;"><div class="cg-checkbox" role="checkbox" aria-checked="false" tabindex="0" onclick="this.classList.toggle('checked');this.setAttribute('aria-checked',this.classList.contains('checked'));event.stopPropagation()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}"></div></td>`;
 const actionCell = ``;
 
 /* ── Module definitions ───────────────────────────── */
@@ -3137,6 +3131,30 @@ function clearAllFilters(silent) {
 var ntChipActive = [];
 var ntChipReady  = false;
 
+/* Suggestions are pulled from the table actually on screen, not a fixed
+   list, so they always match the active module's real data. */
+function ntTableSuggestions() {
+  var tbody = document.getElementById('tableBody');
+  if (!tbody) return [];
+  var set = {};
+  tbody.querySelectorAll('tr').forEach(function(tr) {
+    tr.querySelectorAll('td').forEach(function(td) {
+      if (td.querySelector('input,button,select')) return;
+      var lines = td.querySelectorAll('div');
+      if (lines.length) {
+        lines.forEach(function(line) {
+          var t = line.textContent.trim();
+          if (t && !/^[\d.,\s—-]+$/.test(t)) set[t] = true;
+        });
+        return;
+      }
+      var text = td.textContent.trim();
+      if (text && !/^[\d.,\s—-]+$/.test(text) && !/^\d{2}\.\d{2}\.\d{4}$/.test(text)) set[text] = true;
+    });
+  });
+  return Object.keys(set);
+}
+
 function ntChipClear() {
   ntChipActive = [];
   var wrap = document.getElementById('toolbarChipWrap');
@@ -3157,7 +3175,7 @@ function ntChipInit() {
   var focIdx = -1;
 
   function available(q) {
-    return TAG_SUGGESTIONS.filter(function(s) {
+    return ntTableSuggestions().filter(function(s) {
       return s.toLowerCase().includes(q.toLowerCase()) && !ntChipActive.includes(s);
     });
   }
@@ -3966,11 +3984,13 @@ function cgRender() {
   var thCb = document.createElement('th');
   thCb.style.cssText = 'width:32px;padding:10px 8px 10px 14px;';
   /* Non-native toggle — a real <input type="checkbox"> can paint a faint
-     stray glyph at some zoom/DPI levels even with appearance:none; a plain
-     button avoids the browser's native form-control rendering entirely. */
-  var selectAll = document.createElement('button');
-  selectAll.type = 'button';
+     stray glyph at some zoom/DPI levels even with appearance:none, and a
+     <button> does too (Chromium paints a stray dot on empty buttons even
+     with appearance:none); a plain div avoids native form-control
+     rendering entirely. */
+  var selectAll = document.createElement('div');
   selectAll.className = 'cg-checkbox';
+  selectAll.tabIndex = 0;
   selectAll.setAttribute('role', 'checkbox');
   selectAll.setAttribute('aria-checked', 'false');
   thCb.appendChild(selectAll);
@@ -4073,6 +4093,9 @@ function cgRender() {
     visible.forEach(function(r) { r.sel = next; });
     cgRender();
   });
+  selectAll.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); selectAll.click(); }
+  });
 
   /* ── Build tbody ──────────────────────────────────── */
   var tbody = cgTable.querySelector('tbody');
@@ -4096,9 +4119,9 @@ function cgRender() {
     /* Checkbox td */
     var tdCb = document.createElement('td');
     tdCb.style.cssText = 'padding:10px 8px 10px 14px;width:32px';
-    var cb = document.createElement('button');
-    cb.type = 'button';
+    var cb = document.createElement('div');
     cb.className = 'cg-checkbox' + (row.sel ? ' checked' : '');
+    cb.tabIndex = 0;
     cb.setAttribute('role', 'checkbox');
     cb.setAttribute('aria-checked', String(!!row.sel));
     cb.addEventListener('click', function(e) {
@@ -4112,6 +4135,9 @@ function cgRender() {
       selectAll.classList.toggle('checked', allSel);
       selectAll.classList.toggle('indeterminate', someSel);
       selectAll.setAttribute('aria-checked', someSel ? 'mixed' : String(allSel));
+    });
+    cb.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); cb.click(); }
     });
     tdCb.appendChild(cb);
     tr.appendChild(tdCb);
@@ -5552,6 +5578,204 @@ bootRenderTable();
     </div>
   </div>
 </div>
+
+<script>
+/* ── Module page i18n ─────────────────────────────────
+   Reads smb_lang set by the login page. Runs after
+   bootRenderTable() so all dynamic content is in the DOM.  */
+(function() {
+  var lang = localStorage.getItem('smb_lang') || 'az';
+  if (lang === 'az') return;
+
+  var DICT = {
+    en: {
+      /* Header / breadcrumb */
+      'Ana səhifə': 'Home',
+      'Modullar': 'Modules',
+      'Çıxış': 'Sign out',
+      'Sistem administratoru': 'System administrator',
+      /* Module names (breadcrumb, sidebar, logo dropdown) */
+      'Maliyyə': 'Finance',
+      'Satış': 'Sales',
+      'Alış': 'Procurement',
+      'Anbar': 'Inventory',
+      'Bank': 'Banking',
+      'Hesabatlar': 'Reports',
+      'Kontragentlər': 'Counterparties',
+      'Məhsul kataloqu': 'Product catalogue',
+      'Alış sənədləri': 'Purchase documents',
+      'İmza': 'Signatures',
+      /* Sidebar section headers */
+      'Sənədlər': 'Documents',
+      'Kataloqlar': 'Catalogues',
+      'Analitika': 'Analytics',
+      /* İmza sidebar items */
+      'İmza gözləyən sənədlər': 'Documents awaiting signature',
+      'İmzalanmış sənədlər': 'Signed documents',
+      'Rədd edilmiş sənədlər': 'Rejected documents',
+      'İmza səlahiyyətliləri': 'Signing authorities',
+      /* Page & button */
+      'İmza tələbi göndər': 'Send signature request',
+      'İxrac': 'Export',
+      /* Toolbar */
+      'Status: Hamısı': 'Status: All',
+      'Hamısı': 'All',
+      'Tarix aralığı': 'Date range',
+      'Axtar: müştəri, sənəd, status…': 'Search: customer, document, status…',
+      'Sənəd axtar...': 'Search documents...',
+      '5 sənəd': '5 documents',
+      '1–5 / 5 qeyd göstərilir': '1–5 / 5 records shown',
+      /* Column headers */
+      'Sənəd №': 'Doc No.',
+      'Növ': 'Type',
+      'Göndərən': 'Sender',
+      'Göndərilmə tarixi': 'Sent date',
+      'Son tarix': 'Due date',
+      'Məbləğ': 'Amount',
+      'Status': 'Status',
+      /* Document types (Növ column) */
+      'Faktura': 'Invoice',
+      'Müqavilə': 'Contract',
+      'Ödəniş tapşırığı': 'Payment order',
+      'Qəbul aktı': 'Receipt act',
+      'Satış sifarişi': 'Sales order',
+      /* Department labels */
+      'Satış şöbəsi': 'Sales dept.',
+      'Hüquq şöbəsi': 'Legal dept.',
+      'Maliyyə şöbəsi': 'Finance dept.',
+      'Anbar şöbəsi': 'Warehouse dept.',
+      /* Status badges */
+      '2 gün qalıb': '2 days left',
+      '3 gün qalıb': '3 days left',
+      'Gecikib': 'Overdue',
+      'Gözlənilir': 'Pending',
+      /* Logo dropdown nav */
+      'Hesablar planı': 'Chart of accounts',
+      'Jurnal qeydləri': 'Journal entries',
+      'Ödəniş tapşırıqları': 'Payment orders',
+      'Maliyyə nəzarəti': 'Financial control',
+      'Satış sifarişləri': 'Sales orders',
+      'Fakturalar': 'Invoices',
+      'Müştəri reyestri': 'Customer registry',
+      'Qiymət siyahıları': 'Price lists',
+      'Alış sifarişləri': 'Purchase orders',
+      'Daxil olan fakturalar': 'Incoming invoices',
+      'Təchizatçı idarəetməsi': 'Supplier management',
+      'Məhsul ehtiyatları': 'Product inventory',
+      'Qəbul-buraxılış əməliyyatları': 'Receiving/issue operations',
+      'İnventar sayımı': 'Inventory count',
+      'Bank hesabları': 'Bank accounts',
+      'Ödənişlər': 'Payments',
+      'Köçürmələr': 'Transfers',
+      'Məzənnə əməliyyatları': 'Exchange rate operations',
+      'Maliyyə hesabatı': 'Financial report',
+      'Satış hesabatı': 'Sales report',
+      'Anbar hesabatı': 'Inventory report',
+      'Vergi hesabatı': 'Tax report',
+      'Müştərilər': 'Customers',
+      'Təchizatçılar': 'Suppliers',
+      'Əlaqə şəxsləri': 'Contacts',
+      'Müqavilə reyestri': 'Contract registry',
+      'Məhsul reyestri': 'Product registry',
+      'Qiymətlər': 'Prices',
+      'Kateqoriyalar': 'Categories',
+      'Vahid ölçüləri': 'Units of measure',
+    },
+    ru: {
+      'Ana səhifə': 'Главная',
+      'Modullar': 'Модули',
+      'Çıxış': 'Выйти',
+      'Sistem administratoru': 'Системный администратор',
+      'Maliyyə': 'Финансы',
+      'Satış': 'Продажи',
+      'Alış': 'Закупки',
+      'Anbar': 'Склад',
+      'Bank': 'Банк',
+      'Hesabatlar': 'Отчёты',
+      'Kontragentlər': 'Контрагенты',
+      'Məhsul kataloqu': 'Каталог товаров',
+      'Alış sənədləri': 'Закупочные документы',
+      'İmza': 'Подписи',
+      'Sənədlər': 'Документы',
+      'Kataloqlar': 'Каталоги',
+      'Analitika': 'Аналитика',
+      'İmza gözləyən sənədlər': 'Документы на подпись',
+      'İmzalanmış sənədlər': 'Подписанные документы',
+      'Rədd edilmiş sənədlər': 'Отклонённые документы',
+      'İmza səlahiyyətliləri': 'Уполномоченные подписанты',
+      'İmza tələbi göndər': 'Отправить запрос на подпись',
+      'İxrac': 'Экспорт',
+      'Status: Hamısı': 'Статус: Все',
+      'Hamısı': 'Все',
+      'Tarix aralığı': 'Диапазон дат',
+      'Axtar: müştəri, sənəd, status…': 'Поиск: клиент, документ, статус…',
+      'Sənəd axtar...': 'Поиск документов...',
+      '5 sənəd': '5 документов',
+      '1–5 / 5 qeyd göstərilir': '1–5 / 5 записей',
+      'Sənəd №': '№ документа',
+      'Növ': 'Тип',
+      'Göndərən': 'Отправитель',
+      'Göndərilmə tarixi': 'Дата отправки',
+      'Son tarix': 'Срок',
+      'Məbləğ': 'Сумма',
+      'Status': 'Статус',
+      'Faktura': 'Счёт-фактура',
+      'Müqavilə': 'Договор',
+      'Ödəniş tapşırığı': 'Платёжное поручение',
+      'Qəbul aktı': 'Акт приёмки',
+      'Satış sifarişi': 'Заказ на продажу',
+      'Satış şöbəsi': 'Отдел продаж',
+      'Hüquq şöbəsi': 'Юридический отдел',
+      'Maliyyə şöbəsi': 'Финансовый отдел',
+      'Anbar şöbəsi': 'Складской отдел',
+      '2 gün qalıb': '2 дня осталось',
+      '3 gün qalıb': '3 дня осталось',
+      'Gecikib': 'Просрочено',
+      'Gözlənilir': 'Ожидается',
+    }
+  };
+
+  var dict = DICT[lang];
+  if (!dict) return;
+
+  function translateNode(node) {
+    if (node.nodeType === 3) {
+      var t = node.textContent;
+      var trimmed = t.trim();
+      if (trimmed && dict[trimmed] !== undefined)
+        node.textContent = t.replace(trimmed, dict[trimmed]);
+      return;
+    }
+    if (node.nodeName === 'SCRIPT' || node.nodeName === 'STYLE') return;
+    node.childNodes.forEach(translateNode);
+  }
+
+  function translateAttrs(root) {
+    root.querySelectorAll('[placeholder]').forEach(function(el) {
+      var p = el.getAttribute('placeholder');
+      if (dict[p]) el.setAttribute('placeholder', dict[p]);
+    });
+    root.querySelectorAll('[title]').forEach(function(el) {
+      var t = el.getAttribute('title');
+      if (dict[t]) el.setAttribute('title', dict[t]);
+    });
+  }
+
+  translateNode(document.body);
+  translateAttrs(document.body);
+  document.documentElement.lang = lang;
+
+  /* Re-translate after status dropdown is built (lazy-built on first open) */
+  var _origBuildStatus = window.buildStatusDropdown;
+  if (_origBuildStatus) {
+    window.buildStatusDropdown = function() {
+      _origBuildStatus.apply(this, arguments);
+      var dd = document.getElementById('statusDropdown');
+      if (dd) translateNode(dd);
+    };
+  }
+})();
+</script>
 
 <!-- PersonaAI Chat Widget -->
 <script>

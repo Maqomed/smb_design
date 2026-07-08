@@ -1163,7 +1163,6 @@ body {
     <div class="form-area">
       <form class="login-form" id="loginForm" novalidate>
 
-        <div class="form-eyebrow" data-i18n="eyebrow">SMB ERP · v1.0</div>
         <div class="form-title" data-i18n="formTitle">Xoş gəldiniz</div>
         <div class="form-subtitle" data-i18n="formSubtitle">Hesabınıza daxil olun</div>
 
@@ -1375,11 +1374,16 @@ function applyLang(lang) {
     b.classList.toggle('active', b.dataset.lang === lang);
   });
   document.documentElement.lang = lang;
+  localStorage.setItem('smb_lang', lang);
 }
 
 document.querySelectorAll('.lang-btn').forEach(btn => {
   btn.addEventListener('click', () => applyLang(btn.dataset.lang));
 });
+
+/* Restore language chosen on previous visit */
+const savedLang = localStorage.getItem('smb_lang');
+if (savedLang && STRINGS[savedLang]) applyLang(savedLang);
 
 /* ── Password toggle ──────────────────────────────── */
 const pwInput  = document.getElementById('passwordInput');

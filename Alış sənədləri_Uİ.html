@@ -39,6 +39,13 @@ body{background:#f4f5f7;display:flex;flex-direction:column;height:100vh;overflow
 .btn-success{background:#2e7d32;color:#fff}.btn-success:hover{background:#1b5e20}
 .btn-warning{background:#f57f17;color:#fff}
 .btn-sm{padding:4px 10px;font-size:12px}
+/* Custom checkbox — a real <input type="checkbox"> keeps painting a faint
+   stray dot via the native UA renderer at small sizes/zoom even with
+   appearance:none, so use a plain div toggled by JS instead */
+.cg-checkbox{display:inline-block;vertical-align:middle;width:15px;height:15px;border:1.5px solid #c5cae9;border-radius:3px;background:#fff;cursor:pointer;position:relative}
+.cg-checkbox:hover{border-color:#1976d2}
+.cg-checkbox.checked{background:#1976d2;border-color:#1976d2}
+.cg-checkbox.checked::after{content:'';position:absolute;left:4px;top:1px;width:4px;height:8px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg)}
 /* Table */
 .data-table{width:100%;border-collapse:collapse;background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.1)}
 .data-table th{background:#e8eaf6;color:#1a237e;font-size:12px;padding:8px 10px;text-align:left;border-bottom:2px solid #c5cae9}
@@ -167,24 +174,24 @@ body{background:#f4f5f7;display:flex;flex-direction:column;height:100vh;overflow
   </div>
   <table class="data-table">
     <thead><tr>
-      <th><input type="checkbox"></th><th>Sənəd №</th><th>Tip</th><th>Tarix</th>
+      <th><div class="cg-checkbox" onclick="this.classList.toggle('checked')"></div></th><th>Sənəd №</th><th>Tip</th><th>Tarix</th>
       <th>Təchizatçı</th><th>Valyuta</th><th>Ümumi</th><th>Ödənilmiş</th><th>Kreditor qalığı</th><th>Status</th>
     </tr></thead>
     <tbody>
       <tr onclick="goScreen('form');setStatus('approved')">
-        <td><input type="checkbox"></td><td style="color:#1976d2;font-weight:600">ALI-2026-00088</td>
+        <td><div class="cg-checkbox" onclick="this.classList.toggle('checked');event.stopPropagation()"></div></td><td style="color:#1976d2;font-weight:600">ALI-2026-00088</td>
         <td>Alış</td><td>20.03.2026</td><td>ABC Texnologiya MMC</td>
         <td>AZN</td><td>11,800.00</td><td>5,900.00</td><td>5,900.00</td>
         <td><span class="badge badge-approved">Təsdiqlənmiş</span></td>
       </tr>
       <tr onclick="goScreen('form');setStatus('draft')">
-        <td><input type="checkbox"></td><td style="color:#1976d2;font-weight:600">ALI-2026-00089</td>
+        <td><div class="cg-checkbox" onclick="this.classList.toggle('checked');event.stopPropagation()"></div></td><td style="color:#1976d2;font-weight:600">ALI-2026-00089</td>
         <td>Alış</td><td>21.03.2026</td><td>Xəzər İdxalat</td>
         <td>USD</td><td>8,500.00</td><td>0.00</td><td>8,500.00</td>
         <td><span class="badge badge-draft">Qaralama</span></td>
       </tr>
       <tr onclick="goScreen('form');setStatus('cancelled')">
-        <td><input type="checkbox"></td><td style="color:#1976d2;font-weight:600">ALI-2026-00086</td>
+        <td><div class="cg-checkbox" onclick="this.classList.toggle('checked');event.stopPropagation()"></div></td><td style="color:#1976d2;font-weight:600">ALI-2026-00086</td>
         <td>Alış</td><td>15.03.2026</td><td>Kənardan Alış İnc.</td>
         <td>AZN</td><td>3,200.00</td><td>0.00</td><td>0.00</td>
         <td><span class="badge badge-cancelled">Ləğv edilmiş</span></td>
